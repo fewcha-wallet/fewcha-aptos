@@ -1,0 +1,16 @@
+{
+  "name": "@fewcha/web3",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "fewcha.app",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn build:tsc",
+    "build:tsc": "tsc -b",
+    "test": "jest"
+  },
+  "dependencies": {
+    "aptos": "^0.0.20"
+  }
+}
