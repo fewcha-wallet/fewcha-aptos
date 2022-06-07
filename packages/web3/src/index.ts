@@ -1,10 +1,9 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { AptosClient } from "aptos";
 import { Transaction } from "aptos/dist/api/data-contracts";
 import Web3Account from "./account";
 import Web3Provider from "./provider";
-import { isUrl } from "./utils/isUrl";
+import { Web3ProviderStandard } from "./types";
 
 class Web3 {
   public provider: Web3Provider = null;
@@ -14,16 +13,8 @@ class Web3 {
     return this;
   }
 
-  public setProvider(client: AptosClient | string) {
-    if (typeof client === "string") {
-      if (!isUrl(client)) {
-        throw Error("invalid provider URL");
-      }
-
-      this.provider = new Web3Provider(new AptosClient(client));
-    }
-
-    this.provider = new Web3Provider(client);
+  public setProvider(provider: Web3Provider) {
+    this.provider = provider;
     return this;
   }
 
@@ -31,16 +22,10 @@ class Web3 {
     return this.provider;
   }
 
-  public isConnect() {
-    return !!this.account.address().hex();
-  }
-
-  public connect(account: Web3Account) {
-    this.account = account;
-    return this;
-  }
-
   public send(transaction: Transaction) {}
 }
+
+export { Web3Account, Web3Provider };
+export type { Web3ProviderStandard };
 
 export default Web3;
