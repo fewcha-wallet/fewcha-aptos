@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "CommonJS",
-    "lib": ["esnext", "es2021"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationMap": true,
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "isolatedModules": true,
+    "lib": ["esnext", "es2021"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "strict": true,
+    "target": "esnext"
   }
 }

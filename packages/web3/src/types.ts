@@ -1,32 +1,47 @@
-import { MaybeHexString, Types } from "aptos";
+// Copyright 2022 Fewcha. All rights reserved.
+
+import { AptosAccount, MaybeHexString, Types } from "aptos";
 import { RequestParams } from "aptos/dist/api/http-client";
+import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
 
 export interface Web3ProviderStandard {
-  getCurrentAddress(): Promise<string>; // get current account address
-  getNodeURL(): string; // get current network URL
+  account(): Promise<string>; // get current account address
+  getNodeURL(): Promise<string>; // get current network URL
   isConnected(): Promise<boolean>; // check website can connect
   connect(): Promise<boolean>; // trigger website connect to wallet
+  disconnect(): Promise<boolean>; // trigger disconnect to wallet
+  signAndSubmitTransaction(
+    txnRequest: Types.UserTransactionRequest
+  ): Promise<Types.HexEncodedBytes>;
 
-  // start onchain call
+  // https://github.com/aptos-labs/aptos-core/blob/main/ecosystem/typescript/sdk/src/aptos_client.ts
   getAccount(accountAddress: MaybeHexString): Promise<Types.Account>;
-  getAccountTransactions(query?: {
-    start?: number;
-    limit?: number;
-  }): Promise<Types.OnChainTransaction[]>;
-  getAccountModules(query?: {
-    version?: Types.LedgerVersion;
-  }): Promise<Types.MoveModule[]>;
+  getAccountTransactions(
+    accountAddress: MaybeHexString,
+    query?: { start?: number; limit?: number }
+  ): Promise<Types.OnChainTransaction[]>;
+  getAccountModules(
+    accountAddress: MaybeHexString,
+    query?: { version?: Types.LedgerVersion }
+  ): Promise<Types.MoveModule[]>;
   getAccountModule(
+    accountAddress: MaybeHexString,
     moduleName: string,
     query?: { version?: Types.LedgerVersion }
   ): Promise<Types.MoveModule>;
-  getAccountResources(query?: {
-    version?: Types.LedgerVersion;
-  }): Promise<Types.AccountResource[]>;
+  getAccountResources(
+    accountAddress: MaybeHexString,
+    query?: { version?: Types.LedgerVersion }
+  ): Promise<Types.AccountResource[]>;
   getAccountResource(
+    accountAddress: MaybeHexString,
     resourceType: string,
     query?: { version?: Types.LedgerVersion }
   ): Promise<Types.AccountResource>;
+  generateBCSTransaction(
+    accountFrom: AptosAccount,
+    rawTxn: RawTransaction
+  ): Promise<Uint8Array>;
   generateTransaction(
     payload: Types.TransactionPayload,
     options?: Partial<Types.UserTransactionRequest>
@@ -37,9 +52,28 @@ export interface Web3ProviderStandard {
   signTransaction(
     txnRequest: Types.UserTransactionRequest
   ): Promise<Types.SubmitTransactionRequest>;
+  getEventsByEventKey(eventKey: Types.HexEncodedBytes): Promise<Types.Event[]>;
+  getEventsByEventHandle(
+    address: MaybeHexString,
+    eventHandleStruct: Types.MoveStructTagId,
+    fieldName: string,
+    query?: { start?: number; limit?: number }
+  ): Promise<Types.Event[]>;
+  submitTransaction(
+    signedTxnRequest: Types.SubmitTransactionRequest
+  ): Promise<Types.PendingTransaction>;
+  submitSignedBCSTransaction(
+    signedTxn: Uint8Array
+  ): Promise<Types.PendingTransaction>;
+  getTransactions(query?: {
+    start?: number;
+    limit?: number;
+  }): Promise<Types.OnChainTransaction[]>;
+  getTransaction(txnHashOrVersion: string): Promise<Types.Transaction>;
   transactionPending(txnHash: Types.HexEncodedBytes): Promise<boolean>;
-  waitForTransaction(txnHash: Types.HexEncodedBytes);
+  waitForTransaction(txnHash: Types.HexEncodedBytes): Promise<void>;
   getLedgerInfo(params: RequestParams): Promise<Types.LedgerInfo>;
+  getChainId(params: RequestParams): Promise<number>;
   getTableItem(
     handle: string,
     data: Types.TableItemRequest,

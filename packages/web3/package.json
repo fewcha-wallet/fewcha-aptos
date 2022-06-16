@@ -11,6 +11,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "aptos": "^0.0.20"
+    "aptos": "^1.0.0"
   }
 }

@@ -1,9 +1,13 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+// Copyright 2022 Fewcha. All rights reserved.
+
+import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import toastReducer from "components/Toast/toastReducer";
+import appReducer from "features/app/appReducer";
 
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
+    app: appReducer,
+    toast: toastReducer,
   },
 });
 

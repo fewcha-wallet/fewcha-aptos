@@ -1,10 +1,13 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { AptosAccount } from "aptos";
+import { AptosAccount, MaybeHexString } from "aptos";
 
 class Web3Account extends AptosAccount {
-  constructor(props) {
-    super(props);
+  constructor(
+    privateKeyBytes?: Uint8Array | undefined,
+    address?: MaybeHexString
+  ) {
+    super(privateKeyBytes, address);
   }
 }
 

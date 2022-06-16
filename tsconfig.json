@@ -1,3 +1,9 @@
 {
-  "extends": "./tsconfig.base.json"
+  "extends": "./tsconfig.base.json",
+  "include": ["./packages/web3/src/**/*.ts"],
+  "compilerOptions": {
+    "paths": {
+      "@fewcha/web3": ["./packages/web3/src"]
+    }
+  }
 }
