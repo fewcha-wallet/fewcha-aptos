@@ -1,7 +1,7 @@
-// Copyright 2022 Fewcha. All rights reserved.
-
+import * as Aptos from "aptos";
 import Web3Account from "./account";
 import Web3Provider from "./provider";
+import AptosProvider from "./provider/aptos";
 import { Web3ProviderStandard } from "./types";
 
 class Web3 {
@@ -17,7 +17,13 @@ class Web3 {
   }
 }
 
-export { Web3Account, Web3Provider };
+const providers = {
+  AptosProvider,
+};
+
+export { Aptos };
+
+export { Web3Account, Web3Provider, providers };
 export type { Web3ProviderStandard };
 
 export default Web3;

@@ -3,7 +3,7 @@
 import React from "react";
 
 const Home: React.FC = () => {
-  return <>hello world!</>;
+  return <>Fewcha DApp Example</>;
 };
 
 export default Home;

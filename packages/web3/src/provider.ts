@@ -18,18 +18,12 @@ class Web3Provider {
         throw Error("invalid provider URL");
       }
 
-      if (!account) {
-        throw Error("account required for AptosClient");
-      }
       this.provider = new AptosProvider(new AptosClient(provider), account);
       return this;
     }
 
     // for AptosClient
     if (provider instanceof AptosClient) {
-      if (!account) {
-        throw Error("account required for AptosClient");
-      }
       this.provider = new AptosProvider(provider, account);
       return this;
     }

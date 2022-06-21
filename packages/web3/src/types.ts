@@ -1,5 +1,3 @@
-// Copyright 2022 Fewcha. All rights reserved.
-
 import { AptosAccount, MaybeHexString, Types } from "aptos";
 import { RequestParams } from "aptos/dist/api/http-client";
 import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
@@ -8,8 +6,8 @@ export interface Web3ProviderStandard {
   account(): Promise<string>; // get current account address
   getNodeURL(): Promise<string>; // get current network URL
   isConnected(): Promise<boolean>; // check website can connect
-  connect(): Promise<boolean>; // trigger website connect to wallet
-  disconnect(): Promise<boolean>; // trigger disconnect to wallet
+  connect(): Promise<void>; // trigger website connect to wallet
+  disconnect(): Promise<void>; // trigger disconnect to wallet
   signAndSubmitTransaction(
     txnRequest: Types.UserTransactionRequest
   ): Promise<Types.HexEncodedBytes>;

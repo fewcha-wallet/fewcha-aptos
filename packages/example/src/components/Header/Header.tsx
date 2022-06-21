@@ -1,33 +1,54 @@
-// Copyright 2022 Fewcha. All rights reserved.
-
-import React from "react";
-import Web3, { Web3Provider } from "@fewcha/web3";
+import React, { useEffect, useState } from "react";
+import { useWeb3 } from "components/Provider/Provider";
 
 const Header: React.FC = () => {
+  const [nodeURL, setNodeURL] = useState("");
+  const aptos = useWeb3();
+
+  const { init, account, isConnected, connect, disconnect, web3 } = aptos;
+
+  useEffect(() => {
+    if (isConnected) {
+      web3.getNodeURL().then((url) => {
+        setNodeURL(url);
+      });
+    }
+  }, [isConnected]);
+
+  if (!init) return <header>Loading..</header>;
+
   return (
-    <div>
-      <button
-        onClick={() => {
-          // https://github.com/aptos-labs/aip/issues
-          const wallet = (window as any).aptos; // window.aptosWallet.fewcha, window.aptosWallet. // <--- fewcha, standard, which wallet <---- define, isFewchaWallet, is.... implement web3 provider to chooose ...etc...
-          const provider = new Web3Provider(wallet); // <--- web3js
-          const web3 = new Web3(provider); // <-- web3js
-
-          web3.action.connect().then().catch(console.error);
-          // web3.action.account();
-          // web3.action; // <-- web3js support all aptos sdk
-
-          // web3 react provider -> react provider <---
-          // const {connect, address, balance} = useWeb3() // <- easy to get out | vue | angular
-        }}
-      >
-        Connect
-      </button>
-    </div>
+    <header>
+      {isConnected ? (
+        <div>
+          {/* logged in */}
+          <div>Connected</div>
+          <div>Address: {account}</div>
+          <div>{nodeURL}</div>
+          <div>
+            <button
+              onClick={() => {
+                disconnect();
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div>Disconnected</div>
+          <button
+            onClick={() => {
+              connect();
+            }}
+          >
+            Connect
+          </button>
+        </div>
+      )}
+    </header>
   );
 };
-
-// w3 -> html, css, ... standard <---  ERC, BIP, ...
-// protocol
 
 export default Header;

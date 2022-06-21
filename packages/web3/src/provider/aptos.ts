@@ -6,12 +6,14 @@ import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/trans
 import { Web3ProviderStandard } from "../types";
 
 class Aptos implements Web3ProviderStandard {
-  private client: AptosClient;
-  private currentAccount: AptosAccount;
+  static isNetworkProvider = true;
 
-  constructor(client: AptosClient, account: AptosAccount) {
+  private client: AptosClient;
+  private currentAccount?: AptosAccount;
+
+  constructor(client: AptosClient, account?: AptosAccount) {
     this.client = client;
-    this.currentAccount = account;
+    if (account) this.currentAccount = account;
   }
 
   public changeNetwork(network: string) {
@@ -24,7 +26,8 @@ class Aptos implements Web3ProviderStandard {
 
   // start web3 standard
   public async account(): Promise<string> {
-    return this.currentAccount.address().hex();
+    if (this.currentAccount) return this.currentAccount.address().hex();
+    return "";
   }
 
   public async getNodeURL(): Promise<string> {
@@ -32,15 +35,19 @@ class Aptos implements Web3ProviderStandard {
   }
 
   public async isConnected(): Promise<boolean> {
+    return false;
+  }
+
+  public async isNetworkAccountConnected(): Promise<boolean> {
     return true;
   }
 
-  public async connect(): Promise<boolean> {
-    return true;
+  public async connect(): Promise<void> {
+    return;
   }
 
-  public async disconnect(): Promise<boolean> {
-    return true;
+  public async disconnect(): Promise<void> {
+    return;
   }
   // /end web3 standard
 
