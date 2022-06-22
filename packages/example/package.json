@@ -9,6 +9,9 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "react-hook-form": "*",
+    "@styled-icons/ionicons-sharp": "*",
+    "aptos": "*",
     "@fewcha/web3": "*",
     "@fewcha/web3-react": "*",
     "@styled-icons/boxicons-solid": "^10.38.0",
