@@ -17,6 +17,7 @@ export const NFTs: React.FC<{}> = () => {
   const [imageURL, setImageURL] = useState("");
   const [collection] = useState("DREAMER");
   const [activeNFT, setActiveNFT] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const aptos = useWeb3();
   const { init, account, isConnected, connect, disconnect, web3 } = aptos;
@@ -24,7 +25,9 @@ export const NFTs: React.FC<{}> = () => {
   const { register, handleSubmit } = useForm<NFTType>();
   const id = useRef<HTMLInputElement | null>(null);
   const description = useRef<HTMLInputElement | null>(null);
+
   const { ref, ...rest } = register("id");
+
   const { ref: descriptionFormRef, ...descriptionRes } =
     register("description");
 
@@ -35,6 +38,33 @@ export const NFTs: React.FC<{}> = () => {
   const onSubmit: SubmitHandler<NFTType> = (data) => {
     data.collection = collection;
     data.url = imageURL;
+
+    setLoading(true);
+
+    // web3
+    //   .createCollection(`${data.id}`, data.description, data.url)
+    //   .then(() => {
+    //     setLoading(false);
+    //   })
+    //   .catch(() => {
+    //     setLoading(false);
+    //   });
+    web3
+      .createToken(
+        data.collection,
+        `${data.id}`,
+        data.description,
+        1,
+        data.url,
+        1
+      )
+      .then(() => {
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+
     console.log(data);
   };
 
@@ -100,7 +130,7 @@ export const NFTs: React.FC<{}> = () => {
                   text-white text-sm
                   sm:text-base
                   bg-blue-600
-                  hover:bg-blue-600
+                  hover:bg-blue-400
                   rounded-2xl
                   py-2
                   w-2/3
@@ -112,6 +142,7 @@ export const NFTs: React.FC<{}> = () => {
                     <Hammer color="white" size={20} />
                     <span className="ml-2">Mint</span>
                   </button>
+                  <div>{loading && "Loading.."}</div>
                 </div>
               </section>
               {/* desc */}

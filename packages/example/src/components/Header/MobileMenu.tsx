@@ -28,7 +28,10 @@ const MobileMenu: React.FC<{ isShow: boolean }> = ({ isShow }) => {
 
         if (menu.href) {
           return (
-            <a className="block text-normal-400 font-medium text-3xl transition-all ease-in duration-150 hover:text-primary-200  py-4 text-center">
+            <a
+              key={idx}
+              className="block text-normal-400 font-medium text-3xl transition-all ease-in duration-150 hover:text-primary-200  py-4 text-center"
+            >
               {menu.name}
             </a>
           );

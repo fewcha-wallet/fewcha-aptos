@@ -77,5 +77,18 @@ export interface Web3ProviderStandard {
     data: Types.TableItemRequest,
     params?: RequestParams
   ): Promise<any>;
+  createCollection(
+    name: string,
+    description: string,
+    uri: string
+  ): Promise<Types.HexEncodedBytes>;
+  createToken(
+    collectionName: string,
+    name: string,
+    description: string,
+    supply: number,
+    uri: string,
+    royalty_points_per_million: number
+  ): Promise<Types.HexEncodedBytes>;
   // /end onchain call
 }

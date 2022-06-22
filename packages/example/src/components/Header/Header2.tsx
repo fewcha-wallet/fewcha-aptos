@@ -29,7 +29,7 @@ const Header: React.FC = () => {
     }
   }, [isConnected, web3]);
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && account) {
       web3.getAccountResources(account).then((data) => {
         const accountResource = data.find(
           (r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>"

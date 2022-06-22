@@ -1,6 +1,12 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { AptosClient, AptosAccount, MaybeHexString, Types } from "aptos";
+import {
+  AptosClient,
+  AptosAccount,
+  MaybeHexString,
+  Types,
+  TokenClient,
+} from "aptos";
 import { RequestParams } from "aptos/dist/api/http-client";
 import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
 import { Web3ProviderStandard } from "../types";
@@ -9,10 +15,13 @@ class Aptos implements Web3ProviderStandard {
   static isNetworkProvider = true;
 
   private client: AptosClient;
+  private token: TokenClient;
   private currentAccount?: AptosAccount;
 
   constructor(client: AptosClient, account?: AptosAccount) {
     this.client = client;
+    this.token = new TokenClient(this.client);
+
     if (account) this.currentAccount = account;
   }
 
@@ -213,6 +222,100 @@ class Aptos implements Web3ProviderStandard {
   ): Promise<any> {
     return await this.client.getTableItem(handle, data, params);
   }
+
+  public async createCollection(
+    name: string,
+    description: string,
+    uri: string
+  ): Promise<Types.HexEncodedBytes> {
+    if (this.currentAccount)
+      return await this.token.createCollection(
+        this.currentAccount,
+        name,
+        description,
+        uri
+      );
+
+    return "";
+  }
+
+  public async createToken(
+    collectionName: string,
+    name: string,
+    description: string,
+    supply: number,
+    uri: string,
+    royalty_points_per_million: number
+  ): Promise<Types.HexEncodedBytes> {
+    if (this.currentAccount)
+      return await this.token.createToken(
+        this.currentAccount,
+        collectionName,
+        name,
+        description,
+        supply,
+        uri
+      );
+
+    return "";
+  }
+
+  public async offerToken(
+    receiver: MaybeHexString,
+    creator: MaybeHexString,
+    collectionName: string,
+    name: string,
+    amount: number
+  ): Promise<Types.HexEncodedBytes> {
+    if (this.currentAccount)
+      return await this.token.offerToken(
+        this.currentAccount,
+        receiver,
+        creator,
+        collectionName,
+        name,
+        amount
+      );
+
+    return "";
+  }
+
+  public async claimToken(
+    sender: MaybeHexString,
+    creator: MaybeHexString,
+    collectionName: string,
+    name: string
+  ): Promise<Types.HexEncodedBytes> {
+    if (this.currentAccount)
+      return await this.token.claimToken(
+        this.currentAccount,
+        sender,
+        creator,
+        collectionName,
+        name
+      );
+
+    return "";
+  }
+
+  public async cancelTokenOffer(
+    receiver: MaybeHexString,
+    creator: MaybeHexString,
+    collectionName: string,
+    name: string
+  ): Promise<Types.HexEncodedBytes> {
+    if (this.currentAccount)
+      return await this.token.cancelTokenOffer(
+        this.currentAccount,
+        receiver,
+        creator,
+        collectionName,
+        name
+      );
+
+    return "";
+  }
+
   // /end section of onchain call, built-in
 }
 
