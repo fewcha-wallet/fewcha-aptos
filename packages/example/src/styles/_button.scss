@@ -1,0 +1,47 @@
+.button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  outline: none;
+  border-radius: 4px;
+  padding: 10px 30px;
+  color: #000000;
+  background: #faff00;
+  transition: all 0.3s ease-out;
+  cursor: pointer;
+  @include fontTiny;
+  &:hover {
+    background: #fbff00;
+  }
+  &:focus {
+    outline: none;
+  }
+  &.outline {
+    background: transparent;
+    border-color: $color-p300;
+  }
+
+  &.block {
+    display: flex;
+    width: 100%;
+    text-align: center;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  &.semibold {
+    font-weight: 600;
+  }
+  &.bold {
+    font-weight: 700;
+  }
+  &.medium {
+    font-weight: 500;
+  }
+  &.regular {
+    font-weight: 400;
+  }
+}

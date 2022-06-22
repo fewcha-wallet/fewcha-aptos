@@ -1,0 +1,112 @@
+$primaryFont: "Basier Circle";
+$secondaryFont: "Inter";
+
+@font-face {
+  font-family: $primaryFont;
+  src: url("../../assets/fonts/BasierCircle-Bold.ttf");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $primaryFont;
+  src: url("../../assets/fonts/BasierCircle-SemiBold.ttf");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $primaryFont;
+  src: url("../../assets/fonts/BasierCircle-Medium.ttf");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $primaryFont;
+  src: url("../../assets/fonts/BasierCircle-Regular.ttf");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $secondaryFont;
+  src: url("../../assets/fonts/Inter-Bold.ttf");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $secondaryFont;
+  src: url("../../assets/fonts/Inter-SemiBold.ttf");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $secondaryFont;
+  src: url("../../assets/fonts/Inter-Medium.ttf");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: $secondaryFont;
+  src: url("../../assets/fonts/Inter-Regular.ttf");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@mixin fontSuper {
+  font-family: $primaryFont;
+  font-size: 48px;
+  line-height: 57px;
+}
+
+@mixin fontHero {
+  font-family: $primaryFont;
+  font-size: 40px;
+  line-height: 48px;
+}
+
+@mixin fontFeature {
+  font-family: $primaryFont;
+  font-size: 33px;
+  line-height: 40px;
+}
+
+@mixin fontTitle {
+  font-family: $primaryFont;
+  font-size: 28px;
+  line-height: 33px;
+}
+
+@mixin fontSubtitle {
+  font-family: $primaryFont;
+  font-size: 23px;
+  line-height: 28px;
+}
+
+@mixin fontSurtitle {
+  font-family: $primaryFont;
+  font-size: 19px;
+  line-height: 23px;
+}
+
+@mixin fontCaption {
+  font-family: $primaryFont;
+  font-size: 16px;
+  line-height: 19px;
+}
+
+@mixin fontTiny {
+  font-family: $primaryFont;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+@mixin fontSmall {
+  font-family: $primaryFont;
+  font-size: 11px;
+  line-height: 13px;
+}

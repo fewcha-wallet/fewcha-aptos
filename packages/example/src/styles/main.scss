@@ -1,0 +1,85 @@
+@import "variables";
+@import "typefaces";
+@import "button";
+@import "custom";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "hero";
+@import "roadmap";
+
+@layer base {
+  html {
+    font-family: $primaryFont, system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .font-super {
+    @include fontSuper;
+  }
+  .font-hero {
+    @include fontHero;
+  }
+  .font-feature {
+    @include fontFeature;
+  }
+  .font-title {
+    @include fontTitle;
+  }
+  .font-subtitle {
+    @include fontSubtitle;
+  }
+  .font-surtitle {
+    @include fontSurtitle;
+  }
+  .font-caption {
+    @include fontCaption;
+  }
+  .font-tiny {
+    @include fontTiny;
+  }
+  .font-small {
+    @include fontSmall;
+  }
+  .shadow-type-1 {
+    box-shadow: 0px 4px 19px rgba(18, 29, 54, 0.09),
+      inset 0px -1px 0px rgba(255, 255, 255, 0.25);
+  }
+  .shadow-type-2 {
+    box-shadow: 0px 9px 13px rgba(0, 126, 251, 0.31);
+  }
+  .shadow-type-3 {
+    box-shadow: -12.1766px 36.6898px 44.9014px rgba(81, 78, 120, 0.18),
+      inset 1.31294px 1.96941px 0px rgba(255, 255, 255, 0.6);
+  }
+  .is-scroll {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background: $color-white;
+    @apply shadow-type-1;
+  }
+  .clip-type-1 {
+    clip-path: polygon(81.05% 9.1%, 92% 9.1%, 92% 10.1%, 81.05% 10.1%);
+  }
+
+  .container {
+    max-width: 1070px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    @media (min-width: 768px) {
+      max-width: 1150px;
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    @media (min-width: 1024px) {
+      max-width: 1160px;
+      padding-left: 60px;
+      padding-right: 60px;
+    }
+  }
+}

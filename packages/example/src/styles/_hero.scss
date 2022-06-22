@@ -1,0 +1,20 @@
+.hero-section-bg {
+  background-image: url("../../public/images/bg2.svg"),
+    url("../../public/images/bg1.svg");
+  background-position: bottom center, bottom center;
+  background-repeat: no-repeat, no-repeat;
+  background-size: contain, cover;
+}
+
+.gradient {
+  background: linear-gradient(
+    90deg,
+    #dff4a4 0%,
+    #66acff 26.1%,
+    #bd7bff 45.6%,
+    #ff7bba 63.44%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
