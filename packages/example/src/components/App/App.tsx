@@ -1,12 +1,16 @@
 import React from "react";
-// import Web3Provider from "@fewcha/web3-react";
 import Web3Provider from "components/Provider/Provider";
-import Header from "components/Header/Header";
+import Header2 from "components/Header/Header2";
+import { Fragment } from "react";
+import { NFTs } from "components/NFT/NFT";
 
 const App: React.FC = () => {
   return (
     <Web3Provider>
-      <Header />
+      <Fragment>
+        <Header2 />
+        <NFTs />
+      </Fragment>
     </Web3Provider>
   );
 };

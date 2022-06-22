@@ -9,7 +9,7 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     if (isConnected) {
-      web3.getNodeURL().then((url) => {
+      web3.getNodeURL().then((url: string) => {
         setNodeURL(url);
       });
     }
