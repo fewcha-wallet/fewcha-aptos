@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { MENUS } from "config/constants";
-
 import MobileMenu from "./MobileMenu";
 import logo from "../../public/svgs/logo-light.svg";
 import { useWeb3 } from "components/Provider/Provider";
@@ -25,77 +24,52 @@ const Header: React.FC = () => {
   useEffect(() => {
     if (isConnected) {
       web3.getNodeURL().then((url: string) => {
-        console.log("useEffect::getNodeURL", url);
         setNodeURL(url);
       });
-      // web3.getAccountResources(account).then((data) => {
-      //   console.log("useEffect::getAccountResources", data);
-      //   const accountResource = data.find(
-      //     (r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>"
-      //   );
-      //   const balance = (accountResource!.data as { coin: { value: string } })
-      //     .coin.value;
-      //   console.log(balance);
-      //   setBalance("1");
-      // });
     }
-  }, [isConnected]);
+  }, [isConnected, web3]);
+  useEffect(() => {
+    if (isConnected) {
+      web3.getAccountResources(account).then((data) => {
+        const accountResource = data.find(
+          (r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>"
+        );
+        const balance = (accountResource!.data as { coin: { value: string } })
+          .coin.value;
+        setBalance(balance);
+      });
+    }
+  }, [isConnected, account, web3]);
 
-  console.log(nodeURL);
-
-  const onShowBalance = () => {
-    // const resources = await client.getAccountResources(account.address());
-    // const accountResource = resources.find(
-    //   (r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>"
-    // );
-
-    // const balance = (accountResource!.data as { coin: { value: string } }).coin
-    //   .value;
-    return <></>;
-  };
   const onShowButton = () => {
     if (isConnected) {
       return (
-        <button
-          className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:bg-gray-100 w-64 p-4 shadow rounded bg-white text-sm font-medium leading-none text-black flex items-center justify-between cursor-pointer"
-          onClick={() => disconnect()}
-        >
-          <WalletAlt size={24} />
-          <div>
-            <div>{truncateEthAddress(account)}</div>
-            <div>{balance}</div>
+        <div className="relative ml-auto flex items-center gap-6">
+          <button
+            className="p-2 shadow rounded bg-white text-sm font-medium text-black ml-auto flex items-center justify-between cursor-pointer"
+            onClick={() => disconnect()}
+          >
+            <WalletAlt size={24} />
+            <div className="hidden md:flex flex-col ml-2">
+              <div className="mb-1">{truncateEthAddress(account)}</div>
+              <div>APT: {balance}</div>
+            </div>
+          </button>
+          <div
+            className={`block lg:hidden hambuger ${
+              showMobile ? "is-active" : ""
+            }`}
+            onClick={toggleMobile}
+          >
+            <span className="line"></span>
           </div>
-          <div>
-            <div id="open"></div>
-          </div>
-        </button>
-        // <div className="relative ml-auto flex items-center gap-6">
-        //   <button
-        //     onClick={() => {
-        //       console.log("disconnect");
-        //       disconnect();
-        //     }}
-        //     className="hidden sm:inline-block px-6 py-[14px] bg-[#007EFB] text-white font-medium rounded-[34px]"
-        //   >
-        //     Disconnect
-        //   </button>
-
-        //   <div
-        //     className={`block lg:hidden hambuger ${
-        //       showMobile ? "is-active" : ""
-        //     }`}
-        //     onClick={toggleMobile}
-        //   >
-        //     <span className="line"></span>
-        //   </div>
-        // </div>
+        </div>
       );
     } else {
       return (
         <div className="relative ml-auto flex items-center gap-6">
           <button
             onClick={() => {
-              console.log("connect");
               connect();
             }}
             className="hidden sm:inline-block px-6 py-[14px] bg-[#007EFB] text-white font-medium rounded-[34px]"
