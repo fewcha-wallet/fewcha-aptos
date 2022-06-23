@@ -5,67 +5,85 @@ import { Hammer } from "@styled-icons/ionicons-sharp";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Input from "components/Input/Input";
 import { useWeb3 } from "components/Provider/Provider";
+import { Popup } from "components/Popup/Popup";
 
 type NFTType = {
   collection: string;
-  id: number;
+  codename: number;
   description: string;
   url: string;
 };
 
 export const NFTs: React.FC<{}> = () => {
   const [imageURL, setImageURL] = useState("");
-  const [collection] = useState("DREAMER");
   const [activeNFT, setActiveNFT] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
   const aptos = useWeb3();
   const { init, account, isConnected, connect, disconnect, web3 } = aptos;
 
-  const { register, handleSubmit } = useForm<NFTType>();
-  const id = useRef<HTMLInputElement | null>(null);
+  const { register, handleSubmit: nftHandleSubmit } = useForm<NFTType>();
+  const codename = useRef<HTMLInputElement | null>(null);
   const description = useRef<HTMLInputElement | null>(null);
-
-  const { ref, ...rest } = register("id");
-
+  const nftCollection = useRef<HTMLInputElement | null>(null);
+  const { ref: codenameFormRef, ...rest } = register("codename");
   const { ref: descriptionFormRef, ...descriptionRes } =
     register("description");
+  const { ref: nftCollectionFormRef, ...nftCollectionRes } =
+    register("collection");
+
+  const { register: collectionRegister, handleSubmit: collectionHandleSubmit } =
+    useForm<{ collection: string }>();
+  const collection = useRef<HTMLInputElement | null>(null);
+  const { ref: collectionFormRef, ...collectionRes } =
+    collectionRegister("collection");
 
   const onPickImage = (url: string, index: number) => {
     setImageURL(url);
     setActiveNFT(index);
   };
-  const onSubmit: SubmitHandler<NFTType> = (data) => {
-    data.collection = collection;
+  const onSubmitNFT: SubmitHandler<NFTType> = (data) => {
     data.url = imageURL;
-
-    setLoading(true);
-
-    // web3
-    //   .createCollection(`${data.id}`, data.description, data.url)
-    //   .then(() => {
-    //     setLoading(false);
-    //   })
-    //   .catch(() => {
-    //     setLoading(false);
-    //   });
     web3
       .createToken(
         data.collection,
-        `${data.id}`,
+        `${data.codename}`,
         data.description,
         1,
         data.url,
         1
       )
-      .then(() => {
-        setLoading(false);
+      .then((data) => {
+        if (data) {
+          console.log(data);
+          setTransactionHash(data);
+          setIsOpenPopup(true);
+        }
       })
       .catch(() => {
-        setLoading(false);
+        setIsOpenPopup(false);
+        setTransactionHash(null);
       });
-
-    console.log(data);
+  };
+  const onSubmitCollection: SubmitHandler<{ collection: string }> = (data) => {
+    web3
+      .createCollection(
+        `${data.collection}`,
+        "From fewcha with love",
+        "fewcha.app"
+      )
+      .then((data) => {
+        if (data) {
+          setTransactionHash(data);
+          setIsOpenPopup(true);
+        }
+      })
+      .catch(() => {
+        setIsOpenPopup(false);
+        setTransactionHash(null);
+      });
   };
 
   const onShowNFTs = () => {
@@ -86,42 +104,35 @@ export const NFTs: React.FC<{}> = () => {
     return list;
   };
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <section className="pt-[119px] bg-[#000000] bg-no-repeat bg-cover bg-center h-screen overflow-hidden">
-        <div className="overflow-hidden relative z-10">
+    <div>
+      <section className="pt-[119px] bg-[#000000] bg-no-repeat bg-cover bg-center h-screen">
+        <div className="relative z-10">
           <div className="grid 2xl:grid-cols-12 xl:grid-cols-10 2xl:max-w-[1440px] xl:max-w-[1280px] lg:max-w-[768px] mx-auto">
             {/* left */}
             <div className="2xl:col-span-6 xl:col-span-6 flex flex-col pt-[0px] xl:pt-[80px] 2xl:pl-[120px] xl:pl-[120px] text-center xl:text-left">
               {/* title */}
-              <h1 className="pb-16 text-center font-bold text-white xs:max-w-[688px] md:max-w-[746px] text-[33px] xs:text-[40px] md:text-[48px] leading-[48px] xs:leading-[56px] lg:leading-[64px] mx-auto xl:ml-0">
-                <span className="gradient">Mint your NFT with </span>
-                <span className="gradient">Fewcha</span>
-              </h1>
-              <section className="flex flex-col space-y-4">
-                <div className="flex justify-center items-center">
-                  <Input
-                    placeholder="ID NFT Ex: 001,002,..."
-                    {...rest}
-                    ref={(e: any) => {
-                      ref(e);
-                      id.current = e!;
-                    }}
-                  />
-                </div>
-                <div className="flex justify-center items-center">
-                  <Input
-                    placeholder="Input description for NFT"
-                    {...descriptionRes}
-                    ref={(e: any) => {
-                      descriptionFormRef(e);
-                      description.current = e!;
-                    }}
-                  />
-                </div>
-                <div className="flex justify-center items-center">
-                  <button
-                    type="submit"
-                    className="
+              <div className="flex-col space-y-8">
+                <form onSubmit={collectionHandleSubmit(onSubmitCollection)}>
+                  <h1 className="pb-4 text-center font-bold text-white xs:max-w-[688px] md:max-w-[746px] text-[33px] xs:text-[40px] md:text-[48px] leading-[48px] xs:leading-[56px] lg:leading-[64px] mx-auto xl:ml-0">
+                    <span className="gradient">
+                      Create your collection with FewCha
+                    </span>
+                  </h1>
+                  <section className="flex flex-col space-y-4">
+                    <div className="flex justify-center items-center">
+                      <Input
+                        placeholder="Input your collection name Ex: Fewcha, Aptos, something,..."
+                        {...collectionRes}
+                        ref={(e: any) => {
+                          collectionFormRef(e);
+                          collection.current = e!;
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <button
+                        type="submit"
+                        className="
                   flex
                   mt-2
                   items-center
@@ -138,15 +149,82 @@ export const NFTs: React.FC<{}> = () => {
                   duration-150
                   ease-in
                 "
-                  >
-                    <Hammer color="white" size={20} />
-                    <span className="ml-2">Mint</span>
-                  </button>
-                  <div>{loading && "Loading.."}</div>
-                </div>
-              </section>
+                      >
+                        <Hammer color="white" size={20} />
+                        <span className="ml-2">Create collection</span>
+                      </button>
+                      <div>{loading && "Loading.."}</div>
+                    </div>
+                  </section>
+                </form>
+                <form onSubmit={nftHandleSubmit(onSubmitNFT)}>
+                  <h1 className="pb-4 text-center font-bold text-white xs:max-w-[688px] md:max-w-[746px] text-[33px] xs:text-[40px] md:text-[48px] leading-[48px] xs:leading-[56px] lg:leading-[64px] mx-auto xl:ml-0">
+                    <span className="gradient">Mint your NFT with </span>
+                    <span className="gradient">Fewcha</span>
+                  </h1>
+                  <section className="flex flex-col space-y-4">
+                    <div className="flex justify-center items-center">
+                      <Input
+                        placeholder="Input your collection name Ex: Fewcha, Aptos, something,..."
+                        {...nftCollectionRes}
+                        ref={(e: any) => {
+                          nftCollectionFormRef(e);
+                          nftCollection.current = e!;
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <Input
+                        placeholder="ID NFT Ex: 001,002,..."
+                        {...rest}
+                        ref={(e: any) => {
+                          codenameFormRef(e);
+                          codename.current = e!;
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <Input
+                        placeholder="Input description for NFT"
+                        {...descriptionRes}
+                        ref={(e: any) => {
+                          descriptionFormRef(e);
+                          description.current = e!;
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <button
+                        type="submit"
+                        className="
+                  flex
+                  mt-2
+                  items-center
+                  justify-center
+                  focus:outline-none
+                  text-white text-sm
+                  sm:text-base
+                  bg-blue-600
+                  hover:bg-blue-400
+                  rounded-2xl
+                  py-2
+                  w-2/3
+                  transition
+                  duration-150
+                  ease-in
+                "
+                      >
+                        <Hammer color="white" size={20} />
+                        <span className="ml-2">Mint</span>
+                      </button>
+                      <div>{loading && "Loading.."}</div>
+                    </div>
+                  </section>
+                </form>
+              </div>
               {/* desc */}
             </div>
+
             {/*right*/}
             <div className="2xl:col-span-6 xl:col-span-6 flex flex-col pt-[0px] xl:pt-[80px] 2xl:pl-[120px] xl:pl-[120px] text-center xl:text-left">
               {/* title */}
@@ -170,6 +248,12 @@ export const NFTs: React.FC<{}> = () => {
           <div className="absolute ball-4 bg-[url('../../public/images/ball4.png')] bg-cover bg-no-repeat xl:w-[91px] xl:h-[91px] lg:w-[32px] lg:h-[32px] md:w-[43px] md:h-[43px] xl:top-[562px] xl:right-[103px] lg:top-[662px] lg:right-[136px] md:top-[659px] md:right-[25px]" />
         </div>
       </section>
-    </form>
+      <Popup
+        status={isOpenPopup}
+        transactionHash={transactionHash}
+        setPopup={setIsOpenPopup}
+        setData={setTransactionHash}
+      />
+    </div>
   );
 };
