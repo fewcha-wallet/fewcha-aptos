@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { NFTResources } from "./data";
 import { NFTCard } from "./NFTCard";
 import { Hammer } from "@styled-icons/ionicons-sharp";
@@ -6,45 +6,58 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import Input from "components/Input/Input";
 import { useWeb3 } from "components/Provider/Provider";
 import { Popup } from "components/Popup/Popup";
-
-type NFTType = {
-  collection: string;
-  codename: number;
-  description: string;
-  url: string;
-};
+import {
+  createCollectionResolver,
+  NFTType,
+  CollectionType,
+  mintNFTResolver,
+} from "services/resolver";
+import Error from "../Error/Error";
+import { ErrorPopup } from "components/Popup/ErrorPopup";
 
 export const NFTs: React.FC<{}> = () => {
   const [imageURL, setImageURL] = useState("");
   const [activeNFT, setActiveNFT] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [isOpenErrorPopup, setIsOpenErrorPopup] = useState(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
-
   const aptos = useWeb3();
   const { init, account, isConnected, connect, disconnect, web3 } = aptos;
 
-  const { register, handleSubmit: nftHandleSubmit } = useForm<NFTType>();
-  const codename = useRef<HTMLInputElement | null>(null);
-  const description = useRef<HTMLInputElement | null>(null);
-  const nftCollection = useRef<HTMLInputElement | null>(null);
-  const { ref: codenameFormRef, ...rest } = register("codename");
-  const { ref: descriptionFormRef, ...descriptionRes } =
-    register("description");
-  const { ref: nftCollectionFormRef, ...nftCollectionRes } =
-    register("collection");
+  const {
+    register: mintNFTRegister,
+    handleSubmit: nftHandleSubmit,
+    formState: { errors: mintNFTErrors },
+  } = useForm<NFTType>({
+    mode: "onChange",
+    reValidateMode: "onChange",
+    resolver: mintNFTResolver,
+    shouldFocusError: true,
+    shouldUnregister: false,
+  });
 
-  const { register: collectionRegister, handleSubmit: collectionHandleSubmit } =
-    useForm<{ collection: string }>();
-  const collection = useRef<HTMLInputElement | null>(null);
-  const { ref: collectionFormRef, ...collectionRes } =
-    collectionRegister("collection");
+  const {
+    register: collectionRegister,
+    handleSubmit: collectionHandleSubmit,
+    formState: { errors: createCollectionErrors },
+  } = useForm<CollectionType>({
+    mode: "onChange",
+    reValidateMode: "onChange",
+    resolver: createCollectionResolver,
+    shouldFocusError: true,
+    shouldUnregister: false,
+  });
 
   const onPickImage = (url: string, index: number) => {
     setImageURL(url);
     setActiveNFT(index);
   };
   const onSubmitNFT: SubmitHandler<NFTType> = (data) => {
+    if (!imageURL) {
+      setIsOpenErrorPopup(true);
+      return;
+    }
     data.url = imageURL;
     web3
       .createToken(
@@ -119,35 +132,24 @@ export const NFTs: React.FC<{}> = () => {
                     </span>
                   </h1>
                   <section className="flex flex-col space-y-4">
-                    <div className="flex justify-center items-center">
+                    <div className="flex-col justify-center items-center">
                       <Input
+                        isError={!!createCollectionErrors.collection}
                         placeholder="Input your collection name Ex: Fewcha, Aptos, something,..."
-                        {...collectionRes}
-                        ref={(e: any) => {
-                          collectionFormRef(e);
-                          collection.current = e!;
-                        }}
+                        {...collectionRegister("collection", {
+                          required: {
+                            value: true,
+                            message: "Please fill collection name",
+                          },
+                        })}
                       />
+                      <Error error={createCollectionErrors.collection} />
                     </div>
+
                     <div className="flex justify-center items-center">
                       <button
                         type="submit"
-                        className="
-                  flex
-                  mt-2
-                  items-center
-                  justify-center
-                  focus:outline-none
-                  text-white text-sm
-                  sm:text-base
-                  bg-blue-600
-                  hover:bg-blue-400
-                  rounded-2xl
-                  py-2
-                  w-2/3
-                  transition
-                  duration-150
-                  ease-in
+                        className="flex mt-2 items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-400 rounded-2xl py-2 w-2/3 transition duration-150 ease-in
                 "
                       >
                         <Hammer color="white" size={20} />
@@ -165,54 +167,44 @@ export const NFTs: React.FC<{}> = () => {
                   <section className="flex flex-col space-y-4">
                     <div className="flex justify-center items-center">
                       <Input
+                        isError={!!mintNFTErrors.collection}
                         placeholder="Input your collection name Ex: Fewcha, Aptos, something,..."
-                        {...nftCollectionRes}
-                        ref={(e: any) => {
-                          nftCollectionFormRef(e);
-                          nftCollection.current = e!;
-                        }}
+                        {...mintNFTRegister("collection", {
+                          required: {
+                            value: true,
+                            message: "Enter your collection name",
+                          },
+                        })}
                       />
                     </div>
                     <div className="flex justify-center items-center">
                       <Input
+                        isError={!!mintNFTErrors.codename}
                         placeholder="ID NFT Ex: 001,002,..."
-                        {...rest}
-                        ref={(e: any) => {
-                          codenameFormRef(e);
-                          codename.current = e!;
-                        }}
+                        {...mintNFTRegister("codename", {
+                          required: {
+                            value: true,
+                            message: "Enter your codename",
+                          },
+                        })}
                       />
                     </div>
                     <div className="flex justify-center items-center">
                       <Input
+                        isError={!!mintNFTErrors.description}
                         placeholder="Input description for NFT"
-                        {...descriptionRes}
-                        ref={(e: any) => {
-                          descriptionFormRef(e);
-                          description.current = e!;
-                        }}
+                        {...mintNFTRegister("description", {
+                          required: {
+                            value: true,
+                            message: "Enter description for your NFT",
+                          },
+                        })}
                       />
                     </div>
                     <div className="flex justify-center items-center">
                       <button
                         type="submit"
-                        className="
-                  flex
-                  mt-2
-                  items-center
-                  justify-center
-                  focus:outline-none
-                  text-white text-sm
-                  sm:text-base
-                  bg-blue-600
-                  hover:bg-blue-400
-                  rounded-2xl
-                  py-2
-                  w-2/3
-                  transition
-                  duration-150
-                  ease-in
-                "
+                        className="flex mt-2 items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-600 hover:bg-blue-400 rounded-2xl py-2 w-2/3 transition duration-150 ease-in"
                       >
                         <Hammer color="white" size={20} />
                         <span className="ml-2">Mint</span>
@@ -248,6 +240,11 @@ export const NFTs: React.FC<{}> = () => {
           <div className="absolute ball-4 bg-[url('../../public/images/ball4.png')] bg-cover bg-no-repeat xl:w-[91px] xl:h-[91px] lg:w-[32px] lg:h-[32px] md:w-[43px] md:h-[43px] xl:top-[562px] xl:right-[103px] lg:top-[662px] lg:right-[136px] md:top-[659px] md:right-[25px]" />
         </div>
       </section>
+      <ErrorPopup status={isOpenErrorPopup} setPopup={setIsOpenErrorPopup}>
+        <div className="flex justify-center items-center">
+          Please pick image on NFT Collection section!
+        </div>
+      </ErrorPopup>
       <Popup
         status={isOpenPopup}
         transactionHash={transactionHash}
