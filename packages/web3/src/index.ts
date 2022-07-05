@@ -1,4 +1,4 @@
-import * as Aptos from "aptos";
+import * as Aptos from "@fewcha/aptos";
 import Web3Account from "./account";
 import Web3Provider from "./provider";
 import AptosProvider from "./provider/aptos";

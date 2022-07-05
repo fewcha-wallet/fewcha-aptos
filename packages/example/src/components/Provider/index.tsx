@@ -1,18 +1,16 @@
-import React, {
-  useContext,
-  createContext,
-  PropsWithChildren,
-  useState,
-} from "react";
+import React, { useContext, createContext, PropsWithChildren, useState, useEffect } from "react";
 import Web3, { Web3Provider, Web3ProviderStandard } from "@fewcha/web3";
-import { useEffect } from "react";
 
 const defaultNodeURL = "https://fullnode.devnet.aptoslabs.com";
 const defaultWeb3 = new Web3(new Web3Provider(defaultNodeURL));
 
-type Web3ContextType = {
+export type Tx = { id: string; hash: string };
+
+type Web3ContextValue = {
   init: boolean;
   account: string;
+  balance: string;
+  txs: Tx[];
   isConnected: boolean;
   connect: () => void;
   disconnect: () => void;
@@ -20,30 +18,33 @@ type Web3ContextType = {
   web3: Web3ProviderStandard;
 };
 
-export const Web3Context = createContext<Web3ContextType>({
+const defaultContext: Web3ContextValue = {
   init: false,
   account: "",
+  balance: "",
+  txs: [],
   isConnected: false,
   connect: () => {},
   disconnect: () => {},
   nodeURL: "",
   web3: defaultWeb3.action,
-});
-
-export const useWeb3 = () => {
-  const { init, web3, account, isConnected, connect, disconnect } =
-    useContext(Web3Context);
-  return { init, web3, account, isConnected, connect, disconnect };
 };
 
-const { Provider } = Web3Context;
+export const Web3Context = createContext<Web3ContextValue>(defaultContext);
+
+export const useWeb3 = () => {
+  const { init, web3, account, balance, txs, isConnected, connect, disconnect } = useContext(Web3Context);
+  return { init, web3, account, balance, txs, isConnected, connect, disconnect };
+};
 
 const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
+  const [init, setInit] = useState(false);
   const [account, setAccount] = useState("");
+  const [balance, setBalance] = useState("");
+  const [txs, setTxs] = useState<Tx[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [nodeURL, setNodeURL] = useState("");
   const [web3, setWeb3] = useState(defaultWeb3);
-  const [init, setInit] = useState(false);
 
   const connect = async () => {
     await web3.action.connect();
@@ -69,6 +70,8 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     });
   };
 
+  const changeBalance = () => {};
+
   const getNodeURL = () => {
     web3.action.getNodeURL().then((data) => {
       setNodeURL(data);
@@ -85,6 +88,11 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     setAccount("");
   };
 
+  const pushTransaction = (event: Event) => {
+    const e = event as CustomEvent;
+    if (e.detail) setTxs([...txs, { id: e.detail.id, hash: e.detail.tx }]);
+  };
+
   useEffect(() => {
     setWeb3Init();
   }, []);
@@ -94,32 +102,38 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     window.addEventListener("aptos#connected", connectedEvent);
     window.addEventListener("aptos#disconnected", disconnectedEvent);
     window.addEventListener("aptos#changeAccount", getAccount);
+    window.addEventListener("aptos#changeBalance", changeBalance);
     window.addEventListener("aptos#changeNetwork", getNodeURL);
+    window.addEventListener("aptos#transaction", pushTransaction);
 
     return () => {
       window.removeEventListener("aptos#initialized", setWeb3Init);
       window.removeEventListener("aptos#connected", connectedEvent);
       window.removeEventListener("aptos#disconnected", disconnectedEvent);
-      window.addEventListener("aptos#changeAccount", getAccount);
-      window.addEventListener("aptos#changeNetwork", getNodeURL);
+      window.removeEventListener("aptos#changeAccount", getAccount);
+      window.removeEventListener("aptos#changeBalance", changeBalance);
+      window.removeEventListener("aptos#changeNetwork", getNodeURL);
+      window.removeEventListener("aptos#transaction", pushTransaction);
     };
     // eslint-disable-next-line
   }, [web3]);
 
   return (
-    <Provider
+    <Web3Context.Provider
       value={{
+        init,
         account,
+        balance,
+        txs,
         isConnected,
         connect,
         disconnect,
         web3: web3.action,
         nodeURL,
-        init,
       }}
     >
       {children}
-    </Provider>
+    </Web3Context.Provider>
   );
 };
 

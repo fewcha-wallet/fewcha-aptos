@@ -1,14 +1,6 @@
-// Copyright 2022 Fewcha. All rights reserved.
-
-import {
-  AptosClient,
-  AptosAccount,
-  MaybeHexString,
-  Types,
-  TokenClient,
-} from "aptos";
-import { RequestParams } from "aptos/dist/api/http-client";
-import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
+import { AptosClient, AptosAccount, MaybeHexString, Types, TokenClient } from "@fewcha/aptos";
+import { RequestParams } from "@fewcha/aptos/dist/api/http-client";
+import { RawTransaction } from "@fewcha/aptos/dist/transaction_builder/aptos_types/transaction";
 import { Web3ProviderStandard } from "../types";
 
 class Aptos implements Web3ProviderStandard {
@@ -58,12 +50,8 @@ class Aptos implements Web3ProviderStandard {
   public async disconnect(): Promise<void> {
     return;
   }
-  // /end web3 standard
 
-  // start section of onchain call, built-in
-  public async getAccount(
-    accountAddress: MaybeHexString
-  ): Promise<Types.Account> {
+  public async getAccount(accountAddress: MaybeHexString): Promise<Types.Account> {
     return this.client.getAccount(accountAddress);
   }
 
@@ -72,7 +60,7 @@ class Aptos implements Web3ProviderStandard {
     query?: {
       start?: number;
       limit?: number;
-    }
+    },
   ): Promise<Types.OnChainTransaction[]> {
     return this.client.getAccountTransactions(accountAddress, query);
   }
@@ -81,7 +69,7 @@ class Aptos implements Web3ProviderStandard {
     accountAddress: MaybeHexString,
     query?: {
       version?: Types.LedgerVersion;
-    }
+    },
   ): Promise<Types.MoveModule[]> {
     return this.client.getAccountModules(accountAddress, query);
   }
@@ -89,7 +77,7 @@ class Aptos implements Web3ProviderStandard {
   public async getAccountModule(
     accountAddress: MaybeHexString,
     moduleName: string,
-    query?: { version?: Types.LedgerVersion }
+    query?: { version?: Types.LedgerVersion },
   ): Promise<Types.MoveModule> {
     return this.client.getAccountModule(accountAddress, moduleName, query);
   }
@@ -98,7 +86,7 @@ class Aptos implements Web3ProviderStandard {
     accountAddress: MaybeHexString,
     query?: {
       version?: Types.LedgerVersion;
-    }
+    },
   ): Promise<Types.AccountResource[]> {
     return this.client.getAccountResources(accountAddress, query);
   }
@@ -106,44 +94,31 @@ class Aptos implements Web3ProviderStandard {
   public async getAccountResource(
     accountAddress: MaybeHexString,
     resourceType: string,
-    query?: { version?: Types.LedgerVersion }
+    query?: { version?: Types.LedgerVersion },
   ): Promise<Types.AccountResource> {
     return this.client.getAccountResource(accountAddress, resourceType, query);
   }
 
-  public async generateBCSTransaction(
-    accountFrom: AptosAccount,
-    rawTxn: RawTransaction
-  ): Promise<Uint8Array> {
+  public async generateBCSTransaction(accountFrom: AptosAccount, rawTxn: RawTransaction): Promise<Uint8Array> {
     return AptosClient.generateBCSTransaction(accountFrom, rawTxn);
   }
 
   public async generateTransaction(
     payload: Types.TransactionPayload,
-    options?: Partial<Types.UserTransactionRequest>
+    options?: Partial<Types.UserTransactionRequest>,
   ): Promise<Types.UserTransactionRequest> {
-    return this.client.generateTransaction(
-      await this.account(),
-      payload,
-      options
-    );
+    return this.client.generateTransaction(await this.account(), payload, options);
   }
 
-  public createSigningMessage(
-    txnRequest: Types.UserTransactionRequest
-  ): Promise<Types.HexEncodedBytes> {
+  public createSigningMessage(txnRequest: Types.UserTransactionRequest): Promise<Types.HexEncodedBytes> {
     return this.client.createSigningMessage(txnRequest);
   }
 
-  public async signTransaction(
-    txnRequest: Types.UserTransactionRequest
-  ): Promise<Types.SubmitTransactionRequest> {
+  public async signTransaction(txnRequest: Types.UserTransactionRequest): Promise<Types.SubmitTransactionRequest> {
     return await this.client.signTransaction(this.currentAccount, txnRequest);
   }
 
-  public async getEventsByEventKey(
-    eventKey: Types.HexEncodedBytes
-  ): Promise<Types.Event[]> {
+  public async getEventsByEventKey(eventKey: Types.HexEncodedBytes): Promise<Types.Event[]> {
     return await this.client.getEventsByEventKey(eventKey);
   }
 
@@ -151,55 +126,34 @@ class Aptos implements Web3ProviderStandard {
     address: MaybeHexString,
     eventHandleStruct: Types.MoveStructTagId,
     fieldName: string,
-    query?: { start?: number; limit?: number }
+    query?: { start?: number; limit?: number },
   ): Promise<Types.Event[]> {
-    return await this.client.getEventsByEventHandle(
-      address,
-      eventHandleStruct,
-      fieldName,
-      query
-    );
+    return await this.client.getEventsByEventHandle(address, eventHandleStruct, fieldName, query);
   }
 
-  public async submitTransaction(
-    signedTxnRequest: Types.SubmitTransactionRequest
-  ): Promise<Types.PendingTransaction> {
+  public async submitTransaction(signedTxnRequest: Types.SubmitTransactionRequest): Promise<Types.PendingTransaction> {
     return await this.client.submitTransaction(signedTxnRequest);
   }
 
-  public async submitSignedBCSTransaction(
-    signedTxn: Uint8Array
-  ): Promise<Types.PendingTransaction> {
+  public async submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Types.PendingTransaction> {
     return await this.client.submitSignedBCSTransaction(signedTxn);
   }
 
-  public async signAndSubmitTransaction(
-    txnRequest: Types.UserTransactionRequest
-  ): Promise<Types.HexEncodedBytes> {
-    const signed = await this.client.signTransaction(
-      this.currentAccount,
-      txnRequest
-    );
+  public async signAndSubmitTransaction(txnRequest: Types.UserTransactionRequest): Promise<Types.HexEncodedBytes> {
+    const signed = await this.client.signTransaction(this.currentAccount, txnRequest);
     const tx = await this.client.submitTransaction(signed);
     return tx.hash;
   }
 
-  public async getTransactions(query?: {
-    start?: number;
-    limit?: number;
-  }): Promise<Types.OnChainTransaction[]> {
+  public async getTransactions(query?: { start?: number; limit?: number }): Promise<Types.OnChainTransaction[]> {
     return await this.client.getTransactions(query);
   }
 
-  public async getTransaction(
-    txnHashOrVersion: string
-  ): Promise<Types.Transaction> {
+  public async getTransaction(txnHashOrVersion: string): Promise<Types.Transaction> {
     return await this.client.getTransaction(txnHashOrVersion);
   }
 
-  public async transactionPending(
-    txnHash: Types.HexEncodedBytes
-  ): Promise<boolean> {
+  public async transactionPending(txnHash: Types.HexEncodedBytes): Promise<boolean> {
     return await this.client.transactionPending(txnHash);
   }
 
@@ -215,26 +169,12 @@ class Aptos implements Web3ProviderStandard {
     return await this.client.getChainId(params);
   }
 
-  public async getTableItem(
-    handle: string,
-    data: Types.TableItemRequest,
-    params?: RequestParams
-  ): Promise<any> {
+  public async getTableItem(handle: string, data: Types.TableItemRequest, params?: RequestParams): Promise<any> {
     return await this.client.getTableItem(handle, data, params);
   }
 
-  public async createCollection(
-    name: string,
-    description: string,
-    uri: string
-  ): Promise<Types.HexEncodedBytes> {
-    if (this.currentAccount)
-      return await this.token.createCollection(
-        this.currentAccount,
-        name,
-        description,
-        uri
-      );
+  public async createCollection(name: string, description: string, uri: string): Promise<Types.HexEncodedBytes> {
+    if (this.currentAccount) return await this.token.createCollection(this.currentAccount, name, description, uri);
 
     return "";
   }
@@ -245,7 +185,7 @@ class Aptos implements Web3ProviderStandard {
     description: string,
     supply: number,
     uri: string,
-    royalty_points_per_million: number
+    royalty_points_per_million: number,
   ): Promise<Types.HexEncodedBytes> {
     if (this.currentAccount)
       return await this.token.createToken(
@@ -254,7 +194,8 @@ class Aptos implements Web3ProviderStandard {
         name,
         description,
         supply,
-        uri
+        uri,
+        royalty_points_per_million,
       );
 
     return "";
@@ -265,17 +206,10 @@ class Aptos implements Web3ProviderStandard {
     creator: MaybeHexString,
     collectionName: string,
     name: string,
-    amount: number
+    amount: number,
   ): Promise<Types.HexEncodedBytes> {
     if (this.currentAccount)
-      return await this.token.offerToken(
-        this.currentAccount,
-        receiver,
-        creator,
-        collectionName,
-        name,
-        amount
-      );
+      return await this.token.offerToken(this.currentAccount, receiver, creator, collectionName, name, amount);
 
     return "";
   }
@@ -284,16 +218,10 @@ class Aptos implements Web3ProviderStandard {
     sender: MaybeHexString,
     creator: MaybeHexString,
     collectionName: string,
-    name: string
+    name: string,
   ): Promise<Types.HexEncodedBytes> {
     if (this.currentAccount)
-      return await this.token.claimToken(
-        this.currentAccount,
-        sender,
-        creator,
-        collectionName,
-        name
-      );
+      return await this.token.claimToken(this.currentAccount, sender, creator, collectionName, name);
 
     return "";
   }
@@ -302,21 +230,13 @@ class Aptos implements Web3ProviderStandard {
     receiver: MaybeHexString,
     creator: MaybeHexString,
     collectionName: string,
-    name: string
+    name: string,
   ): Promise<Types.HexEncodedBytes> {
     if (this.currentAccount)
-      return await this.token.cancelTokenOffer(
-        this.currentAccount,
-        receiver,
-        creator,
-        collectionName,
-        name
-      );
+      return await this.token.cancelTokenOffer(this.currentAccount, receiver, creator, collectionName, name);
 
     return "";
   }
-
-  // /end section of onchain call, built-in
 }
 
 export default Aptos;

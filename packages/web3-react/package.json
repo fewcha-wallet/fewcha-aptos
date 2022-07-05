@@ -1,28 +1,64 @@
 {
   "name": "@fewcha/web3-react",
-  "version": "0.1.0",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "version": "0.0.2",
+  "main": "lib/index.js",
+  "types": "./es/index.d.ts",
+  "unpkg": "dist/@fewcha/web3-react.js",
+  "module": "es/index.js",
+  "files": [
+    "dist",
+    "lib",
+    "src",
+    "es"
+  ],
   "author": "fewcha.app",
   "license": "MIT",
   "scripts": {
-    "build": "yarn build:tsc",
-    "build:tsc": "tsc -b",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --extensions \".js,.ts,.tsx\" --out-dir lib",
+    "build:es": "babel src --extensions \".js,.ts,.tsx\" --out-dir es",
+    "build:umd": "cross-env NODE_ENV=development rollup -c -o dist/@fewcha/web3-react.js",
+    "build:umd:min": "cross-env NODE_ENV=production rollup -c -o dist/@fewcha/web3-react.min.js",
+    "build:types": "tsc",
+    "build": "yarn build:types && yarn build:commonjs && yarn build:es && yarn build:umd && yarn build:umd:min",
     "test": "jest"
   },
-  "dependencies": {
-    "@fewcha/web3": "*",
-    "react-query": "^3.39.1",
+  "peerDependencies": {
+    "@fewcha/web3": "0.0.2",
+    "@types/react": "^16.8 || ^17.0 || ^18.0",
+    "@types/react-dom": "^16.8 || ^17.0 || ^18.0",
+    "react": "^16.8 || ^17.0 || ^18.0",
+    "react-dom": "^16.8 || ^17.0 || ^18.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-decorators": "^7.12.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.12.1",
+    "@babel/plugin-transform-react-display-name": "^7.12.1",
+    "@babel/plugin-transform-react-jsx": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-typescript": "^7.14.5",
+    "@babel/runtime": "^7.18.6",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
     "@testing-library/react": "13.3.0",
-    "@types/jest": "^27.0.3",
-    "@types/react": "^17.0.14",
-    "jest": "^27.4.3",
-    "react": "18.1.0",
-    "react-dom": "18.1.0",
-    "rollup": "^2.60.2",
-    "rollup-plugin-typescript2": "^0.31.1",
-    "ts-jest": "^27.1.1",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "@types/jest": "^28.1.4",
+    "@types/react": "^18.0.14",
+    "cross-env": "^7.0.3",
+    "jest": "^28.1.2",
+    "react-query": "^3.39.1",
+    "rollup": "^2.75.7",
+    "rollup-plugin-terser": "^7.0.2",
+    "ts-jest": "^28.0.5",
+    "tslib": "^2.4.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@fewcha/web3": "^0.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@fewcha/web3",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "author": "fewcha.app",
@@ -11,17 +11,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "aptos": "^1.1.0",
-    "@testing-library/react": "13.3.0",
-    "@types/jest": "^27.0.3",
-    "@types/react": "^17.0.14",
-    "jest": "^27.4.3",
-    "react": "18.1.0",
-    "react-dom": "18.1.0",
-    "rollup": "^2.60.2",
-    "rollup-plugin-typescript2": "^0.31.1",
-    "ts-jest": "^27.1.1",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "@fewcha/aptos": "1.2.0",
+    "@types/jest": "^28.1.4",
+    "jest": "^28.1.2",
+    "ts-jest": "^28.0.5",
+    "tslib": "^2.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
   }
 }

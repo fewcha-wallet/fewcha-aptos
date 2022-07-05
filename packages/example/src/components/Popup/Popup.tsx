@@ -1,6 +1,7 @@
 import { longTruncateEthAddress } from "utils/address";
 import logo from "../../public/svgs/logo.svg";
 import { Copy } from "@styled-icons/boxicons-solid";
+import { Link } from "@styled-icons/ionicons-sharp";
 
 export const Popup: React.FC<{
   status: boolean;
@@ -21,18 +22,12 @@ export const Popup: React.FC<{
       <div className="w-full  max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg  bg-white ">
         <div className="">
           <div className="text-center p-5 flex-col justify-center items-center">
-            <img
-              src={logo}
-              alt="logo"
-              className="max-w-[105px] md:max-w-[155px] mx-auto"
-            />
+            <img src={logo} alt="logo" className="max-w-[105px] md:max-w-[155px] mx-auto" />
             {transactionHash ? (
               <>
                 <h2 className="text-xl font-bold py-4 ">Success</h2>
                 <div className="flex justify-center items-center">
-                  <p className="text-lg text-gray-700 pr-2">
-                    Transaction: {longTruncateEthAddress(transactionHash)}{" "}
-                  </p>
+                  <p className="text-lg text-gray-700 pr-2">Transaction: {longTruncateEthAddress(transactionHash)} </p>
                   <Copy
                     className="cursor-pointer"
                     onClick={() => {
@@ -40,6 +35,14 @@ export const Popup: React.FC<{
                     }}
                     size={20}
                   />
+                  <a
+                    className="ml-2"
+                    href={`https://explorer.devnet.aptos.dev/txn/${transactionHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Link size={24} />
+                  </a>
                 </div>
                 {/* <p className="text-sm text-gray-500 px-8">
                   <a href={"https://google.com"}>
@@ -50,9 +53,7 @@ export const Popup: React.FC<{
             ) : (
               <>
                 <h2 className="text-xl font-bold py-4 ">Success</h2>
-                <p className="text-sm text-gray-500 px-8">
-                  Can't get transaction hash!
-                </p>
+                <p className="text-sm text-gray-500 px-8">Can't get transaction hash!</p>
               </>
             )}
           </div>

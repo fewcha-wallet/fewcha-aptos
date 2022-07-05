@@ -1,6 +1,6 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { AptosAccount, AptosClient } from "aptos";
+import { AptosAccount, AptosClient } from "@fewcha/aptos";
 import AptosProvider from "./provider/aptos";
 import { Web3ProviderStandard } from "./types";
 import { isUrl } from "./utils/isUrl";
@@ -8,10 +8,7 @@ import { isUrl } from "./utils/isUrl";
 class Web3Provider {
   public provider: Web3ProviderStandard;
 
-  constructor(
-    provider: string | AptosClient | Web3ProviderStandard,
-    account?: AptosAccount
-  ) {
+  constructor(provider: string | AptosClient | Web3ProviderStandard, account?: AptosAccount) {
     // parse node URL
     if (typeof provider === "string") {
       if (!isUrl(provider)) {
