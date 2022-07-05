@@ -3,6 +3,7 @@ name: Fewcha Example Production Website
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 env:
   CODENAME: fewcha
