@@ -54,7 +54,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   };
 
   const setWeb3Init = () => {
-    const wallet = (window as any).aptos;
+    const wallet = (window as any).fewcha;
 
     if (wallet) {
       const provider = new Web3Provider(wallet);
