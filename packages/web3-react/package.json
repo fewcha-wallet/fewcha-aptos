@@ -1,6 +1,6 @@
 {
   "name": "@fewcha/web3-react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "lib/index.js",
   "types": "./es/index.d.ts",
   "unpkg": "dist/@fewcha/web3-react.js",
@@ -23,7 +23,7 @@
     "test": "jest"
   },
   "peerDependencies": {
-    "@fewcha/web3": "0.0.2",
+    "@fewcha/web3": "0.0.3",
     "@types/react": "^16.8 || ^17.0 || ^18.0",
     "@types/react-dom": "^16.8 || ^17.0 || ^18.0",
     "react": "^16.8 || ^17.0 || ^18.0",
@@ -57,7 +57,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@fewcha/web3": "^0.0.2",
+    "@fewcha/web3": "0.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

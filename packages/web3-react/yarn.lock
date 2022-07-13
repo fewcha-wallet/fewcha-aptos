@@ -1218,10 +1218,10 @@
     typescript-memoize "^1.1.0"
     yarn "^1.22.18"
 
-"@fewcha/web3@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.0.2.tgz#8ff812ce3e6c7d142d73a260b16032cc1ad251b9"
-  integrity sha512-THx5wDo3m6qNqmGrg8tNqgX81k9/G7Lc/ThLnHwDCl+e0cSEIMKhqsN5uPbVJVqNWgmZVLIijRzxpjuU/2ieug==
+"@fewcha/web3@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.0.3.tgz#b11bd11e52e86e43291b2841fe11b5716d5c5d6e"
+  integrity sha512-Pm4q9jyfsxBzikhK3KZM3bNJhEcYHA9Hs8t52JDKqZyMH7RmxImLk9KMQGuNWGTtT0ObzFEv1Vegv1gwD3y7bw==
   dependencies:
     "@fewcha/aptos" "1.2.0"
     "@types/jest" "^28.1.4"

@@ -1403,15 +1403,19 @@
     typescript-memoize "^1.1.0"
     yarn "^1.22.18"
 
-"@fewcha/web3-react@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3-react/-/web3-react-0.0.1.tgz#e0c1077c9c7a2d23fb330e187a601913f83655c3"
-  integrity sha512-mnvJN8kCDLVX2117B4Woe/JvoTawJmwga5ocJMcef3pQrrjwRG2QyH3pwFpDlv7a/OKCwpBR5CDrAJavicJDaQ==
+"@fewcha/web3-react@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@fewcha/web3-react/-/web3-react-0.0.3.tgz#45ff2a3cdb5469102fdbf9278f21add7e298cf37"
+  integrity sha512-P4Kp3cRkMfIqDKO0ETEs47pfKw/+W7i1Nra4k7+RgZjz4u1HhOLNGywbSp2wg/CgYP3t3Ln7nQJPPKB2b38qJA==
+  dependencies:
+    "@fewcha/web3" "0.0.3"
+    react "^18.2.0"
+    react-dom "^18.2.0"
 
-"@fewcha/web3@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.0.1.tgz#faf770490ca290f33a57ea21667622b849099c11"
-  integrity sha512-TXg8yHxpRZh3qJjo93F1tJTMQTyew0jyZv58bAQRIV0gL3ER2bQ/dGYUGwjEmdMm7gqBmsIwwpEzPIMoCyrizA==
+"@fewcha/web3@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.0.3.tgz#b11bd11e52e86e43291b2841fe11b5716d5c5d6e"
+  integrity sha512-Pm4q9jyfsxBzikhK3KZM3bNJhEcYHA9Hs8t52JDKqZyMH7RmxImLk9KMQGuNWGTtT0ObzFEv1Vegv1gwD3y7bw==
   dependencies:
     "@fewcha/aptos" "1.2.0"
     "@types/jest" "^28.1.4"
