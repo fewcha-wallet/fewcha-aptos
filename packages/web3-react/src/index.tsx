@@ -117,7 +117,12 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   const connectedEvent = () => {
     setIsConnected(true);
-    getAccount();
+    setTimeout(() => {
+      setWeb3Init();
+      getAccount();
+      changeBalance();
+      getNetwork();
+    }, 200);
   };
 
   const disconnectedEvent = () => {
