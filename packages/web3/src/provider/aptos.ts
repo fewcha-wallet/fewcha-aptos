@@ -67,13 +67,17 @@ class Aptos implements Web3ProviderType {
     return await this.client.simulateTransaction(this.currentAccount, txnRequest);
   }
 
-  generateBCSTransaction(rawTxn: RawTransaction): Uint8Array {
+  generateBCSTransaction(rawTxn: RawTransaction): Promise<Uint8Array> {
     if (!this.currentAccount) throw new Error("401");
-    return AptosClient.generateBCSTransaction(this.currentAccount, rawTxn);
+    return new Promise((resolve) => {
+      resolve(AptosClient.generateBCSTransaction(this.currentAccount, rawTxn));
+    });
   }
-  generateBCSSimulation(rawTxn: RawTransaction): Uint8Array {
+  generateBCSSimulation(rawTxn: RawTransaction): Promise<Uint8Array> {
     if (!this.currentAccount) throw new Error("401");
-    return AptosClient.generateBCSSimulation(this.currentAccount, rawTxn);
+    return new Promise((resolve) => {
+      resolve(AptosClient.generateBCSSimulation(this.currentAccount, rawTxn));
+    });
   }
 
   async submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction> {

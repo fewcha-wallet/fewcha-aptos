@@ -23,8 +23,8 @@ export interface Web3ProviderType {
 
   simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction>;
 
-  generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array;
-  generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array;
+  generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
+  generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
 
   submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction>;
   submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction>;
