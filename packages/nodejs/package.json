@@ -1,0 +1,11 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@fewcha/web3": "^0.0.5",
+    "aptos": "^1.2.0"
+  }
+}

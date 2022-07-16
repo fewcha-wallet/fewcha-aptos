@@ -1,14 +1,14 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { AptosAccount, AptosClient } from "@fewcha/aptos";
+import { AptosAccount, AptosClient } from "aptos";
 import AptosProvider from "./provider/aptos";
-import { Web3ProviderStandard } from "./types";
+import { Web3ProviderType } from "./types";
 import { isUrl } from "./utils/isUrl";
 
 class Web3Provider {
-  public provider: Web3ProviderStandard;
+  public provider: Web3ProviderType;
 
-  constructor(provider: string | AptosClient | Web3ProviderStandard, account?: AptosAccount) {
+  constructor(provider: string | AptosClient | Web3ProviderType, account?: AptosAccount) {
     // parse node URL
     if (typeof provider === "string") {
       if (!isUrl(provider)) {
@@ -25,14 +25,13 @@ class Web3Provider {
       return this;
     }
 
-    // for FewchaWallet
-    if ((provider as any).isFewchaWallet) {
-      this.provider = provider as Web3ProviderStandard;
+    if (provider) {
+      this.provider = provider as Web3ProviderType;
       return this;
     }
 
     // for web3provider standard
-    const p = provider as Web3ProviderStandard;
+    const p = provider as Web3ProviderType;
     this.provider = p;
     return this;
   }
