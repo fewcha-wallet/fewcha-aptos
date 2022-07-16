@@ -27,7 +27,7 @@ const main = async function () {
   // }
 
   // get node url
-  console.log(await web3.action.getNodeURL());
+  console.log(await web3.action.getNetwork());
   // https://fullnode.devnet.aptoslabs.com
 
   // get account detail
