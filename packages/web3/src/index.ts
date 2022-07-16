@@ -4,7 +4,7 @@ import * as Aptos from "aptos";
 import Web3Account from "./account";
 import Web3Provider from "./provider";
 import AptosProvider from "./provider/aptos";
-import { Web3ProviderType } from "./types";
+import { Web3ProviderType, Web3SDK, Web3Token } from "./types";
 
 class Web3 {
   public action: Web3ProviderType;
@@ -27,6 +27,6 @@ const providers = {
 export { Aptos };
 
 export { Web3Account, Web3Provider, providers };
-export type { Web3ProviderType };
+export type { Web3ProviderType, Web3Token, Web3SDK };
 
 export default Web3;
