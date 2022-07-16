@@ -1,10 +1,10 @@
 {
   "name": "@fewcha/web3",
-  "version": "0.1.0",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "version": "0.1.1",
   "author": "fewcha.app",
   "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/fewcha-wallet/aptos-web3.git"
@@ -15,9 +15,13 @@
   },
   "keywords": [
     "Aptos",
-    "Fewcha Wallet",
     "Web3",
-    "Wallet"
+    "Fewcha Wallet",
+    "Wallet",
+    "Aptos Wallet",
+    "Dapp",
+    "Dapps",
+    "Blockchain"
   ],
   "scripts": {
     "build": "yarn build:tsc",

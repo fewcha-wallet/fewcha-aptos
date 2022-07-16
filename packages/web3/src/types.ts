@@ -30,7 +30,7 @@ export interface Web3ProviderType {
   submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction>;
 
   account(): Promise<PublicAccount>;
-  getNodeURL(): Promise<string>;
+  getNetwork(): Promise<string>;
   getBalance(): Promise<string>;
 
   sdk: {

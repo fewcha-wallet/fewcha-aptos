@@ -88,7 +88,7 @@ class Aptos implements Web3ProviderType {
     if (this.currentAccount) return { address: this.currentAccount.address().hex(), publicKey: this.currentAccount.pubKey().hex() };
     return { address: "", publicKey: "" };
   }
-  public async getNodeURL(): Promise<string> {
+  public async getNetwork(): Promise<string> {
     return this.client.nodeUrl;
   }
   public async getBalance(): Promise<string> {
