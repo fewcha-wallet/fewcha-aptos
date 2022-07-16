@@ -1,81 +1,118 @@
 import React, { useContext, createContext, PropsWithChildren, useState, useEffect } from "react";
-import Web3, { Web3Provider, Web3ProviderStandard } from "@fewcha/web3";
-
-const defaultNodeURL = "https://fullnode.devnet.aptoslabs.com";
-const defaultWeb3 = new Web3(new Web3Provider(defaultNodeURL));
+import Web3, { Web3ProviderType, Web3Provider, Web3SDK, Web3Token } from "@fewcha/web3";
+import { TxnBuilderTypes } from "aptos";
+import { TransactionPayload, UserTransactionRequest, SubmitTransactionRequest, PendingTransaction, OnChainTransaction } from "aptos/dist/api/data-contracts";
+import { PublicAccount } from "@fewcha/web3/dist/types";
 
 export type Tx = { id: string; hash: string };
 
 type Web3ContextValue = {
   init: boolean;
-  account: string;
+
+  account: PublicAccount;
   balance: string;
-  txs: Tx[];
+  // getBalance(): Promise<string>;
+
+  connect: () => Promise<PublicAccount>;
+  disconnect: () => Promise<void>;
   isConnected: boolean;
-  connect: () => void;
-  disconnect: () => void;
-  nodeURL: string;
-  web3: Web3ProviderStandard;
+  // isConnected(): Promise<boolean>;
+
+  network: string;
+  txs: Tx[];
+
+  sdk: Web3SDK;
+  token: Web3Token;
+
+  generateTransaction(payload: TransactionPayload, options?: Partial<UserTransactionRequest>): Promise<UserTransactionRequest>;
+
+  signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<PendingTransaction>;
+  signTransaction(txnRequest: UserTransactionRequest): Promise<UserTransactionRequest>;
+  signMessage(message: string): Promise<string>;
+  submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<PendingTransaction>;
+
+  simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction>;
+
+  generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array;
+  generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array;
+
+  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction>;
+  submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction>;
 };
 
-const defaultContext: Web3ContextValue = {
-  init: false,
-  account: "",
-  balance: "",
-  txs: [],
-  isConnected: false,
-  connect: () => {},
-  disconnect: () => {},
-  nodeURL: "",
-  web3: defaultWeb3.action,
-};
-
-export const Web3Context = createContext<Web3ContextValue>(defaultContext);
+export const Web3Context = createContext<Web3ContextValue>(null as any);
 
 export const useWeb3 = () => {
-  const { init, web3, account, balance, txs, isConnected, connect, disconnect } = useContext(Web3Context);
-  return { init, web3, account, balance, txs, isConnected, connect, disconnect };
+  const { init, account, balance, isConnected, connect, disconnect, network, txs, sdk, token } = useContext(Web3Context);
+  return {
+    init,
+    account,
+    balance,
+    isConnected,
+    connect,
+    disconnect,
+    network,
+    txs,
+    sdk,
+    token,
+  };
 };
 
 const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
-  const [init, setInit] = useState(false);
-  const [account, setAccount] = useState("");
-  const [balance, setBalance] = useState("");
-  const [txs, setTxs] = useState<Tx[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [nodeURL, setNodeURL] = useState("");
-  const [web3, setWeb3] = useState(defaultWeb3);
+  const emptyAccount = { address: "", publicKey: "" };
 
-  const connect = async () => {
-    await web3.action.connect();
-  };
-  const disconnect = async () => {
-    await web3.action.disconnect();
-  };
+  const [init, setInit] = useState(false);
+  const [account, setAccount] = useState<PublicAccount>(emptyAccount);
+  const [balance, setBalance] = useState("");
+
+  const [isConnected, setIsConnected] = useState(false);
+
+  const [network, setNetwork] = useState("");
+  const [txs, setTxs] = useState<Tx[]>([]);
+
+  const [web3, setWeb3] = useState(null as unknown as Web3ProviderType);
 
   const setWeb3Init = () => {
     const wallet = (window as any).fewcha;
 
     if (wallet) {
       const provider = new Web3Provider(wallet);
-      const web3 = new Web3(provider);
-      setWeb3(web3);
+      const w = new Web3(provider);
+
       setInit(true);
+      setWeb3(w.action);
     }
   };
 
-  const getAccount = () => {
-    web3.action.account().then((data) => {
-      setAccount(data);
-    });
+  const connect = async () => {
+    if (!web3) throw new Error("404");
+    return web3.connect();
   };
 
-  const changeBalance = () => {};
+  const disconnect = async () => {
+    if (!web3) throw new Error("404");
+    await web3.disconnect();
+  };
 
-  const getNodeURL = () => {
-    web3.action.getNodeURL().then((data) => {
-      setNodeURL(data);
-    });
+  const getAccount = () => {
+    if (web3)
+      web3.account().then((data) => {
+        setAccount(data);
+      });
+  };
+
+  const changeBalance = () => {
+    if (web3)
+      web3.getBalance().then((data) => {
+        setBalance(data);
+      });
+  };
+
+  const getNetwork = () => {
+    if (web3)
+      web3.getNetwork().then((data) => {
+        setNetwork(data);
+      });
   };
 
   const connectedEvent = () => {
@@ -84,8 +121,8 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   };
 
   const disconnectedEvent = () => {
-    setIsConnected(false);
-    setAccount("");
+    setIsConnected(false); // TO-DO: handle correct tab connected
+    setAccount(emptyAccount);
   };
 
   const pushTransaction = (event: Event) => {
@@ -103,7 +140,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     window.addEventListener("aptos#disconnected", disconnectedEvent);
     window.addEventListener("aptos#changeAccount", getAccount);
     window.addEventListener("aptos#changeBalance", changeBalance);
-    window.addEventListener("aptos#changeNetwork", getNodeURL);
+    window.addEventListener("aptos#changeNetwork", getNetwork);
     window.addEventListener("aptos#transaction", pushTransaction);
 
     return () => {
@@ -112,29 +149,45 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       window.removeEventListener("aptos#disconnected", disconnectedEvent);
       window.removeEventListener("aptos#changeAccount", getAccount);
       window.removeEventListener("aptos#changeBalance", changeBalance);
-      window.removeEventListener("aptos#changeNetwork", getNodeURL);
+      window.removeEventListener("aptos#changeNetwork", getNetwork);
       window.removeEventListener("aptos#transaction", pushTransaction);
     };
     // eslint-disable-next-line
   }, [web3]);
 
-  return (
-    <Web3Context.Provider
-      value={{
-        init,
-        account,
-        balance,
-        txs,
-        isConnected,
-        connect,
-        disconnect,
-        web3: web3.action,
-        nodeURL,
-      }}
-    >
-      {children}
-    </Web3Context.Provider>
-  );
+  let value: Web3ContextValue = { init: false } as Web3ContextValue;
+
+  if (web3) {
+    const { generateTransaction, signAndSubmitTransaction, signTransaction, signMessage, submitTransaction, simulateTransaction, generateBCSTransaction, generateBCSSimulation, submitSignedBCSTransaction, submitBCSSimulation } = web3;
+    value = {
+      init,
+      account,
+      balance,
+
+      isConnected,
+      connect,
+      disconnect,
+
+      network,
+      txs,
+
+      sdk: web3?.sdk,
+      token: web3?.token,
+
+      generateTransaction,
+      signAndSubmitTransaction,
+      signTransaction,
+      signMessage,
+      submitTransaction,
+      simulateTransaction,
+      generateBCSTransaction,
+      generateBCSSimulation,
+      submitSignedBCSTransaction,
+      submitBCSSimulation,
+    };
+  }
+
+  return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
 };
 
 export default Web3ReactProvider;
