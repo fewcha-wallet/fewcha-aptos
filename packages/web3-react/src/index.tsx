@@ -111,26 +111,46 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
           setBalance(data);
         });
       } else {
-        web3.sdk.getAccountResources(account.address).then((data) => {
-          const accountResource = data.find((r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>");
-          if (accountResource) {
-            if ((accountResource.data as any).coin) {
-              const balance = (accountResource.data as any).coin.value;
-              setBalance(balance);
-              return;
-            }
-          }
+        let func = web3.sdk.getAccountResources;
 
-          setBalance("0");
-        });
+        if (!func) {
+          // support old versions of wallets
+          func = (web3 as any).getAccountResources;
+          if (func)
+            func(account.address).then((data) => {
+              const accountResource = data.find((r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>");
+              if (accountResource) {
+                if ((accountResource.data as any).coin) {
+                  const balance = (accountResource.data as any).coin.value;
+                  setBalance(balance);
+                  return;
+                }
+              }
+
+              setBalance("0");
+            });
+        }
+
+        if (!func) {
+          // support maritian
+          // https://docs.martianwallet.xyz/docs/methods/fetch-account-balance
+          func = (web3 as any).getAccountBalance;
+          (func as any)((res: { status: number; data: any }) => {
+            if (res.status === 200) {
+              setBalance(res.data);
+            }
+          });
+          return;
+        }
       }
   };
 
   const getNetwork = () => {
     if (web3)
-      web3.getNetwork().then((data) => {
-        setNetwork(data);
-      });
+      if (web3.getNetwork)
+        web3.getNetwork().then((data) => {
+          setNetwork(data);
+        });
   };
 
   const connectedEvent = () => {
@@ -166,21 +186,24 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       }
     } else {
       if (web3) {
-        web3.isConnected().then((data) => {
-          setIsConnected(data);
-          getAccount();
-          getBalance();
-          getNetwork();
-        });
+        if (typeof web3.isConnected === "function")
+          web3.isConnected().then((data) => {
+            setIsConnected(data);
+            getAccount();
+            getBalance();
+            getNetwork();
+          });
+        // support martian
+        if (typeof web3.isConnected === "boolean") setIsConnected((web3 as any).isConnected as boolean);
       }
     }
 
-    setLoopId(setTimeout(loop, 1000));
+    setLoopId(setTimeout(loop, 1500));
   };
 
   useEffect(() => {
     setWeb3Init();
-    setLoopId(setTimeout(loop, 1000));
+    setLoopId(setTimeout(loop, 1500));
     return () => {
       clearTimeout(loopId);
     };
