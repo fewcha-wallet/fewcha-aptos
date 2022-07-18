@@ -13,7 +13,7 @@ const Account = () => {
         {isConnected ? (
           <div>
             <div>Address: {account.address}</div>
-            <div>Balance: {balance}</div>
+            <div>Balance: {balance || "0"}</div>
             <div>Network: {network}</div>
             <div>
               <button

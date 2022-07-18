@@ -27,14 +27,14 @@ type Web3ContextValue = {
   generateTransaction(payload: TransactionPayload, options?: Partial<UserTransactionRequest>): Promise<UserTransactionRequest>;
 
   signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<PendingTransaction>;
-  signTransaction(txnRequest: UserTransactionRequest): Promise<UserTransactionRequest>;
+  signTransaction(txnRequest: UserTransactionRequest): Promise<SubmitTransactionRequest>;
   signMessage(message: string): Promise<string>;
   submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<PendingTransaction>;
 
   simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction>;
 
-  generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array;
-  generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array;
+  generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
+  generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
 
   submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction>;
   submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction>;
@@ -72,6 +72,8 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   const [web3, setWeb3] = useState(null as unknown as Web3ProviderType);
 
+  const [loopId, setLoopId] = useState<NodeJS.Timeout>();
+
   const setWeb3Init = () => {
     const wallet = (window as any).fewcha;
 
@@ -98,14 +100,30 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     if (web3)
       web3.account().then((data) => {
         setAccount(data);
+        getBalance();
       });
   };
 
-  const changeBalance = () => {
+  const getBalance = () => {
     if (web3)
-      web3.getBalance().then((data) => {
-        setBalance(data);
-      });
+      if (web3.getBalance) {
+        web3.getBalance().then((data) => {
+          setBalance(data);
+        });
+      } else {
+        web3.sdk.getAccountResources(account.address).then((data) => {
+          const accountResource = data.find((r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>");
+          if (accountResource) {
+            if ((accountResource.data as any).coin) {
+              const balance = (accountResource.data as any).coin.value;
+              setBalance(balance);
+              return;
+            }
+          }
+
+          setBalance("0");
+        });
+      }
   };
 
   const getNetwork = () => {
@@ -120,7 +138,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     setTimeout(() => {
       setWeb3Init();
       getAccount();
-      changeBalance();
+      getBalance();
       getNetwork();
     }, 200);
   };
@@ -135,16 +153,45 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     if (e.detail) setTxs([...txs, { id: e.detail.id, hash: e.detail.tx }]);
   };
 
+  const loop = async () => {
+    if (isConnected) {
+      if (!account) {
+        getAccount();
+      }
+      if (!network) {
+        getNetwork();
+      }
+      if (!balance) {
+        getBalance();
+      }
+    } else {
+      if (web3) {
+        web3.isConnected().then((data) => {
+          setIsConnected(data);
+          getAccount();
+          getBalance();
+          getNetwork();
+        });
+      }
+    }
+
+    setLoopId(setTimeout(loop, 1000));
+  };
+
   useEffect(() => {
     setWeb3Init();
-  }, []);
+    setLoopId(setTimeout(loop, 1000));
+    return () => {
+      clearTimeout(loopId);
+    };
+  }, [web3]);
 
   useEffect(() => {
     window.addEventListener("aptos#initialized", setWeb3Init);
     window.addEventListener("aptos#connected", connectedEvent);
     window.addEventListener("aptos#disconnected", disconnectedEvent);
     window.addEventListener("aptos#changeAccount", getAccount);
-    window.addEventListener("aptos#changeBalance", changeBalance);
+    window.addEventListener("aptos#changeBalance", getBalance);
     window.addEventListener("aptos#changeNetwork", getNetwork);
     window.addEventListener("aptos#transaction", pushTransaction);
 
@@ -153,7 +200,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       window.removeEventListener("aptos#connected", connectedEvent);
       window.removeEventListener("aptos#disconnected", disconnectedEvent);
       window.removeEventListener("aptos#changeAccount", getAccount);
-      window.removeEventListener("aptos#changeBalance", changeBalance);
+      window.removeEventListener("aptos#changeBalance", getBalance);
       window.removeEventListener("aptos#changeNetwork", getNetwork);
       window.removeEventListener("aptos#transaction", pushTransaction);
     };
