@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@fewcha/web3": "^0.1.4",
-    "@fewcha/web3-react": "^0.0.14",
+    "@fewcha/web3-react": "^0.1.1",
     "aptos": "^1.2.0",
     "next": "12.2.2",
     "react": "18.2.0",

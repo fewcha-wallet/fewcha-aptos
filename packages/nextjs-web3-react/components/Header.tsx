@@ -1,11 +1,9 @@
 import React from "react";
-import { useWeb3 } from "@fewcha/web3-react";
+import { ConnectWallet, useWeb3 } from "@fewcha/web3-react";
 
 const Account = () => {
   const web3 = useWeb3();
-  const { init, account, balance, isConnected, connect, disconnect, network, txs, sdk, token } = web3;
-
-  if (!init) return <div></div>;
+  const { account, balance, isConnected, disconnect, network, txs, sdk, token } = web3;
 
   return (
     <div>
@@ -26,15 +24,7 @@ const Account = () => {
             </div>
           </div>
         ) : (
-          <div>
-            <button
-              onClick={() => {
-                connect();
-              }}
-            >
-              Connect
-            </button>
-          </div>
+          <ConnectWallet type="list" />
         )}
       </div>
     </div>
