@@ -4,6 +4,8 @@ import { Types } from './types';
 import { Buffer } from 'buffer/';
 
 export type CoinData = {
+  address: string;
+  resource_type: string;
   name: string;
   symbol: string;
   decimals: number;
@@ -11,7 +13,7 @@ export type CoinData = {
 
 export type CoinStore = {
   coin: {
-    value: number
+    value: string
   };
 };
 
@@ -165,14 +167,19 @@ export class CoinClient {
   }
 
   /** Get coin metadata */
-  // coin_type_address: something like 0x${coinTypeAddress}
+  // address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
-  async getCoinData(coin_type_address: string, resource_type: string) : Promise<CoinData> {
-    const coin_data = await this.aptosClient.getAccountResource(
-      coin_type_address,
-      `0x1::coin::CoinInfo<${coin_type_address}::${resource_type}>`
+  async getCoinData(address: string, resource_type: string) : Promise<CoinData> {
+    const resource = await this.aptosClient.getAccountResource(
+      address,
+      `0x1::coin::CoinInfo<${address}::${resource_type}>`
     );
-    return coin_data.data as CoinData;
+    let coin_data = resource.data as CoinData;
+    return {
+      ...coin_data,
+      address,
+      resource_type,
+    };
   }
 
   /** Get coin balance */
@@ -180,14 +187,34 @@ export class CoinClient {
   // coin_type_address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
   async getCoinBalance(
-    accountAddress: string, 
+    account_address: string, 
     coin_type_address: string, 
     resource_type: string,
-  ): Promise<number> {
+  ): Promise<string> {
     const coin_info = await this.aptosClient.getAccountResource(
-      accountAddress,
+      account_address,
       `0x1::coin::CoinStore<${coin_type_address}::${resource_type}>`
     );
     return (coin_info.data as CoinStore).coin.value;
+  }
+
+  /** Get list registered coins */
+  // account_address: something like 0x${accountAddress}
+  async getCoins(account_address: string) : Promise<CoinData[]> {
+    const resources = await this.aptosClient.getAccountResources(account_address);
+    return resources.filter(
+      (r) => r.type.startsWith("0x1::coin::CoinInfo")
+    ).map(
+      (r) => {
+        let coin_data = r.data as CoinData;
+        var regExp = new RegExp("0x1::coin::CoinInfo<(0x[0-9A-Fa-f]+)::([^>]+)>", "i");
+        var match = regExp.exec(r.type);
+        return {
+          ...coin_data,
+          address: match[1],
+          resource_type: match[2],
+        };
+      }
+    );
   }
 }
