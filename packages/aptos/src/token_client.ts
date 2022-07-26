@@ -314,4 +314,81 @@ export class TokenClient {
     const tableItem = await this.aptosClient.getTableItem(handle, getTokenTableItemRequest);
     return tableItem.data;
   }
+
+  // returns a list of token IDs of the tokens in a user's account (including the tokens that were minted)
+  async getTokenIds(address: string) {
+    const depositEvents = await this.aptosClient.getEventsByEventHandle(
+      address,
+      "0x1::token::TokenStore",
+      "deposit_events"
+    );
+    const withdrawEvents = await this.aptosClient.getEventsByEventHandle(
+      address,
+      "0x1::token::TokenStore",
+      "withdraw_events"
+    );
+
+    var countDeposit : Record<string, number> = {};
+    var countWithdraw : Record<string, number> = {};
+    var tokenIds = [];
+    for (var elem of depositEvents) {
+      const elem_string = JSON.stringify(elem.data.id)
+      countDeposit[elem_string] = countDeposit[
+        elem_string
+      ]
+        ? countDeposit[elem_string] + 1
+        : 1;
+    }
+    for (var elem of withdrawEvents) {
+      const elem_string = JSON.stringify(elem.data.id)
+      countWithdraw[elem_string] = countWithdraw[
+        elem_string
+      ]
+        ? countWithdraw[elem_string] + 1
+        : 1;
+    }
+
+    for (var elem of depositEvents) {
+      const elem_string = JSON.stringify(elem.data.id)
+      const count1 = countDeposit[elem_string];
+      const count2 = countWithdraw[elem_string]
+        ? countWithdraw[elem_string]
+        : 0;
+      if (count1 - count2 == 1) {
+        tokenIds.push(elem.data.id);
+      }
+    }
+    return tokenIds;
+  }
+
+  async getTokens(address: string) {
+    let localCache : Record<string, Types.AccountResource[]> = {};
+    const tokenIds = await this.getTokenIds(address);
+    var tokens = [];
+    for (var tokenId of tokenIds) {
+      let resources: Types.AccountResource[];
+      if (tokenId.creator in localCache) {
+        resources = localCache[tokenId.creator];
+      } else {
+        resources = await this.aptosClient.getAccountResources(tokenId.creator);
+        localCache[tokenId.creator] = resources;
+      }
+      const accountResource: { type: string; data: any } = resources.find(
+        (r) => r.type === "0x1::token::Collections"
+      );
+      let tableItemRequest: Types.TableItemRequest = {
+        key_type: "0x1::token::TokenId",
+        value_type: "0x1::token::TokenData",
+        key: tokenId,
+      };
+      const token = (
+        await this.aptosClient.getTableItem(
+          accountResource.data.token_data.handle,
+          tableItemRequest
+        )
+      ).data;
+      tokens.push(token);
+    }
+    return tokens;
+  }
 }
