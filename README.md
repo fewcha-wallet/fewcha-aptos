@@ -1,20 +1,46 @@
-# `@fewcha/web3` Aptos Web3.js - Fewcha Aptos Wallet
+# Aptos Web3 packages by Fewcha Aptos Wallet
 
 ## Packages
 
-| Package                                                                                           | Description | Type           |
-|---------------------------------------------------------------------------------------------------|-------------|----------------|
-| [`@fewcha/web3`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/web3)             |             | Nodejs/Browser |
-| [`@fewcha/web3-react`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/web3-react) |             | Nodejs/Browser |
-| [`example source code`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/example)   |             | Nodejs/Browser |
-
+| Package                                                                                           | Description |
+|---------------------------------------------------------------------------------------------------|-------------|
+| [`@fewcha/web3`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/web3)             |             |
+| [`@fewcha/web3-react`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/web3-react) |             |
 
 ## Development
 
+### Install
+
 ```
 yarn
-yarn bs
 ```
+
+### Build
+
+```
+yarn build
+```
+
+### Publish
+
+```
+yarn build
+yarn run publish
+```
+
+### Web3-react
+
+```
+yarn build
+```
+
+Keep a terminal for
+
+```
+yarn dev start
+```
+
+Change `packages/web3-react` and run `yarn build` again
 
 ## License
 

@@ -1,9 +1,7 @@
 import React, { useContext, createContext, PropsWithChildren, useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import styled, { css } from "styled-components";
-import { TxnBuilderTypes } from "aptos";
-import { TransactionPayload, UserTransactionRequest, SubmitTransactionRequest, PendingTransaction, OnChainTransaction } from "aptos/dist/api/data-contracts";
-import Web3, { Web3ProviderType, Web3Provider, Web3SDK, Web3Token } from "@fewcha/web3";
+import Web3, { Web3ProviderType, Web3Provider } from "@fewcha/web3";
 import { PublicAccount } from "@fewcha/web3/dist/types";
 import { isEmpty } from "lodash";
 
@@ -33,8 +31,8 @@ type PopupProps = {};
 type PopupType = (props: { Component: React.FC<PopupProps>; callback?: (key: string) => void }) => string;
 
 export const useWeb3 = () => {
-  const { init, account, balance, isConnected, connect, disconnect, network, txs, sdk, token } = useContext(Web3Context);
-  return { init, account, balance, isConnected, connect, disconnect, network, txs, sdk, token };
+  const { init, account, balance, isConnected, connect, disconnect, network, txs, web3 } = useContext(Web3Context);
+  return { init, account, balance, isConnected, connect, disconnect, network, txs, web3 };
 };
 
 export type Tx = { id: string; hash: string };
@@ -53,9 +51,6 @@ type Web3ContextValue = {
   network: string;
   txs: Tx[];
 
-  sdk: Web3SDK;
-  token: Web3Token;
-
   addPopup: PopupType;
   removePopup: (key: string) => void;
   removeAll: () => void;
@@ -63,21 +58,6 @@ type Web3ContextValue = {
   changeWeb3: (walletCodename: string, callback: () => void) => Promise<void>;
 
   web3: Web3ProviderType;
-
-  generateTransaction(payload: TransactionPayload, options?: Partial<UserTransactionRequest>): Promise<UserTransactionRequest>;
-
-  signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<PendingTransaction>;
-  signTransaction(txnRequest: UserTransactionRequest): Promise<SubmitTransactionRequest>;
-  signMessage(message: string): Promise<string>;
-  submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<PendingTransaction>;
-
-  simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction>;
-
-  generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
-  generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
-
-  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction>;
-  submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction>;
 };
 
 const emptyAccount = { address: "", publicKey: "" };
@@ -192,7 +172,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
           if (func)
             if (account)
               func(account.address).then((data) => {
-                const accountResource = data.find((r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>");
+                const accountResource = data.find((r) => r.type === "0x1::coin::CoinStore<0x1::test_coin::TestCoin>");
                 if (accountResource) {
                   if ((accountResource.data as any).coin) {
                     const balance = (accountResource.data as any).coin.value;
@@ -229,7 +209,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
         changeWeb3(code, () => {
           setInit(true);
           getAccount();
-          getBalance();
+
           getNetwork();
         });
       }
@@ -254,16 +234,12 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       if (!network) {
         getNetwork();
       }
-      if (!balance) {
-        getBalance();
-      }
     } else {
       if (web3) {
         if (typeof web3.isConnected === "function")
           web3.isConnected().then((data) => {
             setIsConnected(data);
             getAccount();
-            getBalance();
             getNetwork();
           });
         // support martian
@@ -305,39 +281,8 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   const Component = popups.length > 0 ? popups[popups.length - 1].Component : () => <></>;
 
-  const { generateTransaction, signAndSubmitTransaction, signTransaction, signMessage, submitTransaction, simulateTransaction, generateBCSTransaction, generateBCSSimulation, submitSignedBCSTransaction, submitBCSSimulation } = web3;
-
   return (
-    <Web3Context.Provider
-      value={{
-        init,
-        account,
-        balance,
-        isConnected,
-        txs,
-        addPopup,
-        removePopup,
-        removeAll,
-        sdk: web3.sdk,
-        token: web3.token,
-        connect,
-        disconnect,
-        network,
-        changeWeb3,
-        web3,
-
-        generateTransaction,
-        signAndSubmitTransaction,
-        signTransaction,
-        signMessage,
-        submitTransaction,
-        simulateTransaction,
-        generateBCSTransaction,
-        generateBCSSimulation,
-        submitSignedBCSTransaction,
-        submitBCSSimulation,
-      }}
-    >
+    <Web3Context.Provider value={{ init, account, balance, isConnected, txs, addPopup, removePopup, removeAll, connect, disconnect, network, changeWeb3, web3 }}>
       {children}
       {/* popup */}
       {popups.length > 0 && (
@@ -521,6 +466,7 @@ const ConnectWalletButton = styled.button`
 
 // popup
 const Popup = styled.div`
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
   display: inline-block;
   overflow: hidden;

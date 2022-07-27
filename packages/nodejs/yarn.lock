@@ -2,14 +2,6 @@
 # yarn lockfile v1
 
 
-"@fewcha/web3@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.1.tgz#10e220c92117e35a2346d2c3aa8db611381a90ab"
-  integrity sha512-e34pFVNdOXaX3Eo719IolW1jrsmBYuwBnAiQDdLyWfvWCRNZ5lvJ1XijiOuitwiMLD0lWucUCuqLkdj7lk4rag==
-  dependencies:
-    aptos "^1.2.0"
-    buffer "^6.0.3"
-
 aptos@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.2.0.tgz#c555da3db90b66e7d623024e95ea6920cbf48403"

@@ -1,22 +1,28 @@
 {
   "name": "@fewcha/root",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "author": "fewcha.app",
   "license": "MIT",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "bootstrap": "lerna bootstrap --npm-client=yarn",
     "build": "lerna run build --npm-client=yarn --parallel --scope @fewcha/web3 --scope @fewcha/web3-react --scope @fewcha/aptos",
-    "publish": "lerna publish",
     "test": "lerna run test --npm-client=yarn --stream",
+    "publish": "lerna publish --no-private",
     "bs": "yarn bootstrap",
+    "dev": "yarn workspace web3-react-development",
+    "link-all": "lerna exec --parallel yarn link",
+    "unlink-all": "lerna exec --parallel --bail=false yarn unlink",
     "nx": "nx"
   },
   "dependencies": {
     "@commitlint/config-conventional": "^17.0.3",
-    "@types/node": "^18.0.6",
+    "@types/node": "^18.6.1",
     "commitlint": "^17.0.3",
-    "lerna": "^5.1.8",
+    "lerna": "^5.2.0",
     "lint-staged": "^13.0.3",
     "nx": "^14.4.3",
     "typescript": "^4.7.4"
