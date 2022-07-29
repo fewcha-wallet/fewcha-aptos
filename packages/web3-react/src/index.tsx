@@ -2,7 +2,7 @@ import React, { useContext, createContext, PropsWithChildren, useState, useEffec
 import { v4 as uuidv4 } from "uuid";
 import styled, { css } from "styled-components";
 import Web3, { Web3ProviderType, Web3Provider } from "@fewcha/web3";
-import { PublicAccount } from "@fewcha/web3/dist/types";
+import { PublicAccount, Response } from "@fewcha/web3/dist/types";
 import { isEmpty } from "lodash";
 
 class LocalStorage<T> {
@@ -43,7 +43,7 @@ type Web3ContextValue = {
   balance: string;
   // getBalance(): Promise<string>;
 
-  connect: () => Promise<PublicAccount>;
+  connect: () => Promise<Response<PublicAccount>>;
   disconnect: () => Promise<void>;
   isConnected: boolean;
   // isConnected(): Promise<boolean>;
@@ -115,7 +115,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     }
   };
 
-  const connect = async (): Promise<PublicAccount> => {
+  const connect = async (): Promise<Response<PublicAccount>> => {
     if (isEmpty(web3)) throw new Error("404");
 
     setInit(true);
@@ -238,7 +238,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       if (web3) {
         if (typeof web3.isConnected === "function")
           web3.isConnected().then((data) => {
-            setIsConnected(data);
+            setIsConnected(data.data);
             getAccount();
             getNetwork();
           });

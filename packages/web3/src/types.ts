@@ -4,29 +4,24 @@ import { MaybeHexString, TxnBuilderTypes } from "aptos";
 import { Account, AccountResource, Event, HexEncodedBytes, LedgerInfo, LedgerVersion, MoveModule, MoveStructTagId, OnChainTransaction, PendingTransaction, SubmitTransactionRequest, TableItemRequest, Token, TokenData, TokenId, Transaction, TransactionPayload, UserTransactionRequest } from "aptos/dist/api/data-contracts";
 import { RequestParams } from "aptos/dist/api/http-client";
 
-export type PublicAccount = {
-  address: string;
-  publicKey: string;
-};
-
 export interface Web3ProviderType {
-  connect(): Promise<PublicAccount>;
+  connect(): Promise<Response<PublicAccount>>;
   disconnect(): Promise<void>;
-  isConnected(): Promise<boolean>;
+  isConnected(): Promise<Response<boolean>>;
 
   generateTransaction(payload: TransactionPayload, options?: Partial<UserTransactionRequest>): Promise<UserTransactionRequest>;
 
-  signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<PendingTransaction>;
+  signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<HexEncodedBytes>;
   signTransaction(txnRequest: UserTransactionRequest): Promise<SubmitTransactionRequest>;
   signMessage(message: string): Promise<string>;
-  submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<PendingTransaction>;
+  submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<HexEncodedBytes>;
 
   simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction>;
 
   generateBCSTransaction(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
   generateBCSSimulation(rawTxn: TxnBuilderTypes.RawTransaction): Promise<Uint8Array>;
 
-  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction>;
+  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<HexEncodedBytes>;
   submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction>;
 
   account(): Promise<PublicAccount>;
@@ -69,4 +64,23 @@ export type Web3Token = {
   getTokenData(creator: MaybeHexString, collectionName: string, tokenName: string): Promise<TokenData>;
   getTokenBalance(creator: MaybeHexString, collectionName: string, tokenName: string): Promise<Token>;
   getTokenBalanceForAccount(account: MaybeHexString, tokenId: TokenId): Promise<Token>;
+};
+
+export type PublicAccount = {
+  address: string;
+  publicKey: string;
+};
+
+export type Response<T> = {
+  data: T;
+  method: string;
+  status: number;
+};
+
+export const createReponse = <T>(method: string, status: number, data: T): Response<T> => {
+  return {
+    method,
+    status,
+    data,
+  };
 };

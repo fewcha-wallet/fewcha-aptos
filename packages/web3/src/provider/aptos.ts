@@ -4,7 +4,7 @@ import { AptosClient, AptosAccount, MaybeHexString, Types, TokenClient } from "a
 import { HexEncodedBytes, LedgerInfo, OnChainTransaction, PendingTransaction, SubmitTransactionRequest, TableItemRequest, Token, TokenData, TokenId, Transaction, UserTransactionRequest } from "aptos/dist/api/data-contracts";
 import { RequestParams } from "aptos/dist/api/http-client";
 import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
-import { PublicAccount, Web3ProviderType } from "../types";
+import { PublicAccount, Web3ProviderType, Response, createReponse } from "../types";
 import { Buffer } from "buffer/";
 
 class Aptos implements Web3ProviderType {
@@ -32,25 +32,27 @@ class Aptos implements Web3ProviderType {
   }
 
   // Connection API
-  public connect(): Promise<PublicAccount> {
-    return this.account();
+  public async connect(): Promise<Response<PublicAccount>> {
+    return createReponse("connect", 200, await this.account());
   }
   public disconnect(): Promise<void> {
     this.currentAccount = null;
     return;
   }
-  public async isConnected(): Promise<boolean> {
-    return !!this.currentAccount;
+  public async isConnected(): Promise<Response<boolean>> {
+    return createReponse("isConnected", 200, !!this.currentAccount);
   }
 
   // Transaction API
   public async generateTransaction(payload: Types.TransactionPayload, options?: Partial<Types.UserTransactionRequest>): Promise<Types.UserTransactionRequest> {
     return this.client.generateTransaction(await (await this.account()).address, payload, options);
   }
-  async signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<PendingTransaction> {
+  async signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<HexEncodedBytes> {
     if (!this.currentAccount) throw new Error("No account selected");
     const signed = await this.client.signTransaction(this.currentAccount, txnRequest);
-    return await this.client.submitTransaction(signed);
+    const tx = await this.client.submitTransaction(signed);
+    await this.client.waitForTransaction(tx.hash);
+    return tx.hash;
   }
   async signTransaction(txnRequest: UserTransactionRequest): Promise<SubmitTransactionRequest> {
     return await this.client.signTransaction(this.currentAccount, txnRequest);
@@ -58,8 +60,10 @@ class Aptos implements Web3ProviderType {
   async signMessage(message: string): Promise<string> {
     return await this.currentAccount.signBuffer(Buffer.from(message)).hex();
   }
-  async submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<PendingTransaction> {
-    return await this.client.submitTransaction(signedTxnRequest);
+  async submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<HexEncodedBytes> {
+    const tx = await this.client.submitTransaction(signedTxnRequest);
+    await this.client.waitForTransaction(tx.hash);
+    return tx.hash;
   }
 
   async simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction> {
@@ -80,8 +84,10 @@ class Aptos implements Web3ProviderType {
     });
   }
 
-  async submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction> {
-    return await this.client.submitSignedBCSTransaction(signedTxn);
+  async submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<HexEncodedBytes> {
+    const tx = await this.client.submitSignedBCSTransaction(signedTxn);
+    await this.client.waitForTransaction(tx.hash);
+    return tx.hash;
   }
   async submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction> {
     return await this.client.submitBCSSimulation(bcsBody);
