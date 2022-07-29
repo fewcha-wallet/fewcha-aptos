@@ -36,14 +36,14 @@ export class WalletClient {
   }
 
   // returns a list of token IDs of the tokens in a user's account (including the tokens that were minted)
-  async getEventStream(address: string, eventHandleStruct: string, fieldName: string): Promise<any> {
+  async getEventStream(address: string, eventHandleStruct: string, fieldName: string): Promise<Types.Event[]> {
     const response = await this.accounts.getEventsByEventHandle(address, eventHandleStruct, fieldName);
 
     if (response.status == 404) {
       return [];
     }
 
-    return await response;
+    return response.data;
   }
   async getTokenIds(address: string) {
     const depositEvents = await this.getEventStream(address, '0x1::token::TokenStore', 'deposit_events');
