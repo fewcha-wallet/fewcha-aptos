@@ -36,8 +36,8 @@ export class WalletClient {
     return await response.json();
   }
   async getTokenIds(address: string) {
-    const depositEvents = await this.getEventStream(address, '0x1::Token::TokenStore', 'deposit_events');
-    const withdrawEvents = await this.getEventStream(address, '0x1::Token::TokenStore', 'withdraw_events');
+    const depositEvents = await this.getEventStream(address, '0x1::token::TokenStore', 'deposit_events');
+    const withdrawEvents = await this.getEventStream(address, '0x1::token::TokenStore', 'withdraw_events');
     function isEventEqual(event1: any, event2: any) {
       return (
         event1.data.id.creator === event2.data.id.creator &&
