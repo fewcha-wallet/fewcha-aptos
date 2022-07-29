@@ -1,3 +1,5 @@
+import { Accounts } from './api/Accounts';
+import { HttpClient } from './api/http-client';
 import { AptosClient } from './aptos_client';
 import { FaucetClient } from './faucet_client';
 import { TokenClient } from './token_client';
@@ -10,10 +12,23 @@ export class WalletClient {
 
   tokenClient: TokenClient;
 
+  client: HttpClient;
+
+  accounts: Accounts;
+
   constructor(node_url: string, faucet_url: string) {
     this.faucetClient = new FaucetClient(node_url, faucet_url);
     this.aptosClient = new AptosClient(node_url);
     this.tokenClient = new TokenClient(this.aptosClient);
+    this.client = new HttpClient<unknown>({
+      withCredentials: false,
+      baseURL: node_url,
+      validateStatus: () => true, // Don't explode here on error responses; let our code handle it
+      ...{},
+    });
+
+    // Initialize routes
+    this.accounts = new Accounts(this.client);
   }
 
   async getAccountResources(accountAddress: string): Promise<Types.AccountResource[]> {
@@ -21,19 +36,14 @@ export class WalletClient {
   }
 
   // returns a list of token IDs of the tokens in a user's account (including the tokens that were minted)
-  async getEventStream(address: string, eventHandleStruct: string, fieldName: string) {
-    const response = await fetch(
-      `${this.aptosClient.nodeUrl}/accounts/${address}/events/${eventHandleStruct}/${fieldName}`,
-      {
-        method: 'GET',
-      },
-    );
+  async getEventStream(address: string, eventHandleStruct: string, fieldName: string): Promise<any> {
+    const response = await this.accounts.getEventsByEventHandle(address, eventHandleStruct, fieldName);
 
     if (response.status == 404) {
       return [];
     }
 
-    return await response.json();
+    return await response;
   }
   async getTokenIds(address: string) {
     const depositEvents = await this.getEventStream(address, '0x1::token::TokenStore', 'deposit_events');
