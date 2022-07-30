@@ -141,7 +141,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     if (!isEmpty(web3)) {
       if (web3.account) {
         web3.account().then((data) => {
-          setAccount(data);
+          setAccount(data.data);
         });
       }
     }
@@ -151,7 +151,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     if (!isEmpty(web3)) {
       if (web3.getNetwork) {
         web3.getNetwork().then((data) => {
-          setNetwork(data);
+          setNetwork(data.data);
         });
       }
     }
@@ -161,7 +161,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     if (!isEmpty(web3)) {
       if (web3.getBalance) {
         web3.getBalance().then((data) => {
-          setBalance(data);
+          setBalance(data.data);
         });
       } else {
         let func = web3.sdk?.getAccountResources;
@@ -172,7 +172,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
           if (func)
             if (account)
               func(account.address).then((data) => {
-                const accountResource = data.find((r) => r.type === "0x1::coin::CoinStore<0x1::test_coin::TestCoin>");
+                const accountResource = data.data.find((r) => r.type === "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>");
                 if (accountResource) {
                   if ((accountResource.data as any).coin) {
                     const balance = (accountResource.data as any).coin.value;

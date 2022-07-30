@@ -9,8 +9,8 @@
  * ---------------------------------------------------------------
  */
 
-import { AptosError, Event, HexEncodedBytes } from "./data-contracts";
-import { HttpClient, RequestParams } from "./http-client";
+import { AptosError, Event, HexEncodedBytes } from './data-contracts';
+import { HttpClient, RequestParams } from './http-client';
 
 export class Events<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -30,8 +30,8 @@ export class Events<SecurityDataType = unknown> {
   getEventsByEventKey = (eventKey: HexEncodedBytes, params: RequestParams = {}) =>
     this.http.request<Event[], AptosError>({
       path: `/events/${eventKey}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       ...params,
     });
 }

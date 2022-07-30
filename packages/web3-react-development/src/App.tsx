@@ -12,13 +12,44 @@ const Account = () => {
   const provider = new Web3Provider(fewcha);
   const web3 = new Web3(provider);
 
+  const parseError = (status: number): boolean => {
+    switch (status) {
+      case 200:
+        return true;
+      case 400:
+        alert("bad request");
+        return false;
+      case 401:
+        alert("User denied");
+        return false;
+      case 403:
+        alert("Forbidden: please connect wallet");
+        return false;
+      case 404:
+        alert("Not Found");
+        return false;
+      case 500:
+        alert("Internal Server Error");
+        return false;
+      case 502:
+        alert("Bad Gateway");
+        return false;
+      case 503:
+        alert("Service Unavailable");
+        return false;
+      default:
+        alert("Unknown Error");
+        return false;
+    }
+  };
+
   return (
     <div>
       <button
         onClick={() => {
           web3.action
             .connect()
-            .then((data) => console.log(data))
+            .then((data) => parseError(data.status) && console.log(data))
             .catch(console.log)
             .finally(console.log);
         }}
@@ -29,7 +60,7 @@ const Account = () => {
         onClick={() => {
           web3.action
             .isConnected()
-            .then((data) => console.log(data))
+            .then((data) => parseError(data.status) && console.log(data))
             .catch(console.log)
             .finally(console.log);
         }}
@@ -40,7 +71,7 @@ const Account = () => {
         onClick={() => {
           web3.action
             .disconnect()
-            .then((data) => console.log(data))
+            .then((data) => parseError(data.status) && console.log(data))
             .catch(console.log)
             .finally(console.log);
         }}
@@ -51,7 +82,7 @@ const Account = () => {
         onClick={() => {
           web3.action
             .account()
-            .then((data) => console.log(data))
+            .then((data) => parseError(data.status) && console.log(data))
             .catch(console.log)
             .finally(console.log);
         }}
@@ -62,7 +93,7 @@ const Account = () => {
         onClick={() => {
           web3.action
             .getNetwork()
-            .then((data) => console.log(data))
+            .then((data) => parseError(data.status) && console.log(data))
             .catch(console.log)
             .finally(console.log);
         }}
@@ -73,7 +104,7 @@ const Account = () => {
         onClick={() => {
           web3.action
             .getBalance()
-            .then((data) => console.log(data))
+            .then((data) => parseError(data.status) && console.log(data))
             .catch(console.log)
             .finally(console.log);
         }}
@@ -86,24 +117,32 @@ const Account = () => {
           const sendBalance = "1000";
           const payload = {
             type: "script_function_payload",
-            function: "0x1::Coin::transfer",
+            function: "0x1::coin::transfer",
             type_arguments: ["0x1::aptos_coin::AptosCoin"],
             arguments: [receiverAddress, sendBalance],
           };
 
           const txnRequest = await web3.action.generateTransaction(payload);
-          console.log("longheo100", txnRequest);
-          return;
-          const transactionEstRes = await web3.action.simulateTransaction(txnRequest);
-
-          if (transactionEstRes.success) {
-            console.log(transactionEstRes.gas_used);
-          } else {
-            console.error(transactionEstRes.vm_status);
+          if (!parseError(txnRequest.status)) {
+            return;
+          }
+          const transactionEstRes = await web3.action.simulateTransaction(txnRequest.data);
+          if (!parseError(transactionEstRes.status)) {
+            return;
           }
 
-          const txnHash = await web3.action.signAndSubmitTransaction(txnRequest);
-          console.log(txnHash);
+          if (transactionEstRes.data.success) {
+            console.log(transactionEstRes.data.gas_used, "gas_used");
+          } else {
+            console.log(transactionEstRes.data.vm_status, "vm_status");
+          }
+
+          const txnHash = await web3.action.signAndSubmitTransaction(txnRequest.data);
+          if (!parseError(txnHash.status)) {
+            return;
+          }
+
+          console.log(txnHash.data, "txnHash");
         }}
       >
         Sign TX

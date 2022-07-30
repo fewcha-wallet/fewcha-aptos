@@ -1,6 +1,6 @@
 # Aptos TS/JS SDK - Fewcha edition
 
-> Fewcha: work with Chrome Extension
+> Fewcha: work with Chrome Extension, support aptos SDK 1.2.2
 
 [![Discord][discord-image]][discord-url]
 [![NPM Package Version][npm-image-version]][npm-url]

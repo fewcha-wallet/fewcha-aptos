@@ -9,8 +9,8 @@
  * ---------------------------------------------------------------
  */
 
-import { AptosError, TableItemRequest } from "./data-contracts";
-import { ContentType, HttpClient, RequestParams } from "./http-client";
+import { AptosError, TableItemRequest } from './data-contracts';
+import { ContentType, HttpClient, RequestParams } from './http-client';
 
 export class Tables<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -30,10 +30,10 @@ export class Tables<SecurityDataType = unknown> {
   getTableItem = (tableHandle: string, data: TableItemRequest, params: RequestParams = {}) =>
     this.http.request<object, AptosError>({
       path: `/tables/${tableHandle}/item`,
-      method: "POST",
+      method: 'POST',
       body: data,
       type: ContentType.Json,
-      format: "json",
+      format: 'json',
       ...params,
     });
 }

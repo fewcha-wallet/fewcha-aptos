@@ -51,7 +51,7 @@ export class TokenClient {
   ): Promise<Types.HexEncodedBytes> {
     const payload: Types.TransactionPayload = {
       type: 'script_function_payload',
-      function: '0x1::Token::create_unlimited_collection_script',
+      function: '0x1::token::create_unlimited_collection_script',
       type_arguments: [],
       arguments: [
         Buffer.from(name).toString('hex'),
@@ -85,7 +85,7 @@ export class TokenClient {
   ): Promise<Types.HexEncodedBytes> {
     const payload: Types.TransactionPayload = {
       type: 'script_function_payload',
-      function: '0x1::Token::create_unlimited_token_script',
+      function: '0x1::token::create_unlimited_token_script',
       type_arguments: [],
       arguments: [
         Buffer.from(collectionName).toString('hex'),
@@ -121,7 +121,7 @@ export class TokenClient {
   ): Promise<Types.HexEncodedBytes> {
     const payload: Types.TransactionPayload = {
       type: 'script_function_payload',
-      function: '0x1::TokenTransfers::offer_script',
+      function: '0x1::token_transfers::offer_script',
       type_arguments: [],
       arguments: [
         receiver,
@@ -153,7 +153,7 @@ export class TokenClient {
   ): Promise<Types.HexEncodedBytes> {
     const payload: Types.TransactionPayload = {
       type: 'script_function_payload',
-      function: '0x1::TokenTransfers::claim_script',
+      function: '0x1::token_transfers::claim_script',
       type_arguments: [],
       arguments: [sender, creator, Buffer.from(collectionName).toString('hex'), Buffer.from(name).toString('hex')],
     };
@@ -179,7 +179,7 @@ export class TokenClient {
   ): Promise<Types.HexEncodedBytes> {
     const payload: Types.TransactionPayload = {
       type: 'script_function_payload',
-      function: '0x1::TokenTransfers::cancel_offer_script',
+      function: '0x1::token_transfers::cancel_offer_script',
       type_arguments: [],
       arguments: [receiver, creator, Buffer.from(collectionName).toString('hex'), Buffer.from(name).toString('hex')],
     };
@@ -209,11 +209,11 @@ export class TokenClient {
    */
   async getCollectionData(creator: MaybeHexString, collectionName: string): Promise<any> {
     const resources = await this.aptosClient.getAccountResources(creator);
-    const accountResource: { type: string; data: any } = resources.find((r) => r.type === '0x1::Token::Collections');
+    const accountResource: { type: string; data: any } = resources.find((r) => r.type === '0x1::token::Collections');
     const { handle }: { handle: string } = accountResource.data.collections;
     const getCollectionTableItemRequest: Types.TableItemRequest = {
-      key_type: '0x1::ASCII::String',
-      value_type: '0x1::Token::Collection',
+      key_type: '0x1::string::String',
+      value_type: '0x1::token::Collection',
       key: collectionName,
     };
     // eslint-disable-next-line no-unused-vars
@@ -247,7 +247,7 @@ export class TokenClient {
   async getTokenData(creator: MaybeHexString, collectionName: string, tokenName: string): Promise<Types.TokenData> {
     const collection: { type: string; data: any } = await this.aptosClient.getAccountResource(
       creator,
-      '0x1::Token::Collections',
+      '0x1::token::Collections',
     );
     const { handle } = collection.data.token_data;
     const tokenId = {
@@ -257,8 +257,8 @@ export class TokenClient {
     };
 
     const getTokenTableItemRequest: Types.TableItemRequest = {
-      key_type: '0x1::Token::TokenId',
-      value_type: '0x1::Token::TokenData',
+      key_type: '0x1::token::TokenId',
+      value_type: '0x1::token::TokenData',
       key: tokenId,
     };
 
@@ -302,13 +302,13 @@ export class TokenClient {
   async getTokenBalanceForAccount(account: MaybeHexString, tokenId: Types.TokenId): Promise<Types.Token> {
     const tokenStore: { type: string; data: any } = await this.aptosClient.getAccountResource(
       account,
-      '0x1::Token::TokenStore',
+      '0x1::token::TokenStore',
     );
     const { handle } = tokenStore.data.tokens;
 
     const getTokenTableItemRequest: Types.TableItemRequest = {
-      key_type: '0x1::Token::TokenId',
-      value_type: '0x1::Token::Token',
+      key_type: '0x1::token::TokenId',
+      value_type: '0x1::token::Token',
       key: tokenId,
     };
 
@@ -376,6 +376,7 @@ export class TokenClient {
     }
     return tokens;
   }
+
   async tableItem(handle: string, keyType: string, valueType: string, key: any): Promise<any> {
     const response = await fetch(`${this.aptosClient.nodeUrl}/tables/${handle}/item`, {
       method: 'POST',
