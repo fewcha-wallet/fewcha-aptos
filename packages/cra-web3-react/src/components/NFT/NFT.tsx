@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NFTResources } from "./data";
 import { NFTCard } from "./NFTCard";
 import { Hammer } from "@styled-icons/ionicons-sharp";
@@ -23,10 +23,19 @@ export const NFTs: React.FC<{}> = () => {
   const aptos = useWeb3();
   const { web3, txs } = aptos;
 
-  useEffect(() => {
-    if (loading) {
-      if (txs.length) {
-        const tx = txs[txs.length - 1];
+  useEffect(() => {}, [txs]);
+
+  const { register, handleSubmit: nftHandleSubmit } = useForm<NFTType>();
+
+  const codename = useRef<HTMLInputElement | null>(null);
+  const description = useRef<HTMLInputElement | null>(null);
+  const nftCollection = useRef<HTMLInputElement | null>(null);
+
+  const { ref: codenameFormRef, ...rest } = register("codename");
+  const { ref: descriptionFormRef, ...descriptionRes } =
+    register("description");
+  const { ref: nftCollectionFormRef, ...nftCollectionRes } =
+    register("collection");
 
         if (pendingTxs.includes(`${tx.id}`)) {
           setLoading(false);
@@ -81,12 +90,12 @@ export const NFTs: React.FC<{}> = () => {
     web3
       .createToken(data.collection, `${data.codename}`, data.description, 1, data.url, 1)
       .then((data) => {
-        setPendingTxs([...pendingTxs, data]);
+        // setTransactionHash(data);
+        // setIsOpenPopup(true);
       })
       .catch(() => {
-        setLoading(false);
-        setIsOpenPopup(false);
-        setTransactionHash(null);
+        // setIsOpenPopup(false);
+        // setTransactionHash(null);
       });
   };
 
@@ -96,13 +105,13 @@ export const NFTs: React.FC<{}> = () => {
       .createCollection(`${data.collection}`, "From fewcha with love", "fewcha.app")
       .then((data) => {
         if (data) {
-          setPendingTxs([...pendingTxs, data]);
+          // setTransactionHash(data);
+          // setIsOpenPopup(true);
         }
       })
       .catch(() => {
-        setLoading(false);
-        setIsOpenPopup(false);
-        setTransactionHash(null);
+        // setIsOpenPopup(false);
+        // setTransactionHash(null);
       });
   };
 

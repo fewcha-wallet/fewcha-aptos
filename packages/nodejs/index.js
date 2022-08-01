@@ -68,7 +68,7 @@ const main = async function () {
 
   // get balance
   const data = await web3.action.sdk.getAccountResources(address);
-  const accountResource = data.find((r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>");
+  const accountResource = data.find((r) => r.type === "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>");
   const balance = accountResource.data.coin.value;
   console.log(balance);
   // account balance
@@ -79,7 +79,7 @@ const main = async function () {
   const payload = {
     type: "script_function_payload",
     function: "0x1::Coin::transfer",
-    type_arguments: ["0x1::TestCoin::TestCoin"],
+    type_arguments: ["0x1::aptos_coin::AptosCoin"],
     arguments: [receiverAddress, sendBalance],
   };
   const txnRequest = await web3.action.generateTransaction(payload);

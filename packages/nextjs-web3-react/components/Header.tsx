@@ -1,7 +1,6 @@
 import React from "react";
 import { ConnectWallet, useWeb3 } from "@fewcha/web3-react";
 
-
 const Account = () => {
   const web3 = useWeb3();
   const { account, balance, isConnected, disconnect, network, txs, sdk, token } = web3;
@@ -21,7 +20,7 @@ const Account = () => {
                 const payload = {
                   type: "script_function_payload",
                   function: "0x1::Coin::transfer",
-                  type_arguments: ["0x1::TestCoin::TestCoin"],
+                  type_arguments: ["0x1::aptos_coin::AptosCoin"],
                   arguments: [receiverAddress, sendBalance],
                 };
                 generateTransaction(payload).then((tx) => {

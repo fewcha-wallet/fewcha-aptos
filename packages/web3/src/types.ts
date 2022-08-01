@@ -29,7 +29,8 @@ export interface Web3ProviderType {
   getBalance(): Promise<Response<string>>;
 
   sdk: Web3SDK;
-  token: Web3Token;
+  token: Web3Token; // NFT
+  coin: Web3Coin; // Coin
 }
 
 export type Web3SDK = {
@@ -48,8 +49,8 @@ export type Web3SDK = {
 
   transactionPending(txnHash: HexEncodedBytes): Promise<Response<boolean>>;
   waitForTransaction(txnHash: HexEncodedBytes): Promise<Response<void>>;
-  getLedgerInfo(params: RequestParams): Promise<Response<LedgerInfo>>;
-  getChainId(params: RequestParams): Promise<Response<number>>;
+  getLedgerInfo(params?: RequestParams): Promise<Response<LedgerInfo>>;
+  getChainId(params?: RequestParams): Promise<Response<number>>;
   getTableItem(handle: string, data: TableItemRequest, params?: RequestParams): Promise<Response<any>>;
 };
 
@@ -66,9 +67,26 @@ export type Web3Token = {
   getTokenBalanceForAccount(account: MaybeHexString, tokenId: TokenId): Promise<Response<Token>>;
 };
 
+export type Web3Coin = {
+  initializeCoin(resource_type: string, name: string, symbol: string, decimals: string): Promise<Response<string>>;
+  registerCoin(coin_type_resource: string): Promise<Response<string>>;
+  mintCoin(coin_type_resource: string, dst_address: string, amount: number): Promise<Response<string>>;
+  transferCoin(coin_type_resource: string, to_address: string, amount: number): Promise<Response<string>>;
+  getCoinData(coin_type_resource: string): Promise<Response<CoinData>>;
+  getCoinBalance(account_address: string, coin_type_resource: string): Promise<Response<string>>;
+  getCoins(account_address: string): Promise<Response<string[]>>;
+};
+
 export type PublicAccount = {
   address: string;
   publicKey: string;
+};
+
+export type CoinData = {
+  coin_type_resource: string;
+  name: string;
+  symbol: string;
+  decimals: number;
 };
 
 export type Response<T> = {

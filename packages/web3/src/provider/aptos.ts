@@ -4,19 +4,22 @@ import { AptosClient, AptosAccount, MaybeHexString, Types, TokenClient } from "a
 import { HexEncodedBytes, LedgerInfo, OnChainTransaction, SubmitTransactionRequest, TableItemRequest, Token, TokenData, TokenId, Transaction, UserTransactionRequest } from "aptos/dist/api/data-contracts";
 import { RequestParams } from "aptos/dist/api/http-client";
 import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
-import { PublicAccount, Web3ProviderType, Response, createReponse } from "../types";
+import { PublicAccount, Web3ProviderType, Response, createReponse, CoinData } from "../types";
 import { Buffer } from "buffer/";
+import { CoinClient } from "../coinClient";
 
 class Aptos implements Web3ProviderType {
   static isNetworkProvider = true;
 
   private client: AptosClient;
   private tokenClient: TokenClient;
+  private coinClient: CoinClient;
   private currentAccount?: AptosAccount;
 
   constructor(client: AptosClient, account?: AptosAccount) {
     this.client = client;
     this.tokenClient = new TokenClient(this.client);
+    this.coinClient = new CoinClient(this.client);
 
     if (account) this.currentAccount = account;
   }
@@ -114,7 +117,7 @@ class Aptos implements Web3ProviderType {
   // Aptos SDK
   public sdk = {
     getAccount: async (accountAddress: MaybeHexString): Promise<Response<Types.Account>> => {
-      return createReponse("getAccount", 200, await this.client.getAccount(accountAddress));
+      return createReponse("sdk/getAccount", 200, await this.client.getAccount(accountAddress));
     },
     getAccountTransactions: async (accountAddress: MaybeHexString, query?: { start?: number; limit?: number }): Promise<Response<Types.OnChainTransaction[]>> => {
       return createReponse("getAccountTransactions", 200, await this.client.getAccountTransactions(accountAddress, query));
@@ -196,6 +199,30 @@ class Aptos implements Web3ProviderType {
     },
     getTokenBalanceForAccount: async (account: MaybeHexString, tokenId: TokenId): Promise<Response<Token>> => {
       return createReponse("getTokenBalanceForAccount", 200, await this.tokenClient.getTokenBalanceForAccount(account, tokenId));
+    },
+  };
+
+  public coin = {
+    initializeCoin: async (resource_type: string, name: string, symbol: string, decimals: string): Promise<Response<string>> => {
+      return createReponse("initializeCoin", 200, await this.coinClient.initializeCoin(this.currentAccount, resource_type, name, symbol, decimals));
+    },
+    registerCoin: async (coin_type_resource: string): Promise<Response<string>> => {
+      return createReponse("registerCoin", 200, await this.coinClient.registerCoin(this.currentAccount, coin_type_resource));
+    },
+    mintCoin: async (coin_type_resource: string, dst_address: string, amount: number): Promise<Response<string>> => {
+      return createReponse("mintCoin", 200, await this.coinClient.mintCoin(this.currentAccount, coin_type_resource, dst_address, amount));
+    },
+    transferCoin: async (coin_type_resource: string, to_address: string, amount: number): Promise<Response<string>> => {
+      return createReponse("transferCoin", 200, await this.coinClient.transferCoin(this.currentAccount, coin_type_resource, to_address, amount));
+    },
+    getCoinData: async (coin_type_resource: string): Promise<Response<CoinData>> => {
+      return createReponse("getCoinData", 200, await this.coinClient.getCoinData(coin_type_resource));
+    },
+    getCoinBalance: async (account_address: string, coin_type_resource: string): Promise<Response<string>> => {
+      return createReponse("getCoinBalance", 200, await this.coinClient.getCoinBalance(account_address, coin_type_resource));
+    },
+    getCoins: async (account_address: string): Promise<Response<string[]>> => {
+      return createReponse("getCoins", 200, await this.coinClient.getCoins(account_address));
     },
   };
 }

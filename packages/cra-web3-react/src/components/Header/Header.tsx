@@ -4,8 +4,7 @@ import { WalletAlt } from "@styled-icons/boxicons-solid";
 import { MENUS } from "config/constants";
 import logo from "../../public/svgs/logo-light.svg";
 import MobileMenu from "./MobileMenu";
-// import { useWeb3 } from '@fewcha/web3-react';
-import { useWeb3 } from "components/Provider";
+import { useWeb3 } from "@fewcha/web3-react";
 
 const Header: React.FC = () => {
   const [showMobile, setShowMobile] = useState(false);
@@ -19,30 +18,27 @@ const Header: React.FC = () => {
   const [balance, setBalance] = useState("");
 
   const aptos = useWeb3();
-  const { init, account, isConnected, connect, disconnect, web3 } = aptos;
+  const { init, account, isConnected, connect, disconnect, sdk } = aptos;
 
   useEffect(() => {
     if (isConnected && account) {
-      web3.getAccountResources(account).then((data) => {
-        const accountResource = data.find((r) => r.type === "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>");
+      sdk.getAccountResources(account.address).then((data) => {
+        const accountResource = data.data.find((r) => r.type === "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>");
         const balance = (accountResource!.data as { coin: { value: string } }).coin.value;
 
         setBalance(balance);
       });
     }
-  }, [isConnected, account, web3]);
+  }, [isConnected, account, sdk]);
 
   const onShowButton = () => {
     if (isConnected) {
       return (
         <div className="relative ml-auto flex items-center gap-6">
-          <button
-            className="p-2 shadow rounded bg-white text-sm font-medium text-black ml-auto flex items-center justify-between cursor-pointer"
-            onClick={() => disconnect()}
-          >
+          <button className="p-2 shadow rounded bg-white text-sm font-medium text-black ml-auto flex items-center justify-between cursor-pointer" onClick={() => disconnect()}>
             <WalletAlt size={24} />
             <div className="hidden md:flex flex-col ml-2">
-              <div className="mb-1">{truncateEthAddress(account)}</div>
+              <div className="mb-1">{truncateEthAddress(account.address)}</div>
               <div>APT: {balance}</div>
             </div>
           </button>
@@ -87,13 +83,7 @@ const Header: React.FC = () => {
             if (menu.external) {
               return (
                 <div key={idx}>
-                  <a
-                    href={menu.external}
-                    key={idx}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="header-link py-2 block text-white font-medium font-caption transition-all ease-in duration-150 hover:text-primary-200"
-                  >
+                  <a href={menu.external} key={idx} target="_blank" rel="noreferrer" className="header-link py-2 block text-white font-medium font-caption transition-all ease-in duration-150 hover:text-primary-200">
                     {menu.name}
                   </a>
                 </div>
