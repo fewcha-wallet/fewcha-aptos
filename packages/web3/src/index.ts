@@ -10,7 +10,15 @@ import { Web3ProviderType, Web3SDK, Web3Token } from "./types";
 class Web3 {
   public action: Web3ProviderType;
 
-  constructor(provider: Web3Provider) {
+  constructor(provider?: Web3Provider) {
+    if (!provider) {
+      this.action = new Web3Provider((window as any).fewcha).provider;
+      window.addEventListener("fewcha#initialized", () => {
+        this.action = new Web3Provider((window as any).fewcha).provider;
+      });
+      return this;
+    }
+
     this.action = provider.provider;
     return this;
   }

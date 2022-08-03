@@ -46,9 +46,9 @@ export type Web3SDK = {
 
   getTransactions(query?: { start?: number; limit?: number }): Promise<Response<OnChainTransaction[]>>;
   getTransaction(txnHashOrVersion: string): Promise<Response<Transaction>>;
-
   transactionPending(txnHash: HexEncodedBytes): Promise<Response<boolean>>;
   waitForTransaction(txnHash: HexEncodedBytes): Promise<Response<void>>;
+
   getLedgerInfo(params?: RequestParams): Promise<Response<LedgerInfo>>;
   getChainId(params?: RequestParams): Promise<Response<number>>;
   getTableItem(handle: string, data: TableItemRequest, params?: RequestParams): Promise<Response<any>>;

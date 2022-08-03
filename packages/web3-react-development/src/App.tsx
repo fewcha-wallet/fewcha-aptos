@@ -1,16 +1,13 @@
 import React from "react";
-import { ConnectWallet, useWeb3 } from "@fewcha/web3-react";
-import Web3, { Web3Provider } from "@fewcha/web3";
 import { v4 as uuidv4 } from "uuid";
+import { ConnectWallet, useWeb3 } from "@fewcha/web3-react";
+import Web3 from "@fewcha/web3";
 import "./App.css";
 
-const Account = () => {
-  const aptos = useWeb3();
-  const { account, balance, isConnected, disconnect, network } = aptos;
+const Web3Raw = () => {
+  const { account, balance, isConnected, network, fewcha, martian } = useWeb3();
 
-  const fewcha = (window as any).fewcha;
-  const provider = new Web3Provider(fewcha);
-  const web3 = new Web3(provider);
+  const web3 = new Web3();
 
   const parseError = (status: number): boolean => {
     switch (status) {
@@ -130,6 +127,7 @@ const Account = () => {
               return;
             }
             const transactionEstRes = await web3.action.simulateTransaction(txnRequest.data);
+            console.log(transactionEstRes, "loghelo");
             if (!parseError(transactionEstRes.status)) {
               return;
             }
@@ -145,7 +143,7 @@ const Account = () => {
               return;
             }
 
-            console.log(txnHash.data, "txnHash");
+            console.log(txnHash, "txnHash");
           }}
         >
           Sign and submit TX
@@ -188,6 +186,14 @@ const Account = () => {
         </button>
         <button
           onClick={async () => {
+            const signed = await web3.action.signMessage("longheo");
+            console.log(signed);
+          }}
+        >
+          Sign Message
+        </button>
+        <button
+          onClick={async () => {
             const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
             const sendBalance = "1000";
             const payload = {
@@ -218,6 +224,7 @@ const Account = () => {
             }
 
             const txnHash = await web3.action.submitTransaction(tx.data);
+
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -493,7 +500,7 @@ const Account = () => {
               tx
             </button>
 
-            <div>
+            {/* <div>
               <button
                 onClick={() => {
                   disconnect();
@@ -501,7 +508,7 @@ const Account = () => {
               >
                 Disconnect
               </button>
-            </div>
+            </div> */}
           </div>
         ) : (
           <ConnectWallet type="list" />
@@ -515,7 +522,7 @@ const App: React.FC = () => {
   return (
     <>
       <header>
-        <Account />
+        <Web3Raw />
       </header>
     </>
   );

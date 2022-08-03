@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "CommonJS",
-    "lib": ["esnext", "es2021"],
+    "lib": ["esnext", "es2021", "dom"],
     "declaration": true,
     "declarationMap": true,
     "moduleResolution": "node",
