@@ -10,8 +10,8 @@ type PopupProps = {};
 type PopupType = (props: { Component: React.FC<PopupProps>; callback?: (key: string) => void }) => string;
 
 export const useWeb3 = () => {
-  const { account, balance, disconnect, isConnected, network, fewcha, martian } = useContext(Web3Context);
-  return { account, balance, disconnect, isConnected, network, fewcha, martian };
+  const { account, balance, disconnect, currentWallet, isConnected, network, fewcha, martian } = useContext(Web3Context);
+  return { account, balance, disconnect, currentWallet, isConnected, network, fewcha, martian };
 };
 
 type Web3ContextValue = {
@@ -128,6 +128,13 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     fewcha &&
       fewcha.isConnected().then((isConnected) => {
         setIsConnected(isConnected.data);
+        setCurrentWallet("fewcha");
+        fewcha.account().then((account) => {
+          setAccount(account.data);
+          fewcha.getBalance().then((balance) => {
+            setBalance(balance.data);
+          });
+        });
       });
   };
 
