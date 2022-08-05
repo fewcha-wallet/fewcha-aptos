@@ -1,6 +1,6 @@
 {
   "name": "@fewcha/web3-react",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "author": "fewcha.app",
   "license": "MIT",
   "main": "lib/index.js",
