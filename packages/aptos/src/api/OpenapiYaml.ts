@@ -9,7 +9,7 @@
  * ---------------------------------------------------------------
  */
 
-import { HttpClient, RequestParams } from "./http-client";
+import { HttpClient, RequestParams } from './http-client';
 
 export class OpenapiYaml<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -29,7 +29,7 @@ export class OpenapiYaml<SecurityDataType = unknown> {
   getSpecYaml = (params: RequestParams = {}) =>
     this.http.request<void, void>({
       path: `/openapi.yaml`,
-      method: "GET",
+      method: 'GET',
       ...params,
     });
 }

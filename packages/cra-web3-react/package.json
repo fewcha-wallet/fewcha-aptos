@@ -1,0 +1,60 @@
+{
+  "name": "cra-web3-react",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "BROWSER=none PORT=3005 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@fewcha/web3": "*",
+    "@fewcha/web3-react": "0.1.2",
+    "@sindresorhus/class-names": "^2.0.0",
+    "@styled-icons/bootstrap": "^10.34.0",
+    "@styled-icons/boxicons-solid": "^10.38.0",
+    "@styled-icons/ionicons-sharp": "10.34.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^14.2.1",
+    "@types/jest": "^28.1.4",
+    "@types/node": "^18.0.1",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@types/react-scroll": "^1.8.3",
+    "@types/styled-components": "^5.1.25",
+    "eslint": "8.19.0",
+    "eslint-config-next": "12.2.0",
+    "next": "12.2.0",
+    "postcss": "^8.4.14",
+    "react": "*",
+    "react-dom": "*",
+    "react-hook-form": "7.33.1",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
+    "sass": "^1.53.0",
+    "styled-components": "^5.3.5",
+    "tailwindcss": "^3.1.4",
+    "typescript": "^4.7.4",
+    "web-vitals": "^2.1.4"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

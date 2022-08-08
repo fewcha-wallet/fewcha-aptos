@@ -19,8 +19,8 @@ import {
   MoveModule,
   MoveStructTagId,
   OnChainTransaction,
-} from "./data-contracts";
-import { HttpClient, RequestParams } from "./http-client";
+} from './data-contracts';
+import { HttpClient, RequestParams } from './http-client';
 
 export class Accounts<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -40,8 +40,8 @@ export class Accounts<SecurityDataType = unknown> {
   getAccount = (address: Address, params: RequestParams = {}) =>
     this.http.request<Account, AptosError>({
       path: `/accounts/${address}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       ...params,
     });
   /**
@@ -55,9 +55,9 @@ export class Accounts<SecurityDataType = unknown> {
   getAccountResources = (address: Address, query?: { version?: LedgerVersion }, params: RequestParams = {}) =>
     this.http.request<AccountResource[], AptosError>({
       path: `/accounts/${address}/resources`,
-      method: "GET",
+      method: 'GET',
       query: query,
-      format: "json",
+      format: 'json',
       ...params,
     });
   /**
@@ -76,9 +76,9 @@ export class Accounts<SecurityDataType = unknown> {
   ) =>
     this.http.request<AccountResource, AptosError>({
       path: `/accounts/${address}/resource/${resourceType}`,
-      method: "GET",
+      method: 'GET',
       query: query,
-      format: "json",
+      format: 'json',
       ...params,
     });
   /**
@@ -92,9 +92,9 @@ export class Accounts<SecurityDataType = unknown> {
   getAccountModules = (address: Address, query?: { version?: LedgerVersion }, params: RequestParams = {}) =>
     this.http.request<MoveModule[], AptosError>({
       path: `/accounts/${address}/modules`,
-      method: "GET",
+      method: 'GET',
       query: query,
-      format: "json",
+      format: 'json',
       ...params,
     });
   /**
@@ -113,9 +113,9 @@ export class Accounts<SecurityDataType = unknown> {
   ) =>
     this.http.request<MoveModule, AptosError>({
       path: `/accounts/${address}/module/${moduleName}`,
-      method: "GET",
+      method: 'GET',
       query: query,
-      format: "json",
+      format: 'json',
       ...params,
     });
   /**
@@ -129,9 +129,9 @@ export class Accounts<SecurityDataType = unknown> {
   getAccountTransactions = (address: Address, query?: { start?: number; limit?: number }, params: RequestParams = {}) =>
     this.http.request<OnChainTransaction[], AptosError>({
       path: `/accounts/${address}/transactions`,
-      method: "GET",
+      method: 'GET',
       query: query,
-      format: "json",
+      format: 'json',
       ...params,
     });
   /**
@@ -151,9 +151,9 @@ export class Accounts<SecurityDataType = unknown> {
   ) =>
     this.http.request<Event[], AptosError>({
       path: `/accounts/${address}/events/${eventHandleStruct}/${fieldName}`,
-      method: "GET",
+      method: 'GET',
       query: query,
-      format: "json",
+      format: 'json',
       ...params,
     });
 }

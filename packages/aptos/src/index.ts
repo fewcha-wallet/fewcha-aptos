@@ -7,3 +7,4 @@ export * from './token_client';
 export * from './types';
 export * from './transaction_builder';
 export * from './coin_client';
+export * from './wallet_client';

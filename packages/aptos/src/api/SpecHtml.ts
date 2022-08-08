@@ -9,7 +9,7 @@
  * ---------------------------------------------------------------
  */
 
-import { HttpClient, RequestParams } from "./http-client";
+import { HttpClient, RequestParams } from './http-client';
 
 export class SpecHtml<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -29,7 +29,7 @@ export class SpecHtml<SecurityDataType = unknown> {
   getSpecHtml = (params: RequestParams = {}) =>
     this.http.request<void, void>({
       path: `/spec.html`,
-      method: "GET",
+      method: 'GET',
       ...params,
     });
 }

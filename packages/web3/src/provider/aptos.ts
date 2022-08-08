@@ -1,22 +1,25 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
 import { AptosClient, AptosAccount, MaybeHexString, Types, TokenClient } from "aptos";
-import { HexEncodedBytes, LedgerInfo, OnChainTransaction, PendingTransaction, SubmitTransactionRequest, TableItemRequest, Token, TokenData, TokenId, Transaction, UserTransactionRequest } from "aptos/dist/api/data-contracts";
+import { HexEncodedBytes, LedgerInfo, OnChainTransaction, SubmitTransactionRequest, TableItemRequest, Token, TokenData, TokenId, Transaction, UserTransactionRequest } from "aptos/dist/api/data-contracts";
 import { RequestParams } from "aptos/dist/api/http-client";
 import { RawTransaction } from "aptos/dist/transaction_builder/aptos_types/transaction";
-import { PublicAccount, Web3ProviderType } from "../types";
+import { PublicAccount, Web3ProviderType, Response, createReponse, CoinData } from "../types";
 import { Buffer } from "buffer/";
+import { CoinClient } from "../coinClient";
 
 class Aptos implements Web3ProviderType {
   static isNetworkProvider = true;
 
   private client: AptosClient;
   private tokenClient: TokenClient;
+  private coinClient: CoinClient;
   private currentAccount?: AptosAccount;
 
   constructor(client: AptosClient, account?: AptosAccount) {
     this.client = client;
     this.tokenClient = new TokenClient(this.client);
+    this.coinClient = new CoinClient(this.client);
 
     if (account) this.currentAccount = account;
   }
@@ -32,158 +35,194 @@ class Aptos implements Web3ProviderType {
   }
 
   // Connection API
-  public connect(): Promise<PublicAccount> {
-    return this.account();
+  public async connect(): Promise<Response<PublicAccount>> {
+    return createReponse("connect", 200, await (await this.account()).data);
   }
-  public disconnect(): Promise<void> {
+  public async disconnect(): Promise<Response<boolean>> {
     this.currentAccount = null;
-    return;
+    return createReponse("disconnect", 200, true);
   }
-  public async isConnected(): Promise<boolean> {
-    return !!this.currentAccount;
+  public async isConnected(): Promise<Response<boolean>> {
+    return createReponse("isConnected", 200, !!this.currentAccount);
   }
 
   // Transaction API
-  public async generateTransaction(payload: Types.TransactionPayload, options?: Partial<Types.UserTransactionRequest>): Promise<Types.UserTransactionRequest> {
-    return this.client.generateTransaction(await (await this.account()).address, payload, options);
+  public async generateTransaction(payload: Types.TransactionPayload, options?: Partial<Types.UserTransactionRequest>): Promise<Response<Types.UserTransactionRequest>> {
+    return createReponse("generateTransaction", 200, await this.client.generateTransaction(await (await this.account()).data.address, payload, options));
   }
-  async signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<PendingTransaction> {
+  async signAndSubmitTransaction(txnRequest: UserTransactionRequest): Promise<Response<HexEncodedBytes>> {
     if (!this.currentAccount) throw new Error("No account selected");
     const signed = await this.client.signTransaction(this.currentAccount, txnRequest);
-    return await this.client.submitTransaction(signed);
+    const tx = await this.client.submitTransaction(signed);
+    await this.client.waitForTransaction(tx.hash);
+    return createReponse("signAndSubmitTransaction", 200, tx.hash);
   }
-  async signTransaction(txnRequest: UserTransactionRequest): Promise<SubmitTransactionRequest> {
-    return await this.client.signTransaction(this.currentAccount, txnRequest);
+  async signTransaction(txnRequest: UserTransactionRequest): Promise<Response<SubmitTransactionRequest>> {
+    return createReponse("signTransaction", 200, await this.client.signTransaction(this.currentAccount, txnRequest));
   }
-  async signMessage(message: string): Promise<string> {
-    return await this.currentAccount.signBuffer(Buffer.from(message)).hex();
+  async signMessage(message: string): Promise<Response<string>> {
+    return createReponse("signMessage", 200, await this.currentAccount.signBuffer(Buffer.from(message)).hex());
   }
-  async submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<PendingTransaction> {
-    return await this.client.submitTransaction(signedTxnRequest);
+  async submitTransaction(signedTxnRequest: SubmitTransactionRequest): Promise<Response<HexEncodedBytes>> {
+    const tx = await this.client.submitTransaction(signedTxnRequest);
+    await this.client.waitForTransaction(tx.hash);
+    return createReponse("submitTransaction", 200, tx.hash);
   }
 
-  async simulateTransaction(txnRequest: UserTransactionRequest): Promise<OnChainTransaction> {
-    if (!this.currentAccount) throw new Error("401");
-    return await this.client.simulateTransaction(this.currentAccount, txnRequest);
+  async simulateTransaction(txnRequest: UserTransactionRequest): Promise<Response<OnChainTransaction>> {
+    if (!this.currentAccount) return createReponse("simulateTransaction", 403, undefined);
+    return createReponse("simulateTransaction", 200, await this.client.simulateTransaction(this.currentAccount, txnRequest));
   }
 
-  generateBCSTransaction(rawTxn: RawTransaction): Promise<Uint8Array> {
-    if (!this.currentAccount) throw new Error("401");
+  generateBCSTransaction(rawTxn: RawTransaction): Promise<Response<Uint8Array>> {
+    if (!this.currentAccount)
+      return new Promise((resolve) => {
+        resolve(createReponse("generateBCSTransaction", 403, undefined));
+      });
     return new Promise((resolve) => {
-      resolve(AptosClient.generateBCSTransaction(this.currentAccount, rawTxn));
+      resolve(createReponse("generateBCSTransaction", 200, AptosClient.generateBCSTransaction(this.currentAccount, rawTxn)));
     });
   }
-  generateBCSSimulation(rawTxn: RawTransaction): Promise<Uint8Array> {
-    if (!this.currentAccount) throw new Error("401");
+  generateBCSSimulation(rawTxn: RawTransaction): Promise<Response<Uint8Array>> {
+    if (!this.currentAccount)
+      return new Promise((resolve) => {
+        resolve(createReponse("generateBCSSimulation", 403, undefined));
+      });
     return new Promise((resolve) => {
-      resolve(AptosClient.generateBCSSimulation(this.currentAccount, rawTxn));
+      resolve(createReponse("generateBCSSimulation", 200, AptosClient.generateBCSSimulation(this.currentAccount, rawTxn)));
     });
   }
 
-  async submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<PendingTransaction> {
-    return await this.client.submitSignedBCSTransaction(signedTxn);
+  async submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<HexEncodedBytes>> {
+    const tx = await this.client.submitSignedBCSTransaction(signedTxn);
+    await this.client.waitForTransaction(tx.hash);
+    return createReponse("submitSignedBCSTransaction", 200, tx.hash);
   }
-  async submitBCSSimulation(bcsBody: Uint8Array): Promise<OnChainTransaction> {
-    return await this.client.submitBCSSimulation(bcsBody);
+  async submitBCSSimulation(bcsBody: Uint8Array): Promise<Response<OnChainTransaction>> {
+    return createReponse("submitBCSSimulation", 200, await this.client.submitBCSSimulation(bcsBody));
   }
 
   // Misc API
-  public async account(): Promise<PublicAccount> {
-    if (this.currentAccount) return { address: this.currentAccount.address().hex(), publicKey: this.currentAccount.pubKey().hex() };
-    return { address: "", publicKey: "" };
+  public async account(): Promise<Response<PublicAccount>> {
+    if (this.currentAccount) return createReponse("", 200, { address: this.currentAccount.address().hex(), publicKey: this.currentAccount.pubKey().hex() });
+    return createReponse("account", 200, { address: "", publicKey: "" });
   }
-  public async getNetwork(): Promise<string> {
-    return this.client.nodeUrl;
+  public async getNetwork(): Promise<Response<string>> {
+    return createReponse("getNetwork", 200, this.client.nodeUrl);
   }
-  public async getBalance(): Promise<string> {
-    return this.client.nodeUrl;
+  public async getBalance(): Promise<Response<string>> {
+    return createReponse("getBalance", 200, this.client.nodeUrl);
   }
 
   // Aptos SDK
   public sdk = {
-    getAccount: async (accountAddress: MaybeHexString): Promise<Types.Account> => {
-      return this.client.getAccount(accountAddress);
+    getAccount: async (accountAddress: MaybeHexString): Promise<Response<Types.Account>> => {
+      return createReponse("sdk/getAccount", 200, await this.client.getAccount(accountAddress));
     },
-    getAccountTransactions: async (accountAddress: MaybeHexString, query?: { start?: number; limit?: number }): Promise<Types.OnChainTransaction[]> => {
-      return this.client.getAccountTransactions(accountAddress, query);
+    getAccountTransactions: async (accountAddress: MaybeHexString, query?: { start?: number; limit?: number }): Promise<Response<Types.OnChainTransaction[]>> => {
+      return createReponse("getAccountTransactions", 200, await this.client.getAccountTransactions(accountAddress, query));
     },
-    getAccountModules: async (accountAddress: MaybeHexString, query?: { version?: Types.LedgerVersion }): Promise<Types.MoveModule[]> => {
-      return this.client.getAccountModules(accountAddress, query);
+    getAccountModules: async (accountAddress: MaybeHexString, query?: { version?: Types.LedgerVersion }): Promise<Response<Types.MoveModule[]>> => {
+      return createReponse("getAccountModules", 200, await this.client.getAccountModules(accountAddress, query));
     },
-    getAccountModule: async (accountAddress: MaybeHexString, moduleName: string, query?: { version?: Types.LedgerVersion }): Promise<Types.MoveModule> => {
-      return this.client.getAccountModule(accountAddress, moduleName, query);
+    getAccountModule: async (accountAddress: MaybeHexString, moduleName: string, query?: { version?: Types.LedgerVersion }): Promise<Response<Types.MoveModule>> => {
+      return createReponse("getAccountModule", 200, await this.client.getAccountModule(accountAddress, moduleName, query));
     },
-    getAccountResources: async (accountAddress: MaybeHexString, query?: { version?: Types.LedgerVersion }): Promise<Types.AccountResource[]> => {
-      return this.client.getAccountResources(accountAddress, query);
+    getAccountResources: async (accountAddress: MaybeHexString, query?: { version?: Types.LedgerVersion }): Promise<Response<Types.AccountResource[]>> => {
+      return createReponse("getAccountResources", 200, await this.client.getAccountResources(accountAddress, query));
     },
-    getAccountResource: async (accountAddress: MaybeHexString, resourceType: string, query?: { version?: Types.LedgerVersion }): Promise<Types.AccountResource> => {
-      return this.client.getAccountResource(accountAddress, resourceType, query);
-    },
-
-    getEventsByEventKey: async (eventKey: Types.HexEncodedBytes): Promise<Types.Event[]> => {
-      return await this.client.getEventsByEventKey(eventKey);
-    },
-    getEventsByEventHandle: async (address: MaybeHexString, eventHandleStruct: Types.MoveStructTagId, fieldName: string, query?: { start?: number; limit?: number }): Promise<Types.Event[]> => {
-      return await this.client.getEventsByEventHandle(address, eventHandleStruct, fieldName, query);
+    getAccountResource: async (accountAddress: MaybeHexString, resourceType: string, query?: { version?: Types.LedgerVersion }): Promise<Response<Types.AccountResource>> => {
+      return createReponse("getAccountResource", 200, await this.client.getAccountResource(accountAddress, resourceType, query));
     },
 
-    getTransactions: async (query?: { start?: number; limit?: number }): Promise<OnChainTransaction[]> => {
-      return await this.client.getTransactions(query);
+    getEventsByEventKey: async (eventKey: Types.HexEncodedBytes): Promise<Response<Types.Event[]>> => {
+      return createReponse("getEventsByEventKey", 200, await this.client.getEventsByEventKey(eventKey));
     },
-    getTransaction: async (txnHashOrVersion: string): Promise<Transaction> => {
-      return await this.client.getTransaction(txnHashOrVersion);
+    getEventsByEventHandle: async (address: MaybeHexString, eventHandleStruct: Types.MoveStructTagId, fieldName: string, query?: { start?: number; limit?: number }): Promise<Response<Types.Event[]>> => {
+      return createReponse("getEventsByEventHandle", 200, await this.client.getEventsByEventHandle(address, eventHandleStruct, fieldName, query));
     },
 
-    transactionPending: async (txnHash: HexEncodedBytes): Promise<boolean> => {
-      return await this.client.transactionPending(txnHash);
+    getTransactions: async (query?: { start?: number; limit?: number }): Promise<Response<OnChainTransaction[]>> => {
+      return createReponse("getTransactions", 200, await this.client.getTransactions(query));
     },
-    waitForTransaction: async (txnHash: HexEncodedBytes) => {
-      await this.client.waitForTransaction(txnHash);
+    getTransaction: async (txnHashOrVersion: string): Promise<Response<Transaction>> => {
+      return createReponse("getTransaction", 200, await this.client.getTransaction(txnHashOrVersion));
     },
-    getLedgerInfo: async (params: RequestParams): Promise<LedgerInfo> => {
-      return await this.client.getLedgerInfo(params);
+
+    transactionPending: async (txnHash: HexEncodedBytes): Promise<Response<boolean>> => {
+      return createReponse("transactionPending", 200, await this.client.transactionPending(txnHash));
     },
-    getChainId: async (params: RequestParams): Promise<number> => {
-      return await this.client.getChainId(params);
+    waitForTransaction: async (txnHash: HexEncodedBytes): Promise<Response<void>> => {
+      return createReponse("waitForTransaction", 200, await this.client.waitForTransaction(txnHash));
     },
-    getTableItem: async (handle: string, data: TableItemRequest, params?: RequestParams): Promise<any> => {
-      return await this.client.getTableItem(handle, data, params);
+    getLedgerInfo: async (params: RequestParams): Promise<Response<LedgerInfo>> => {
+      return createReponse("getLedgerInfo", 200, await this.client.getLedgerInfo(params));
+    },
+    getChainId: async (params: RequestParams): Promise<Response<number>> => {
+      return createReponse("getChainId", 200, await this.client.getChainId(params));
+    },
+    getTableItem: async (handle: string, data: TableItemRequest, params?: RequestParams): Promise<Response<any>> => {
+      return createReponse("getTableItem", 200, await this.client.getTableItem(handle, data, params));
     },
   };
 
   public token = {
-    createCollection: async (name: string, description: string, uri: string): Promise<Types.HexEncodedBytes> => {
-      if (!this.currentAccount) throw new Error("401");
-      return await this.tokenClient.createCollection(this.currentAccount, name, description, uri);
+    createCollection: async (name: string, description: string, uri: string): Promise<Response<Types.HexEncodedBytes>> => {
+      if (!this.currentAccount) return createReponse("createCollection", 403, undefined);
+      return createReponse("createCollection", 200, await this.tokenClient.createCollection(this.currentAccount, name, description, uri));
     },
-    createToken: async (collectionName: string, name: string, description: string, supply: number, uri: string, royalty_points_per_million: number): Promise<Types.HexEncodedBytes> => {
-      if (!this.currentAccount) throw new Error("401");
-      return await this.tokenClient.createToken(this.currentAccount, collectionName, name, description, supply, uri, royalty_points_per_million);
+    createToken: async (collectionName: string, name: string, description: string, supply: number, uri: string, royalty_points_per_million: number): Promise<Response<Types.HexEncodedBytes>> => {
+      if (!this.currentAccount) return createReponse("createToken", 403, undefined);
+      return createReponse("createToken", 200, await this.tokenClient.createToken(this.currentAccount, collectionName, name, description, supply, uri, royalty_points_per_million));
     },
-    offerToken: async (receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, amount: number): Promise<Types.HexEncodedBytes> => {
-      if (!this.currentAccount) throw new Error("401");
-      return await this.tokenClient.offerToken(this.currentAccount, receiver, creator, collectionName, name, amount);
+    offerToken: async (receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, amount: number): Promise<Response<Types.HexEncodedBytes>> => {
+      if (!this.currentAccount) return createReponse("offerToken", 403, undefined);
+      return createReponse("offerToken", 200, await this.tokenClient.offerToken(this.currentAccount, receiver, creator, collectionName, name, amount));
     },
-    claimToken: async (sender: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string): Promise<Types.HexEncodedBytes> => {
-      if (!this.currentAccount) throw new Error("401");
-      return await this.tokenClient.claimToken(this.currentAccount, sender, creator, collectionName, name);
+    claimToken: async (sender: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string): Promise<Response<Types.HexEncodedBytes>> => {
+      if (!this.currentAccount) return createReponse("claimToken", 403, undefined);
+      return createReponse("claimToken", 200, await this.tokenClient.claimToken(this.currentAccount, sender, creator, collectionName, name));
     },
-    cancelTokenOffer: async (receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string): Promise<Types.HexEncodedBytes> => {
-      if (!this.currentAccount) throw new Error("401");
-      return await this.tokenClient.cancelTokenOffer(this.currentAccount, receiver, creator, collectionName, name);
+    cancelTokenOffer: async (receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string): Promise<Response<Types.HexEncodedBytes>> => {
+      if (!this.currentAccount) return createReponse("cancelTokenOffer", 403, undefined);
+      return createReponse("cancelTokenOffer", 200, await this.tokenClient.cancelTokenOffer(this.currentAccount, receiver, creator, collectionName, name));
     },
 
-    getCollectionData: (creator: MaybeHexString, collectionName: string): Promise<any> => {
-      return this.tokenClient.getCollectionData(creator, collectionName);
+    getCollectionData: async (creator: MaybeHexString, collectionName: string): Promise<Response<any>> => {
+      return createReponse("getCollectionData", 200, await this.tokenClient.getCollectionData(creator, collectionName));
     },
-    getTokenData: (creator: MaybeHexString, collectionName: string, tokenName: string): Promise<TokenData> => {
-      return this.tokenClient.getTokenData(creator, collectionName, tokenName);
+    getTokenData: async (creator: MaybeHexString, collectionName: string, tokenName: string): Promise<Response<TokenData>> => {
+      return createReponse("getTokenData", 200, await this.tokenClient.getTokenData(creator, collectionName, tokenName));
     },
-    getTokenBalance: (creator: MaybeHexString, collectionName: string, tokenName: string): Promise<Token> => {
-      return this.tokenClient.getTokenBalance(creator, collectionName, tokenName);
+    getTokenBalance: async (creator: MaybeHexString, collectionName: string, tokenName: string): Promise<Response<Token>> => {
+      return createReponse("getTokenBalance", 200, await this.tokenClient.getTokenBalance(creator, collectionName, tokenName));
     },
-    getTokenBalanceForAccount: (account: MaybeHexString, tokenId: TokenId): Promise<Token> => {
-      return this.tokenClient.getTokenBalanceForAccount(account, tokenId);
+    getTokenBalanceForAccount: async (account: MaybeHexString, tokenId: TokenId): Promise<Response<Token>> => {
+      return createReponse("getTokenBalanceForAccount", 200, await this.tokenClient.getTokenBalanceForAccount(account, tokenId));
+    },
+  };
+
+  public coin = {
+    initializeCoin: async (resource_type: string, name: string, symbol: string, decimals: string): Promise<Response<string>> => {
+      return createReponse("initializeCoin", 200, await this.coinClient.initializeCoin(this.currentAccount, resource_type, name, symbol, decimals));
+    },
+    registerCoin: async (coin_type_resource: string): Promise<Response<string>> => {
+      return createReponse("registerCoin", 200, await this.coinClient.registerCoin(this.currentAccount, coin_type_resource));
+    },
+    mintCoin: async (coin_type_resource: string, dst_address: string, amount: number): Promise<Response<string>> => {
+      return createReponse("mintCoin", 200, await this.coinClient.mintCoin(this.currentAccount, coin_type_resource, dst_address, amount));
+    },
+    transferCoin: async (coin_type_resource: string, to_address: string, amount: number): Promise<Response<string>> => {
+      return createReponse("transferCoin", 200, await this.coinClient.transferCoin(this.currentAccount, coin_type_resource, to_address, amount));
+    },
+    getCoinData: async (coin_type_resource: string): Promise<Response<CoinData>> => {
+      return createReponse("getCoinData", 200, await this.coinClient.getCoinData(coin_type_resource));
+    },
+    getCoinBalance: async (account_address: string, coin_type_resource: string): Promise<Response<string>> => {
+      return createReponse("getCoinBalance", 200, await this.coinClient.getCoinBalance(account_address, coin_type_resource));
+    },
+    getCoins: async (account_address: string): Promise<Response<string[]>> => {
+      return createReponse("getCoins", 200, await this.coinClient.getCoins(account_address));
     },
   };
 }

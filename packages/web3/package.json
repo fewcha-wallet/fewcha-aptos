@@ -1,7 +1,7 @@
 {
   "name": "@fewcha/web3",
   "description": "The `@fewcha/web3` library aims to be an all-in-one toolkit to enable developers interact with Aptos Blockchain and its ecosystem.",
-  "version": "0.1.4",
+  "version": "0.1.13",
   "author": "fewcha.app",
   "license": "MIT",
   "main": "dist/index.js",
@@ -30,13 +30,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "aptos": "^1.2.0",
+    "aptos": "^1.2.2",
     "buffer": "^6.0.3"
   },
   "devDependencies": {
     "@types/jest": "^28.1.6",
     "jest": "^28.1.3",
-    "ts-jest": "^28.0.6",
+    "ts-jest": "^28.0.7",
     "tslib": "^2.4.0",
     "typescript": "^4.7.4"
   }
