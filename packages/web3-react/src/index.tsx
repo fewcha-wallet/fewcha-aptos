@@ -283,7 +283,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   }, [web3, isConnected]);
 
   useEffect(() => {
-    window.addEventListener("aptos#initialized", () => {});
+    window.addEventListener("aptos#initialized", () => { });
     window.addEventListener("aptos#connected", connectedEvent);
     window.addEventListener("aptos#disconnected", disconnectedEvent);
     window.addEventListener("aptos#changeAccount", getAccount);
@@ -292,7 +292,7 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     window.addEventListener("aptos#transaction", pushTransaction);
 
     return () => {
-      window.removeEventListener("aptos#initialized", () => {});
+      window.removeEventListener("aptos#initialized", () => { });
       window.removeEventListener("aptos#connected", connectedEvent);
       window.removeEventListener("aptos#disconnected", disconnectedEvent);
       window.removeEventListener("aptos#changeAccount", getAccount);

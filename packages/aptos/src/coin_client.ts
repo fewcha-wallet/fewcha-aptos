@@ -54,7 +54,7 @@ export class CoinClient {
     name: string,
     symbol: string,
     decimals: number,
-  ) : Promise<string> {
+  ): Promise<string> {
     const payload: {
       function: string;
       arguments: any[];
@@ -63,7 +63,7 @@ export class CoinClient {
     } = {
       type: "script_function_payload",
       function: "0x1::managed_coin::initialize",
-      type_arguments: [`${account.address()}::${resource_type}`], 
+      type_arguments: [`${account.address()}::${resource_type}`],
       arguments: [
         Buffer.from(name).toString("hex"),
         Buffer.from(symbol).toString("hex"),
@@ -83,7 +83,7 @@ export class CoinClient {
   /** Registers the coin */
   // coin_type_address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
-  async registerCoin(account: AptosAccount, coin_type_resource: string) : Promise<string> {
+  async registerCoin(account: AptosAccount, coin_type_resource: string): Promise<string> {
     const payload: {
       function: string;
       arguments: any[];
@@ -92,7 +92,7 @@ export class CoinClient {
     } = {
       type: "script_function_payload",
       function: "0x1::coin::register",
-      type_arguments: [coin_type_resource], 
+      type_arguments: [coin_type_resource],
       arguments: [],
     };
 
@@ -113,7 +113,7 @@ export class CoinClient {
     coin_type_resource: string,
     dst_address: string,
     amount: number
-  ) : Promise<string>{
+  ): Promise<string> {
     const payload: {
       function: string;
       arguments: any[];
@@ -122,7 +122,7 @@ export class CoinClient {
     } = {
       type: "script_function_payload",
       function: "0x1::managed_coin::mint",
-      type_arguments: [coin_type_resource], 
+      type_arguments: [coin_type_resource],
       arguments: [dst_address.toString(), amount.toString()],
     };
     const txnHash = await this.submitTransactionHelper(
@@ -142,7 +142,7 @@ export class CoinClient {
     coin_type_resource: string,
     to_address: string,
     amount: number
-  ) : Promise<string>{
+  ): Promise<string> {
     const payload: {
       function: string;
       arguments: any[];
@@ -151,7 +151,7 @@ export class CoinClient {
     } = {
       type: "script_function_payload",
       function: "0x1::coin::transfer",
-      type_arguments: [coin_type_resource], 
+      type_arguments: [coin_type_resource],
       arguments: [to_address.toString(), amount.toString()],
     };
     const txnHash = await this.submitTransactionHelper(
@@ -166,7 +166,7 @@ export class CoinClient {
   /** Get coin metadata */
   // address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
-  async getCoinData(coin_type_resource: string) : Promise<CoinData> {
+  async getCoinData(coin_type_resource: string): Promise<CoinData> {
     const resource = await this.aptosClient.getAccountResource(
       coin_type_resource.split("::")[0],
       `0x1::coin::CoinInfo<${coin_type_resource}>`
@@ -183,8 +183,8 @@ export class CoinClient {
   // coin_type_address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
   async getCoinBalance(
-    account_address: string, 
-    coin_type_resource: string, 
+    account_address: string,
+    coin_type_resource: string,
   ): Promise<string> {
     const coin_info = await this.aptosClient.getAccountResource(
       account_address,
@@ -195,7 +195,7 @@ export class CoinClient {
 
   /** Get list registered coins (resource name) */
   // account_address: something like 0x${accountAddress}
-  async getCoins(account_address: string) : Promise<string[]> {
+  async getCoins(account_address: string): Promise<string[]> {
     const resources = await this.aptosClient.getAccountResources(account_address);
     return resources.filter(
       (r) => r.type.startsWith("0x1::coin::CoinStore")
