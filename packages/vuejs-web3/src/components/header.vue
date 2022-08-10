@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <p v-if="!isConnect" @click="handleConnect">Connect to Fewcha Walle</p>
+    <p v-if="!isConnect" @click="handleConnect">Connect to Fewcha Wallet</p>
     <div v-else class="option">
       <p @click="hanldeDisConnect">Disconnect</p>
       <p>
