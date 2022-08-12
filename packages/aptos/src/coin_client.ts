@@ -1,7 +1,7 @@
 import { AptosAccount } from './aptos_account';
 import { AptosClient } from './aptos_client';
-import { Types } from './types';
 import { Buffer } from 'buffer/';
+import * as Gen from './generated/index';
 
 export type CoinData = {
   coin_type_resource: string;
@@ -36,7 +36,7 @@ export class CoinClient {
    * @param payload Transaction payload. It depends on transaction type you want to send
    * @returns Promise that resolves to transaction hash
    */
-  async submitTransactionHelper(account: AptosAccount, payload: Types.TransactionPayload) {
+  async submitTransactionHelper(account: AptosAccount, payload: Gen.TransactionPayload) {
     const txnRequest = await this.aptosClient.generateTransaction(account.address(), payload, {
       max_gas_amount: '4000',
     });
@@ -72,7 +72,7 @@ export class CoinClient {
       ],
     };
     const txnHash = await this.submitTransactionHelper(account, payload);
-    await this.aptosClient.getTransaction(txnHash);
+    await this.aptosClient.getTransactionByHash(txnHash);
 
     return txnHash;
   }
@@ -94,7 +94,7 @@ export class CoinClient {
     };
 
     const txnHash = await this.submitTransactionHelper(account, payload);
-    await this.aptosClient.getTransaction(txnHash);
+    await this.aptosClient.getTransactionByHash(txnHash);
 
     return txnHash;
   }
@@ -120,7 +120,7 @@ export class CoinClient {
       arguments: [dst_address.toString(), amount.toString()],
     };
     const txnHash = await this.submitTransactionHelper(account, payload);
-    await this.aptosClient.getTransaction(txnHash);
+    await this.aptosClient.getTransactionByHash(txnHash);
 
     return txnHash;
   }
@@ -146,7 +146,7 @@ export class CoinClient {
       arguments: [to_address.toString(), amount.toString()],
     };
     const txnHash = await this.submitTransactionHelper(account, payload);
-    await this.aptosClient.getTransaction(txnHash);
+    await this.aptosClient.getTransactionByHash(txnHash);
 
     return txnHash;
   }
