@@ -5,7 +5,7 @@ import Web3 from "@fewcha/web3";
 import "./App.css";
 
 const Web3Raw = () => {
-  const { account, balance, isConnected, network, fewcha, martian } = useWeb3();
+  const { account: web3Account, balance, isConnected, network } = useWeb3();
 
   const web3 = new Web3();
 
@@ -127,15 +127,14 @@ const Web3Raw = () => {
               return;
             }
             const transactionEstRes = await web3.action.simulateTransaction(txnRequest.data);
-            console.log(transactionEstRes, "loghelo");
             if (!parseError(transactionEstRes.status)) {
               return;
             }
 
-            if (transactionEstRes.data.success) {
-              console.log(transactionEstRes.data.gas_used, "gas_used");
+            if (transactionEstRes.data[0].success) {
+              console.log(transactionEstRes.data[0].gas_used, "gas_used");
             } else {
-              console.log(transactionEstRes.data.vm_status, "vm_status");
+              console.log(transactionEstRes.data[0].vm_status, "vm_status");
             }
 
             const txnHash = await web3.action.signAndSubmitTransaction(txnRequest.data);
@@ -168,10 +167,10 @@ const Web3Raw = () => {
               return;
             }
 
-            if (transactionEstRes.data.success) {
-              console.log(transactionEstRes.data.gas_used, "gas_used");
+            if (transactionEstRes.data[0].success) {
+              console.log(transactionEstRes.data[0].gas_used, "gas_used");
             } else {
-              console.log(transactionEstRes.data.vm_status, "vm_status");
+              console.log(transactionEstRes.data[0].vm_status, "vm_status");
             }
 
             const txnHash = await web3.action.signTransaction(txnRequest.data);
@@ -212,10 +211,10 @@ const Web3Raw = () => {
               return;
             }
 
-            if (transactionEstRes.data.success) {
-              console.log(transactionEstRes.data.gas_used, "gas_used");
+            if (transactionEstRes.data[0].success) {
+              console.log(transactionEstRes.data[0].gas_used, "gas_used");
             } else {
-              console.log(transactionEstRes.data.vm_status, "vm_status");
+              console.log(transactionEstRes.data[0].vm_status, "vm_status");
             }
 
             const tx = await web3.action.signTransaction(txnRequest.data);
@@ -253,7 +252,7 @@ const Web3Raw = () => {
         <button
           onClick={async () => {
             const id = uuidv4();
-            const txnHash = await web3.action.token.createToken("fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf", `nft ${id}`, `fewcha try ${id} desc`, 1000, "https://fewcha.app/svgs/logo.svg", 1);
+            const txnHash = await web3.action.token.createToken("fewcha try 180a4b1d-c31f-4630-93e8-003af5f8eb77", `nft ${id}`, `fewcha try ${id} desc`, 1, "https://fewcha.app/svgs/logo.svg", 1);
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -475,7 +474,7 @@ const Web3Raw = () => {
       <div>
         {isConnected ? (
           <div>
-            <div>Address: {account.address}</div>
+            <div>Address: {web3Account.address}</div>
             <div>Balance: {balance || "0"}</div>
             <div>Network: {network}</div>
             <div>Connect: </div>
