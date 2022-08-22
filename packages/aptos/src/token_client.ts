@@ -1,3 +1,6 @@
+// Copyright (c) Aptos
+// SPDX-License-Identifier: Apache-2.0
+
 import { AptosAccount } from './aptos_account';
 import { AptosClient } from './aptos_client';
 import * as TokenTypes from './token_types';
@@ -6,7 +9,6 @@ import { HexString, MaybeHexString } from './hex_string';
 import { BCS, TxnBuilderTypes, TransactionBuilderABI } from './transaction_builder';
 import { MAX_U64_BIG_INT } from './transaction_builder/bcs/consts';
 import { TOKEN_ABIS } from './token_client_abis';
-import assert from 'assert';
 
 /**
  * Class for creating, minting and managing minting NFT collections and tokens
@@ -359,86 +361,5 @@ export class TokenClient {
     };
 
     return this.aptosClient.getTableItem(handle, getTokenTableItemRequest);
-  }
-
-  // returns a list of token IDs of the tokens in a user's account (including the tokens that were minted)
-  async getTokenIds(address: string) {
-    const depositEvents = await this.aptosClient.getEventsByEventHandle(
-      address,
-      '0x3::token::TokenStore',
-      'deposit_events',
-    );
-    const withdrawEvents = await this.aptosClient.getEventsByEventHandle(
-      address,
-      '0x3::token::TokenStore',
-      'withdraw_events',
-    );
-
-    var countDeposit: Record<string, number> = {};
-    var countWithdraw: Record<string, number> = {};
-    var tokenIds = [];
-    for (var elem of depositEvents) {
-      const elem_string = JSON.stringify(elem.data.id);
-      countDeposit[elem_string] = countDeposit[elem_string] ? countDeposit[elem_string] + 1 : 1;
-    }
-    for (var elem of withdrawEvents) {
-      const elem_string = JSON.stringify(elem.data.id);
-      countWithdraw[elem_string] = countWithdraw[elem_string] ? countWithdraw[elem_string] + 1 : 1;
-    }
-
-    for (var elem of depositEvents) {
-      const elem_string = JSON.stringify(elem.data.id);
-      const count1 = countDeposit[elem_string];
-      const count2 = countWithdraw[elem_string] ? countWithdraw[elem_string] : 0;
-      if (count1 - count2 == 1) {
-        tokenIds.push(elem.data.id);
-      }
-    }
-    return tokenIds;
-  }
-
-  async getTokens(address: string) {
-    let localCache: Record<string, Gen.MoveResource[]> = {};
-    const tokenIds = await this.getTokenIds(address);
-    var tokens = [];
-    for (var tokenId of tokenIds) {
-      let resources: Gen.MoveResource[];
-      if (tokenId.creator in localCache) {
-        resources = localCache[tokenId.creator];
-      } else {
-        resources = await this.aptosClient.getAccountResources(tokenId.creator);
-        localCache[tokenId.creator] = resources;
-      }
-      const accountResource: { type: string; data: any } = resources.find((r) => r.type === '0x3::token::Collections');
-      let tableItemRequest: Gen.TableItemRequest = {
-        key_type: '0x3::token::TokenId',
-        value_type: '0x3::token::TokenData',
-        key: tokenId,
-      };
-      const token = (await this.aptosClient.getTableItem(accountResource.data.token_data.handle, tableItemRequest))
-        .data;
-      tokens.push(token);
-    }
-    return tokens;
-  }
-
-  async tableItem(handle: string, keyType: string, valueType: string, key: any): Promise<any> {
-    const response = await fetch(`${this.aptosClient.client.nodeURL}/tables/${handle}/item`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key_type: keyType,
-        value_type: valueType,
-        key: key,
-      }),
-    });
-
-    if (response.status == 404) {
-      return null;
-    } else if (response.status != 200) {
-      assert(response.status == 200, await response.text());
-    } else {
-      return await response.json();
-    }
   }
 }

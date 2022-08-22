@@ -1,3 +1,6 @@
+// Copyright (c) Aptos
+// SPDX-License-Identifier: Apache-2.0
+
 import { Memoize } from 'typescript-memoize';
 import { HexString, MaybeHexString } from './hex_string';
 import { fixNodeUrl, sleep } from './util';
@@ -23,6 +26,9 @@ export class AptosClient {
    * @param config Additional configuration options for the generated Axios client.
    */
   constructor(nodeUrl: string, config?: Partial<Gen.OpenAPIConfig>, doNotFixNodeUrl: boolean = false) {
+    if (!nodeUrl) {
+      throw new Error('Node URL cannot be empty.');
+    }
     const conf = config === undefined || config === null ? {} : { ...config };
     if (doNotFixNodeUrl) {
       conf.BASE = nodeUrl;
@@ -58,7 +64,7 @@ export class AptosClient {
    */
   async getAccountTransactions(
     accountAddress: MaybeHexString,
-    query?: { start?: BigInt; limit?: number },
+    query?: { start?: BigInt | number; limit?: number },
   ): Promise<Gen.Transaction[]> {
     return this.client.transactions.getAccountTransactions(
       HexString.ensure(accountAddress).hex(),
@@ -77,7 +83,7 @@ export class AptosClient {
    */
   async getAccountModules(
     accountAddress: MaybeHexString,
-    query?: { ledgerVersion?: BigInt },
+    query?: { ledgerVersion?: BigInt | number },
   ): Promise<Gen.MoveModuleBytecode[]> {
     return this.client.accounts.getAccountModules(
       HexString.ensure(accountAddress).hex(),
@@ -97,7 +103,7 @@ export class AptosClient {
   async getAccountModule(
     accountAddress: MaybeHexString,
     moduleName: string,
-    query?: { ledgerVersion?: BigInt },
+    query?: { ledgerVersion?: BigInt | number },
   ): Promise<Gen.MoveModuleBytecode> {
     return this.client.accounts.getAccountModule(
       HexString.ensure(accountAddress).hex(),
@@ -121,7 +127,7 @@ export class AptosClient {
    */
   async getAccountResources(
     accountAddress: MaybeHexString,
-    query?: { ledgerVersion?: BigInt },
+    query?: { ledgerVersion?: BigInt | number },
   ): Promise<Gen.MoveResource[]> {
     return this.client.accounts.getAccountResources(
       HexString.ensure(accountAddress).hex(),
@@ -146,7 +152,7 @@ export class AptosClient {
   async getAccountResource(
     accountAddress: MaybeHexString,
     resourceType: Gen.MoveStructTag,
-    query?: { ledgerVersion?: BigInt },
+    query?: { ledgerVersion?: BigInt | number },
   ): Promise<Gen.MoveResource> {
     return this.client.accounts.getAccountResource(
       HexString.ensure(accountAddress).hex(),
@@ -282,7 +288,7 @@ export class AptosClient {
     address: MaybeHexString,
     eventHandleStruct: Gen.MoveStructTag,
     fieldName: string,
-    query?: { start?: BigInt; limit?: number },
+    query?: { start?: BigInt | number; limit?: number },
   ): Promise<Gen.Event[]> {
     return this.client.events.getEventsByEventHandle(
       HexString.ensure(address).hex(),
@@ -355,7 +361,7 @@ export class AptosClient {
    * @param query?.limit The max number of transactions should be returned for the page. Default is 25
    * @returns Array of on-chain transactions
    */
-  async getTransactions(query?: { start?: BigInt; limit?: number }): Promise<Gen.Transaction[]> {
+  async getTransactions(query?: { start?: BigInt | number; limit?: number }): Promise<Gen.Transaction[]> {
     return this.client.transactions.getTransactions(query?.start?.toString(), query?.limit);
   }
 
@@ -373,7 +379,7 @@ export class AptosClient {
    * Transaction version is an uint64 number.
    * @returns Transaction from mempool or on-chain transaction
    */
-  async getTransactionByVersion(txnVersion: BigInt): Promise<Gen.Transaction> {
+  async getTransactionByVersion(txnVersion: BigInt | number): Promise<Gen.Transaction> {
     return this.client.transactions.getTransactionByVersion(txnVersion.toString());
   }
 
@@ -508,7 +514,11 @@ export class AptosClient {
    * @param params Request params
    * @returns Table item value rendered in JSON
    */
-  async getTableItem(handle: string, data: Gen.TableItemRequest, query?: { ledgerVersion?: BigInt }): Promise<any> {
+  async getTableItem(
+    handle: string,
+    data: Gen.TableItemRequest,
+    query?: { ledgerVersion?: BigInt | number },
+  ): Promise<any> {
     const tableItem = await this.client.tables.getTableItem(handle, data, query?.ledgerVersion?.toString());
     return tableItem;
   }

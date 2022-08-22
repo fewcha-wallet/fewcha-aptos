@@ -1,3 +1,5 @@
+// Copyright 2022 Fewcha. All rights reserved.
+
 import { AptosAccount } from './aptos_account';
 import { AptosClient } from './aptos_client';
 import { Buffer } from 'buffer/';

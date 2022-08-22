@@ -8,7 +8,7 @@ export interface Web3ProviderType {
   disconnect(): Promise<Response<boolean>>;
   isConnected(): Promise<Response<boolean>>;
 
-  generateRawTransaction(accountFrom: HexString, spayload: TxnBuilderTypes.TransactionPayload, extraArgs?: { maxGasAmount?: BCS.Uint64; gastUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64 }): Promise<Response<TxnBuilderTypes.RawTransaction>>;
+  generateRawTransaction(payload: TxnBuilderTypes.TransactionPayload, extraArgs?: { maxGasAmount?: BCS.Uint64; gastUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64 }): Promise<Response<TxnBuilderTypes.RawTransaction>>;
   generateTransaction(payload: Gen.TransactionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.SubmitTransactionRequest>>;
 
   createSigningMessage(request: Gen.EncodeSubmissionRequest): Promise<Response<string>>;
