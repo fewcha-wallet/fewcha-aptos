@@ -1,6 +1,6 @@
 {
   "name": "@fewcha/web3-react",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "author": "fewcha.app",
   "license": "MIT",
   "main": "lib/index.js",
@@ -47,7 +47,7 @@
     "react-dom": "*"
   },
   "dependencies": {
-    "@fewcha/web3": "^0.1.19",
+    "@fewcha/web3": "^0.1.20",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
