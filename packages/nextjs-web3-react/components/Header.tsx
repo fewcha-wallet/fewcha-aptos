@@ -18,7 +18,7 @@ const Account = () => {
                 const receiverAddress = "0x788b3f37e8925b444fafa49becee9bd4489b1ef1a4005fdd6eac47e4e6d71531";
                 const sendBalance = "1000";
                 const payload = {
-                  type: "script_function_payload",
+                  type: "entry_function_payload",
                   function: "0x1::Coin::transfer",
                   type_arguments: ["0x1::aptos_coin::AptosCoin"],
                   arguments: [receiverAddress, sendBalance],

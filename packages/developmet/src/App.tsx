@@ -1,52 +1,18 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
-import { ConnectWallet, useWeb3 } from "@fewcha/web3-react";
 import Web3 from "@fewcha/web3";
-import "./App.css";
+import { parseError } from "./utils";
 
-const Web3Raw = () => {
-  const { account: web3Account, balance, isConnected, network } = useWeb3();
-
+const Web3Js = () => {
   const web3 = new Web3();
-
-  const parseError = (status: number): boolean => {
-    switch (status) {
-      case 200:
-        return true;
-      case 400:
-        alert("bad request");
-        return false;
-      case 401:
-        alert("User cancelled");
-        return false;
-      case 403:
-        alert("Forbidden: please connect wallet");
-        return false;
-      case 404:
-        alert("Not Found");
-        return false;
-      case 500:
-        alert("Internal Server Error");
-        return false;
-      case 502:
-        alert("Bad Gateway");
-        return false;
-      case 503:
-        alert("Service Unavailable");
-        return false;
-      default:
-        alert("Unknown Error");
-        return false;
-    }
-  };
 
   return (
     <div>
+      {/* Common */}
       <div>
-        {/* Common */}
         <div>Common</div>
         <button
-          onClick={() => {
+          onClick={async () => {
             web3.action
               .connect()
               .then((data) => parseError(data.status) && console.log(data))
@@ -56,6 +22,7 @@ const Web3Raw = () => {
         >
           Connnect
         </button>
+
         <button
           onClick={() => {
             web3.action
@@ -67,6 +34,7 @@ const Web3Raw = () => {
         >
           IsConnnect
         </button>
+
         <button
           onClick={() => {
             web3.action
@@ -78,6 +46,7 @@ const Web3Raw = () => {
         >
           Disconnect
         </button>
+
         <button
           onClick={() => {
             web3.action
@@ -89,6 +58,7 @@ const Web3Raw = () => {
         >
           Account
         </button>
+
         <button
           onClick={() => {
             web3.action
@@ -100,6 +70,7 @@ const Web3Raw = () => {
         >
           Get Network
         </button>
+
         <button
           onClick={() => {
             web3.action
@@ -111,12 +82,19 @@ const Web3Raw = () => {
         >
           Get Balance
         </button>
+      </div>
+
+      {/* Transaction */}
+      <div>
+        <div>Transaction</div>
+
         <button
           onClick={async () => {
-            const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
+            const receiverAddress = "0x1aef4aa8db9d9e3f9fad6f559431dd544807737e6485cc1e3da468351e6c30b0";
             const sendBalance = "1000";
+
             const payload = {
-              type: "script_function_payload",
+              type: "entry_function_payload",
               function: "0x1::coin::transfer",
               type_arguments: ["0x1::aptos_coin::AptosCoin"],
               arguments: [receiverAddress, sendBalance],
@@ -126,34 +104,47 @@ const Web3Raw = () => {
             if (!parseError(txnRequest.status)) {
               return;
             }
-            const transactionEstRes = await web3.action.simulateTransaction(txnRequest.data);
-            if (!parseError(transactionEstRes.status)) {
-              return;
-            }
 
-            if (transactionEstRes.data[0].success) {
-              console.log(transactionEstRes.data[0].gas_used, "gas_used");
-            } else {
-              console.log(transactionEstRes.data[0].vm_status, "vm_status");
-            }
-
-            const txnHash = await web3.action.signAndSubmitTransaction(txnRequest.data);
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash, "txnHash");
+            console.log("txnRequest", txnRequest);
           }}
         >
-          Sign and submit TX
+          Generate Transaction
         </button>
+
         <button
           onClick={async () => {
             const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
             const sendBalance = "1000";
+
+            // const rawTxn = await web3.action.build("0x1::coin::transfer", ["0x1::aptos_coin::AptosCoin"], [receiverAddress, sendBalance]);
+
+            // const bcsTxn = await web3.action.generateBCSTransaction(rawTxn);
+            // console.log(bcsTxn, "bcsTxn");
+          }}
+        >
+          Generate BCS Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
+            const sendBalance = "1000";
+
+            // const bcsTxn = await web3.action.generateBCSTransaction(rawTxn);
+            // console.log(bcsTxn, "bcsTxn");
+          }}
+        >
+          Generate Raw Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0x1aef4aa8db9d9e3f9fad6f559431dd544807737e6485cc1e3da468351e6c30b0";
+            const sendBalance = "1000";
+
             const payload = {
-              type: "script_function_payload",
-              function: "0x1::coin::transfer",
+              type: "entry_function_payload",
+              function: "0x1::coin::transfe",
               type_arguments: ["0x1::aptos_coin::AptosCoin"],
               arguments: [receiverAddress, sendBalance],
             };
@@ -162,15 +153,33 @@ const Web3Raw = () => {
             if (!parseError(txnRequest.status)) {
               return;
             }
-            const transactionEstRes = await web3.action.simulateTransaction(txnRequest.data);
-            if (!parseError(transactionEstRes.status)) {
+
+            const siTx = await web3.action.simulateTransaction(txnRequest.data);
+            if (!parseError(siTx.status)) {
               return;
             }
 
-            if (transactionEstRes.data[0].success) {
-              console.log(transactionEstRes.data[0].gas_used, "gas_used");
-            } else {
-              console.log(transactionEstRes.data[0].vm_status, "vm_status");
+            console.log("siTx", siTx);
+          }}
+        >
+          Simulate Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0x1aef4aa8db9d9e3f9fad6f559431dd544807737e6485cc1e3da468351e6c30b0";
+            const sendBalance = "1000";
+
+            const payload = {
+              type: "entry_function_payload",
+              function: "0x1::coin::transfer",
+              type_arguments: ["0x1::aptos_coin::AptosCoin"],
+              arguments: [receiverAddress, sendBalance],
+            };
+
+            const txnRequest = await web3.action.generateTransaction(payload);
+            if (!parseError(txnRequest.status)) {
+              return;
             }
 
             const txnHash = await web3.action.signTransaction(txnRequest.data);
@@ -178,25 +187,21 @@ const Web3Raw = () => {
               return;
             }
 
-            console.log("tx", txnHash);
+            console.log("txnHash", txnHash);
           }}
         >
-          Sign TX
+          Sign Transaction
         </button>
+
+        <br />
+
         <button
           onClick={async () => {
-            const signed = await web3.action.signMessage("longheo");
-            console.log(signed);
-          }}
-        >
-          Sign Message
-        </button>
-        <button
-          onClick={async () => {
-            const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
+            const receiverAddress = "0x1aef4aa8db9d9e3f9fad6f559431dd544807737e6485cc1e3da468351e6c30b0";
             const sendBalance = "1000";
+
             const payload = {
-              type: "script_function_payload",
+              type: "entry_function_payload",
               function: "0x1::coin::transfer",
               type_arguments: ["0x1::aptos_coin::AptosCoin"],
               arguments: [receiverAddress, sendBalance],
@@ -206,15 +211,78 @@ const Web3Raw = () => {
             if (!parseError(txnRequest.status)) {
               return;
             }
-            const transactionEstRes = await web3.action.simulateTransaction(txnRequest.data);
-            if (!parseError(transactionEstRes.status)) {
+
+            const tx = await web3.action.signTransaction(txnRequest.data);
+            if (!parseError(tx.status)) {
               return;
             }
 
-            if (transactionEstRes.data[0].success) {
-              console.log(transactionEstRes.data[0].gas_used, "gas_used");
+            const txnHash = await web3.action.submitTransaction(tx.data);
+            if (!parseError(txnHash.status)) {
+              return;
+            }
+
+            console.log("tx", txnHash);
+          }}
+        >
+          Submit Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0x1aef4aa8db9d9e3f9fad6f559431dd544807737e6485cc1e3da468351e6c30b0";
+            const sendBalance = "1000";
+
+            const payload = {
+              type: "entry_function_payload",
+              function: "0x1::coin::transfer",
+              type_arguments: ["0x1::aptos_coin::AptosCoin"],
+              arguments: [receiverAddress, sendBalance],
+            };
+
+            const txnRequest = await web3.action.generateTransaction(payload);
+            if (!parseError(txnRequest.status)) {
+              return;
+            }
+
+            const txnHash = await web3.action.signAndSubmitTransaction(txnRequest.data);
+            if (!parseError(txnHash.status)) {
+              return;
+            }
+
+            console.log("txnHash", txnHash);
+          }}
+        >
+          Sign and Submit Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0x1aef4aa8db9d9e3f9fad6f559431dd544807737e6485cc1e3da468351e6c30b0";
+            const sendBalance = "1000";
+
+            const payload = {
+              type: "entry_function_payload",
+              function: "0x1::coin::transfer",
+              type_arguments: ["0x1::aptos_coin::AptosCoin"],
+              arguments: [receiverAddress, sendBalance],
+            };
+
+            const txnRequest = await web3.action.generateTransaction(payload);
+            if (!parseError(txnRequest.status)) {
+              return;
+            }
+            const estTx = await web3.action.simulateTransaction(txnRequest.data);
+            if (!parseError(estTx.status)) {
+              return;
+            }
+
+            const estTx1 = estTx.data[0];
+
+            if (estTx1.success) {
+              console.log(estTx1.gas_used, "gas_used");
             } else {
-              console.log(transactionEstRes.data[0].vm_status, "vm_status");
+              console.log(estTx1.vm_status, "vm_status");
             }
 
             const tx = await web3.action.signTransaction(txnRequest.data);
@@ -231,15 +299,26 @@ const Web3Raw = () => {
             console.log("tx", txnHash);
           }}
         >
-          Submit TX
+          Full Flow Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const signed = await web3.action.signMessage("random message");
+            console.log(signed);
+          }}
+        >
+          Sign Message
         </button>
       </div>
+
+      {/* Token */}
       <div>
         <div>Token</div>
         <button
           onClick={async () => {
             const id = uuidv4();
-            const txnHash = await web3.action.token.createCollection(`fewcha try ${id}`, `fewcha try ${id} desc`, "https://fewcha.app/svgs/logo.svg");
+            const txnHash = await web3.action.token.createCollection(`fewcha try ${id}`, `fewcha try ${id} desc`, "https://fewcha.app/svgs/logo.svg", 18446744073709551615);
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -249,59 +328,60 @@ const Web3Raw = () => {
         >
           Create Collection
         </button>
+
         <button
           onClick={async () => {
-            const id = uuidv4();
-            const txnHash = await web3.action.token.createToken("fewcha try 180a4b1d-c31f-4630-93e8-003af5f8eb77", `nft ${id}`, `fewcha try ${id} desc`, 1, "https://fewcha.app/svgs/logo.svg", 1);
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "txnHash");
+            // const id = uuidv4();
+            // const txnHash = await web3.action.token.createToken("fewcha try 180a4b1d-c31f-4630-93e8-003af5f8eb77", `nft ${id}`, `fewcha try ${id} desc`, 1, "https://fewcha.app/svgs/logo.svg", 1);
+            // if (!parseError(txnHash.status)) {
+            //   return;
+            // }
+            // console.log(txnHash.data, "txnHash");
           }}
         >
           Create Token
         </button>
+
         <button
           onClick={async () => {
-            console.log(web3.action.token);
-            const txnHash = await web3.action.token.offerToken("0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034", "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", `fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf`, `nft 59e4b6ad-9c05-4aa9-8d6d-efc0b55ee4d0`, 1);
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "txnHash");
+            // console.log(web3.action.token);
+            // const txnHash = await web3.action.token.offerToken("0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034", "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", `fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf`, `nft 59e4b6ad-9c05-4aa9-8d6d-efc0b55ee4d0`, 1);
+            // if (!parseError(txnHash.status)) {
+            //   return;
+            // }
+            // console.log(txnHash.data, "txnHash");
           }}
         >
           Offer Token
         </button>
+
         <button
           onClick={async () => {
-            console.log(web3.action.token);
-            const txnHash = await web3.action.token.claimToken("0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034", "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", `fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf`, `nft 59e4b6ad-9c05-4aa9-8d6d-efc0b55ee4d0`);
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "txnHash");
+            // console.log(web3.action.token);
+            // const txnHash = await web3.action.token.claimToken("0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034", "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", `fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf`, `nft 59e4b6ad-9c05-4aa9-8d6d-efc0b55ee4d0`);
+            // if (!parseError(txnHash.status)) {
+            //   return;
+            // }
+            // console.log(txnHash.data, "txnHash");
           }}
         >
           Claim Token
         </button>
+
         <button
           onClick={async () => {
-            console.log(web3.action.token);
-            const txnHash = await web3.action.token.cancelTokenOffer("0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034", "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", `fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf`, `nft 59e4b6ad-9c05-4aa9-8d6d-efc0b55ee4d0`);
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "txnHash");
+            // console.log(web3.action.token);
+            // const txnHash = await web3.action.token.cancelTokenOffer("0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034", "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", `fewcha try 2703a9d1-402b-4014-9b1d-a6a9e792aecf`, `nft 59e4b6ad-9c05-4aa9-8d6d-efc0b55ee4d0`);
+            // if (!parseError(txnHash.status)) {
+            //   return;
+            // }
+            // console.log(txnHash.data, "txnHash");
           }}
         >
           Cancel Token Offer
         </button>
       </div>
+
       {/* SDK Get functions */}
       <div>
         <div>SDK Get functions</div>
@@ -316,6 +396,7 @@ const Web3Raw = () => {
         >
           Get Account
         </button>
+
         <button
           onClick={() => {
             web3.action.sdk
@@ -327,6 +408,7 @@ const Web3Raw = () => {
         >
           Get Account Transactions
         </button>
+
         <button
           onClick={() => {
             web3.action.sdk
@@ -338,6 +420,7 @@ const Web3Raw = () => {
         >
           Get Account Modules
         </button>
+
         <button
           onClick={() => {
             web3.action.sdk
@@ -349,6 +432,7 @@ const Web3Raw = () => {
         >
           Get Account Module: test
         </button>
+
         <button
           onClick={() => {
             web3.action.sdk
@@ -360,6 +444,7 @@ const Web3Raw = () => {
         >
           Get Account Resources
         </button>
+
         <button
           onClick={() => {
             web3.action.sdk
@@ -371,6 +456,7 @@ const Web3Raw = () => {
         >
           Get Transsactions
         </button>
+
         <button
           onClick={() => {
             web3.action.sdk
@@ -471,60 +557,12 @@ const Web3Raw = () => {
           Get coins
         </button>
       </div>
-      <div>
-        {isConnected ? (
-          <div>
-            <div>Address: {web3Account.address}</div>
-            <div>Balance: {balance || "0"}</div>
-            <div>Network: {network}</div>
-            <div>Connect: </div>
-            <button
-            // onClick={() => {
-            //   web3.signMessage("hello world").then((data) => {
-            //     setSigned(data);
-            //   });
-            // }}
-            >
-              Sign
-            </button>
-            <button
-            // onClick={() => {
-            //   web3.sdk
-            //     .getTransaction("0xea2bc550356432d3e2ff23f12a859e5c5824aa61e469da9fe02539beabc55490")
-            //     .then((data) => console.log(data, "longheo"))
-            //     .catch((e) => console.log("error longheo", e));
-            //   (web3.submitTransaction as any)();
-            // }}
-            >
-              tx
-            </button>
-
-            {/* <div>
-              <button
-                onClick={() => {
-                  disconnect();
-                }}
-              >
-                Disconnect
-              </button>
-            </div> */}
-          </div>
-        ) : (
-          <ConnectWallet type="list" />
-        )}
-      </div>
     </div>
   );
 };
 
 const App: React.FC = () => {
-  return (
-    <>
-      <header>
-        <Web3Raw />
-      </header>
-    </>
-  );
+  return <Web3Js />;
 };
 
 export default App;

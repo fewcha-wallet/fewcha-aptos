@@ -59,7 +59,7 @@ export class CoinClient {
       type: string;
       type_arguments: any[];
     } = {
-      type: "script_function_payload",
+      type: "entry_function_payload",
       function: "0x1::managed_coin::initialize",
       type_arguments: [`${account.address()}::${resource_type}`],
       arguments: [
@@ -85,7 +85,7 @@ export class CoinClient {
       type: string;
       type_arguments: any[];
     } = {
-      type: "script_function_payload",
+      type: "entry_function_payload",
       function: "0x1::coins::register",
       type_arguments: [coin_type_resource],
       arguments: [],
@@ -107,7 +107,7 @@ export class CoinClient {
       type: string;
       type_arguments: any[];
     } = {
-      type: "script_function_payload",
+      type: "entry_function_payload",
       function: "0x1::managed_coin::mint",
       type_arguments: [coin_type_resource],
       arguments: [dst_address.toString(), amount.toString()],
@@ -128,7 +128,7 @@ export class CoinClient {
       type: string;
       type_arguments: any[];
     } = {
-      type: "script_function_payload",
+      type: "entry_function_payload",
       function: "0x1::coin::transfer",
       type_arguments: [coin_type_resource],
       arguments: [to_address.toString(), amount.toString()],
