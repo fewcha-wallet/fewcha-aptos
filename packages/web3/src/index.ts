@@ -4,20 +4,17 @@ import * as Aptos from "aptos";
 import * as utils from "./utils";
 import Web3Provider from "./provider";
 import { Web3ProviderType, Web3SDK, Web3Token } from "./types";
+import { MartianMask } from "./martina.mask";
 
 class Web3 {
   public action: Web3ProviderType;
 
-  constructor(provider?: Web3Provider) {
-    if (!provider) {
-      this.action = new Web3Provider((window as any).fewcha).provider;
-      window.addEventListener("fewcha#initialized", () => {
-        this.action = new Web3Provider((window as any).fewcha).provider;
-      });
-      return this;
+  constructor(provider: Web3ProviderType) {
+    if ((provider as any).isFewcha) {
+      this.action = provider;
+    } else {
+      this.action = new MartianMask(provider) as any;
     }
-
-    this.action = provider.provider;
     return this;
   }
 

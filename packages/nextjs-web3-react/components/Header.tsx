@@ -3,7 +3,8 @@ import { ConnectWallet, useWeb3 } from "@fewcha/web3-react";
 
 const Account = () => {
   const web3 = useWeb3();
-  const { account, balance, isConnected, disconnect, network, txs, sdk, token } = web3;
+  //const { account, balance, isConnected, disconnect, network, txs, sdk, token } = web3;
+  const { account, balance, isConnected, disconnect, network } = web3;
 
   return (
     <div>
@@ -23,9 +24,9 @@ const Account = () => {
                   type_arguments: ["0x1::aptos_coin::AptosCoin"],
                   arguments: [receiverAddress, sendBalance],
                 };
-                generateTransaction(payload).then((tx) => {
-                  console.log(tx);
-                });
+                // generateTransaction(payload).then((tx) => {
+                //   console.log(tx);
+                // });
               }}
             >
               gen tx

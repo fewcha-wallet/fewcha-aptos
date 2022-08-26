@@ -4,7 +4,7 @@ import Web3 from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
-  const web3 = new Web3();
+  const web3 = new Web3((window as any).martian);
 
   return (
     <div>
@@ -318,12 +318,12 @@ const Web3Js = () => {
         <button
           onClick={async () => {
             const id = uuidv4();
-            const txnHash = await web3.action.token.createCollection(`fewcha try ${id}`, `fewcha try ${id} desc`, "https://fewcha.app/svgs/logo.svg", 18446744073709551615);
-            if (!parseError(txnHash.status)) {
-              return;
-            }
+            // const txnHash = await web3.action.token.createCollection(`fewcha try ${id}`, `fewcha try ${id} desc`, "https://fewcha.app/svgs/logo.svg", 18446744073709551615);
+            // if (!parseError(txnHash.status)) {
+            //   return;
+            // }
 
-            console.log(txnHash.data, "txnHash");
+            //console.log(txnHash.data, "txnHash");
           }}
         >
           Create Collection
