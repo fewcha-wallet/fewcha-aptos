@@ -1,7 +1,8 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
-import Web3 from "@fewcha/web3";
+import Web3, { utils } from "@fewcha/web3";
 import { parseError } from "./utils";
+import { BCS, TxnBuilderTypes } from "aptos";
 
 const Web3Js = () => {
   const web3 = new Web3();
@@ -128,10 +129,16 @@ const Web3Js = () => {
         <button
           onClick={async () => {
             const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
-            const sendBalance = "1000";
+            const sendBalance = 1000;
 
-            // const bcsTxn = await web3.action.generateBCSTransaction(rawTxn);
-            // console.log(bcsTxn, "bcsTxn");
+            const token = new TxnBuilderTypes.TypeTagStruct(TxnBuilderTypes.StructTag.fromString("0x1::aptos_coin::AptosCoin"));
+            const entryFunctionPayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(TxnBuilderTypes.EntryFunction.natural("0x1::coin", "transfer", [token], [BCS.bcsToBytes(TxnBuilderTypes.AccountAddress.fromHex(receiverAddress)), BCS.bcsSerializeUint64(sendBalance)]));
+
+            const entryFunctionPayloadInput = utils.getTransactionPayloadEntryFunctionInput(entryFunctionPayload);
+
+            const rawTxn = await web3.action.generateRawTransaction(entryFunctionPayloadInput);
+
+            console.log(rawTxn);
           }}
         >
           Generate Raw Transaction
@@ -144,7 +151,7 @@ const Web3Js = () => {
 
             const payload = {
               type: "entry_function_payload",
-              function: "0x1::coin::transfe",
+              function: "0x1::coin::transfer",
               type_arguments: ["0x1::aptos_coin::AptosCoin"],
               arguments: [receiverAddress, sendBalance],
             };
@@ -318,7 +325,7 @@ const Web3Js = () => {
         <button
           onClick={async () => {
             const id = uuidv4();
-            const txnHash = await web3.action.token.createCollection(`fewcha try ${id}`, `fewcha try ${id} desc`, "https://fewcha.app/svgs/logo.svg", 18446744073709551615);
+            const txnHash = await web3.action.token.createCollection(`fewcha try ${id}`, `fewcha try ${id} desc`, "https://fewcha.app/svgs/logo.svg", 18446744073709551615n);
             if (!parseError(txnHash.status)) {
               return;
             }
