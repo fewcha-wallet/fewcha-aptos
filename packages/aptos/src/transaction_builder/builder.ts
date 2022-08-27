@@ -68,16 +68,22 @@ export class TransactionBuilder<F extends SigningFn> {
   static getSigningMessage(rawTxn: AnyRawTransaction): SigningMessage {
     const hash = SHA3.sha3_256.create();
     if (rawTxn instanceof RawTransaction) {
-      hash.update(Buffer.from(RAW_TRANSACTION_SALT));
+      hash.update(RAW_TRANSACTION_SALT);
     } else if (rawTxn instanceof MultiAgentRawTransaction) {
-      hash.update(Buffer.from(RAW_TRANSACTION_WITH_DATA_SALT));
+      hash.update(RAW_TRANSACTION_WITH_DATA_SALT);
     } else {
       throw new Error("Unknown transaction type.");
     }
 
     const prefix = new Uint8Array(hash.arrayBuffer());
 
-    return Buffer.from([...prefix, ...bcsToBytes(rawTxn)]);
+    const body = bcsToBytes(rawTxn);
+
+    const mergedArray = new Uint8Array(prefix.length + body.length);
+    mergedArray.set(prefix);
+    mergedArray.set(body, prefix.length);
+
+    return Buffer.from(mergedArray);
   }
 }
 
@@ -391,8 +397,10 @@ export class TransactionBuilderRemoteABI {
     const senderAddress = sender instanceof AccountAddress ? HexString.fromUint8Array(sender.address) : sender;
 
     const [{ sequence_number: sequenceNumber }, chainId] = await Promise.all([
-      this.aptosClient.getAccount(senderAddress),
-      this.aptosClient.getChainId(),
+      rest?.sequenceNumber
+        ? Promise.resolve({ sequence_number: rest?.sequenceNumber })
+        : this.aptosClient.getAccount(senderAddress),
+      rest?.chainId ? Promise.resolve(rest?.chainId) : this.aptosClient.getChainId(),
     ]);
 
     const builderABI = new TransactionBuilderABI([bcsToBytes(entryFunctionABI)], {

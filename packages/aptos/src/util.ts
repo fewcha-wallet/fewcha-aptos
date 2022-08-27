@@ -11,11 +11,11 @@ export async function sleep(timeMs: number): Promise<null> {
   });
 }
 
-export const DEFAULT_VERSION_PATH_BASE = '/v1';
+export const DEFAULT_VERSION_PATH_BASE = "/v1";
 
 export function fixNodeUrl(nodeUrl: string): string {
   let out = `${nodeUrl}`;
-  if (out.endsWith('/')) {
+  if (out.endsWith("/")) {
     out = out.substring(0, out.length - 1);
   }
   if (!out.endsWith(DEFAULT_VERSION_PATH_BASE)) {
