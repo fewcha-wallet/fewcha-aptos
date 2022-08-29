@@ -352,7 +352,7 @@ export class TransactionBuilderRemoteABI {
   /**
    * Builds a raw transaction. Only support script function a.k.a entry function payloads
    *
-   * @param func fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coins::transfer
+   * @param func fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coin::transfer
    * @param ty_tags
    * @param args
    * @returns RawTransaction
@@ -362,7 +362,7 @@ export class TransactionBuilderRemoteABI {
     if (funcNameParts.length !== 3) {
       throw new Error(
         // eslint-disable-next-line max-len
-        "'func' needs to be a fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coins::transfer",
+        "'func' needs to be a fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coin::transfer",
       );
     }
 
