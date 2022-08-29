@@ -17,8 +17,8 @@ export interface Web3ProviderType {
 
   simulateTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.UserTransaction[]>>;
 
-  generateBCSTransaction(rawTxn: Uint8Array): Promise<Response<Uint8Array>>;
-  generateBCSSimulation(rawTxn: Uint8Array): Promise<Response<Uint8Array>>;
+  generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+  generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
 
   submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
   submitBCSSimulation(bcsBody: Uint8Array): Promise<Response<Gen.UserTransaction[]>>;
@@ -56,11 +56,11 @@ export type Web3SDK = {
 };
 
 export type Web3Token = {
-  createCollection(name: string, description: string, uri: string, maxAmount: BCS.AnyNumber): Promise<Response<string>>;
-  createToken(collectionName: string, name: string, description: string, supply: number, uri: string, max: BCS.AnyNumber, royalty_payee_address: MaybeHexString, royalty_points_denominator: number, royalty_points_numerator: number, property_keys: Array<string>, property_values: Array<string>, property_types: Array<string>): Promise<Response<string>>;
-  offerToken(receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, amount: number, property_version: number): Promise<Response<string>>;
-  claimToken(sender: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, property_version: number): Promise<Response<string>>;
-  cancelTokenOffer(receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, property_version: number): Promise<Response<string>>;
+  createCollection(name: string, description: string, uri: string, maxAmount?: BCS.AnyNumber): Promise<Response<string>>;
+  createToken(collectionName: string, name: string, description: string, supply: number, uri: string, max?: BCS.AnyNumber, royalty_payee_address?: MaybeHexString, royalty_points_denominator?: number, royalty_points_numerator?: number, property_keys?: Array<string>, property_values?: Array<string>, property_types?: Array<string>): Promise<Response<string>>;
+  offerToken(receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, amount: number, property_version?: number): Promise<Response<string>>;
+  claimToken(sender: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, property_version?: number): Promise<Response<string>>;
+  cancelTokenOffer(receiver: MaybeHexString, creator: MaybeHexString, collectionName: string, name: string, property_version?: number): Promise<Response<string>>;
 
   getCollectionData(creator: MaybeHexString, collectionName: string): Promise<Response<any>>;
   getTokenData(creator: MaybeHexString, collectionName: string, tokenName: string): Promise<Response<TokenTypes.TokenData>>;
@@ -73,6 +73,7 @@ export type FewchaWeb3Coin = {
   registerCoin(coin_type_resource: string): Promise<Response<string>>;
   mintCoin(coin_type_resource: string, dst_address: string, amount: number): Promise<Response<string>>;
   transferCoin(coin_type_resource: string, to_address: string, amount: number): Promise<Response<string>>;
+
   getCoinData(coin_type_resource: string): Promise<Response<CoinData>>;
   getCoinBalance(account_address: string, coin_type_resource: string): Promise<Response<string>>;
   getCoins(account_address: string): Promise<Response<string[]>>;
