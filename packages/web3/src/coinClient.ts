@@ -88,7 +88,7 @@ export class FewchaCoinClient {
       type_arguments: any[];
     } = {
       type: "script_function_payload",
-      function: "0x1::coin::register",
+      function: "0x1::managed_coin::register",
       type_arguments: [coin_type_resource],
       arguments: [],
     };
