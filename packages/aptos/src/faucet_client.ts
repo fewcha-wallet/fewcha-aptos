@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /** Faucet creates and funds accounts. This is a thin wrapper around that. */
-import { AptosClient } from './aptos_client';
-import { OpenAPIConfig } from './generated';
-import { AxiosHttpRequest } from './generated/core/AxiosHttpRequest';
-import { HexString, MaybeHexString } from './hex_string';
+import { AptosClient } from "./aptos_client";
+import { OpenAPIConfig } from "./generated";
+import { AxiosHttpRequest } from "./generated/core/AxiosHttpRequest";
+import { HexString, MaybeHexString } from "./hex_string";
 
 /**
  * Class for requsting tokens from faucet
@@ -24,14 +24,14 @@ export class FaucetClient extends AptosClient {
     super(nodeUrl, config);
 
     if (!faucetUrl) {
-      throw new Error('Faucet URL cannot be empty.');
+      throw new Error("Faucet URL cannot be empty.");
     }
     // Build a requester configured to talk to the faucet.
     this.faucetRequester = new AxiosHttpRequest({
       BASE: faucetUrl,
-      VERSION: config?.VERSION ?? '0.1.0',
+      VERSION: config?.VERSION ?? "0.1.0",
       WITH_CREDENTIALS: config?.WITH_CREDENTIALS ?? false,
-      CREDENTIALS: config?.CREDENTIALS ?? 'include',
+      CREDENTIALS: config?.CREDENTIALS ?? "include",
       TOKEN: config?.TOKEN,
       USERNAME: config?.USERNAME,
       PASSWORD: config?.PASSWORD,
@@ -49,8 +49,8 @@ export class FaucetClient extends AptosClient {
    */
   async fundAccount(address: MaybeHexString, amount: number): Promise<string[]> {
     const tnxHashes = await this.faucetRequester.request<Array<string>>({
-      method: 'POST',
-      url: '/mint',
+      method: "POST",
+      url: "/mint",
       query: {
         address: HexString.ensure(address).noPrefix(),
         amount,
