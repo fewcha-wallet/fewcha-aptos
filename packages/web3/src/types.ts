@@ -29,7 +29,7 @@ export interface Web3ProviderType {
 
   sdk: Web3SDK;
   token: Web3Token; // NFT
-  fewchaCoin: FewchaWeb3Coin; // Coin
+  coin: FewchaWeb3Coin; // Coin
 }
 
 export type Web3SDK = {

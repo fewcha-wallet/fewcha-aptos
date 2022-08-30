@@ -5,8 +5,10 @@ import Web3 from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
-  const web3 = new Web3((window as any).fewcha);
-  console.log(web3.action);
+  const provider = (window as any).fewcha;
+
+  const web3 = new Web3(provider);
+
   return (
     <div>
       {/* Common */}
@@ -587,7 +589,7 @@ const Web3Js = () => {
         <div>Coin</div>
         <button
           onClick={async () => {
-            const txnHash = await web3.action.fewchaCoin.initializeCoin("moon_coin::MoonCoin", "Fewcha1", "FWC", "18");
+            const txnHash = await web3.action.coin.initializeCoin("moon_coin::MoonCoin", "Fewcha1", "FWC", "18");
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -599,7 +601,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const txnHash = await web3.action.fewchaCoin.registerCoin("0x1::moon_coin::MoonCoin");
+            const txnHash = await web3.action.coin.registerCoin("0x1::moon_coin::MoonCoin");
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -611,7 +613,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const txnHash = await web3.action.fewchaCoin.mintCoin(
+            const txnHash = await web3.action.coin.mintCoin(
               "0x1::aptos_coin::AptosCoin",
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
               100,
@@ -625,7 +627,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const transfer = await web3.action.fewchaCoin.transferCoin(
+            const transfer = await web3.action.coin.transferCoin(
               "0x1::aptos_coin::AptosCoin",
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
               1,
@@ -639,7 +641,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const coinData = await web3.action.fewchaCoin.getCoinData("0x1::aptos_coin::AptosCoin");
+            const coinData = await web3.action.coin.getCoinData("0x1::aptos_coin::AptosCoin");
             if (!parseError(coinData.status)) {
               return;
             }
@@ -651,7 +653,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const balance = await web3.action.fewchaCoin.getCoinBalance(
+            const balance = await web3.action.coin.getCoinBalance(
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
               "0x1::aptos_coin::AptosCoin",
             );
@@ -666,7 +668,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const coins = await web3.action.fewchaCoin.getCoins(
+            const coins = await web3.action.coin.getCoins(
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
             );
             if (!parseError(coins.status)) {
