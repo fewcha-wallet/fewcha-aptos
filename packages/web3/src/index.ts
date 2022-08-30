@@ -11,7 +11,10 @@ class Web3 {
 
   constructor(provider: Web3ProviderType) {
     if ((provider as any).isFewcha) {
-      this.action = provider;
+      this.action = new Web3Provider((window as any).fewcha).provider;
+      window.addEventListener("fewcha#initialized", () => {
+        this.action = new Web3Provider((window as any).fewcha).provider;
+      });
     } else {
       this.action = new MartianMask(provider) as any;
     }

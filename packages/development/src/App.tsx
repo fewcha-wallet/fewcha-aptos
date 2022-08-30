@@ -5,7 +5,7 @@ import Web3 from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
-  const web3 = new Web3((window as any).martian);
+  const web3 = new Web3((window as any).fewcha);
   console.log(web3.action);
   return (
     <div>
@@ -424,7 +424,7 @@ const Web3Js = () => {
           onClick={async () => {
             const id = uuidv4();
             const txnHash = await web3.action.token.createToken(
-              "fewcha try 9174f2af-b201-44c1-a0a9-ea400864d192",
+              "fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58",
               `nft ${id}`,
               `fewcha try ${id} desc`,
               1,
@@ -447,7 +447,7 @@ const Web3Js = () => {
             const txnHash = await web3.action.token.offerToken(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
-              `fewcha try 9174f2af-b201-44c1-a0a9-ea400864d192`,
+              `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
               `nft 32182451-9852-4425-9d70-b76534b8672f`,
               1,
             );
@@ -465,7 +465,7 @@ const Web3Js = () => {
             const txnHash = await web3.action.token.claimToken(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
-              `fewcha try 9174f2af-b201-44c1-a0a9-ea400864d192`,
+              `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
               `nft 32182451-9852-4425-9d70-b76534b8672f`,
             );
             if (!parseError(txnHash.status)) return;
@@ -482,7 +482,7 @@ const Web3Js = () => {
             const txnHash = await web3.action.token.cancelTokenOffer(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
               "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
-              `fewcha try 9174f2af-b201-44c1-a0a9-ea400864d192`,
+              `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
               `nft 32182451-9852-4425-9d70-b76534b8672f`,
             );
 
