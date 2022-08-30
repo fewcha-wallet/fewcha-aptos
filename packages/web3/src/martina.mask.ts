@@ -1,5 +1,6 @@
-import { BCS, MaybeHexString, Types as Gen } from "aptos";
+import { BCS, MaybeHexString, Types as Gen, TxnBuilderTypes } from "aptos";
 import { createReponse, Response } from "./types";
+import {} from "aptos";
 
 export class MartianMask {
   public provider: any;
@@ -8,11 +9,11 @@ export class MartianMask {
     this.provider = provider;
   }
 
-  public async generateTransaction(payload: Gen.TransactionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.SubmitTransactionRequest>> {
+  public async generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>> {
     const response = await this.provider.connect();
     const sender = response.address;
     const res = await this.provider.generateTransaction(sender, payload);
-    return createReponse<Gen.SubmitTransactionRequest>("generateTransaction", 200, res);
+    return createReponse<Uint8Array>("generateTransaction", 200, res);
   }
   public async signTransaction(txnRequest: Gen.SubmitTransactionRequest): Promise<Response<Gen.SubmitTransactionRequest>> {
     const res = await this.provider.signTransaction(txnRequest);

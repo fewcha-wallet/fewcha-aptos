@@ -6,7 +6,7 @@ import { parseError } from "./utils";
 
 const Web3Js = () => {
   const web3 = new Web3((window as any).martian);
-
+  console.log(web3.action);
   return (
     <div>
       {/* Common */}
