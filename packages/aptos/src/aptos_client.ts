@@ -4,7 +4,7 @@
 import { Memoize } from "typescript-memoize";
 import { HexString, MaybeHexString } from "./hex_string";
 import { fixNodeUrl, sleep } from "./util";
-import { AptosAccount } from "./aptos_account";
+import { IAptosAccount } from "./aptos_account";
 import * as Gen from "./generated/index";
 import {
   TxnBuilderTypes,
@@ -168,7 +168,7 @@ export class AptosClient {
   }
 
   /** Generates a signed transaction that can be submitted to the chain for execution. */
-  static generateBCSTransaction(accountFrom: AptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
+  static generateBCSTransaction(accountFrom: IAptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
     const txnBuilder = new TransactionBuilderEd25519((signingMessage: TxnBuilderTypes.SigningMessage) => {
       // @ts-ignore
       const sigHexStr = accountFrom.signBuffer(signingMessage);
@@ -179,7 +179,7 @@ export class AptosClient {
   }
 
   /** Generates a BCS transaction that can be submitted to the chain for simulation. */
-  static generateBCSSimulation(accountFrom: AptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
+  static generateBCSSimulation(accountFrom: IAptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const txnBuilder = new TransactionBuilderEd25519((_signingMessage: TxnBuilderTypes.SigningMessage) => {
       // @ts-ignore
@@ -243,7 +243,7 @@ export class AptosClient {
    */
   // eslint-disable-next-line class-methods-use-this
   async signTransaction(
-    accountFrom: AptosAccount,
+    accountFrom: IAptosAccount,
     rawTransaction: TxnBuilderTypes.RawTransaction,
   ): Promise<Uint8Array> {
     return Promise.resolve(AptosClient.generateBCSTransaction(accountFrom, rawTransaction));
@@ -298,7 +298,7 @@ export class AptosClient {
 
   /** Submits a transaction with fake signature to the transaction simulation endpoint. */
   async simulateTransaction(
-    accountFrom: AptosAccount,
+    accountFrom: IAptosAccount,
     rawTransaction: TxnBuilderTypes.RawTransaction,
   ): Promise<Gen.UserTransaction[]> {
     const signedTxn = AptosClient.generateBCSSimulation(accountFrom, rawTransaction);
@@ -585,7 +585,7 @@ export class AptosClient {
    * @returns The transaction response from the API.
    */
   async generateSignSubmitTransaction(
-    sender: AptosAccount,
+    sender: IAptosAccount,
     payload: TxnBuilderTypes.TransactionPayload,
     extraArgs?: {
       maxGasAmount?: BCS.Uint64;
@@ -608,7 +608,7 @@ export class AptosClient {
    * those for information about the return / error semantics of this function.
    */
   async generateSignSubmitWaitForTransaction(
-    sender: AptosAccount,
+    sender: IAptosAccount,
     payload: TxnBuilderTypes.TransactionPayload,
     extraArgs?: {
       maxGasAmount?: BCS.Uint64;
