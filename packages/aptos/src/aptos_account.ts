@@ -15,10 +15,19 @@ export interface AptosAccountObject {
   privateKeyHex: Gen.HexEncodedBytes;
 }
 
+export interface IAptosAccount {
+  address(): HexString;
+  authKey(): HexString;
+  pubKey(): HexString;
+  signBuffer(buffer: Buffer): HexString;
+  signHexString(hexString: MaybeHexString): HexString;
+  toPrivateKeyObject(): AptosAccountObject;
+}
+
 /**
  * Class for creating and managing Aptos account
  */
-export class AptosAccount {
+export class AptosAccount implements IAptosAccount {
   /**
    * A private key and public key, associated with the given account
    */
