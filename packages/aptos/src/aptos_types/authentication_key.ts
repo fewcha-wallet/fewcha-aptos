@@ -1,8 +1,8 @@
 // Copyright (c) Aptos
 // SPDX-License-Identifier: Apache-2.0
 
-import * as SHA3 from "js-sha3";
-import { HexString } from "../../hex_string";
+import { sha3_256 as sha3Hash } from "@noble/hashes/sha3";
+import { HexString } from "../hex_string";
 import { Bytes } from "../bcs";
 import { MultiEd25519PublicKey } from "./multi_ed25519";
 
@@ -39,10 +39,10 @@ export class AuthenticationKey {
     bytes.set(pubKeyBytes);
     bytes.set([AuthenticationKey.MULTI_ED25519_SCHEME], pubKeyBytes.length);
 
-    const hash = SHA3.sha3_256.create();
-    hash.update(Buffer.from(bytes));
+    const hash = sha3Hash.create();
+    hash.update(bytes);
 
-    return new AuthenticationKey(new Uint8Array(hash.arrayBuffer()));
+    return new AuthenticationKey(hash.digest());
   }
 
   /**

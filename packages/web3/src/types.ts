@@ -1,6 +1,6 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { BCS, MaybeHexString, TokenTypes, Types as Gen } from "aptos";
+import { BCS, HexString, MaybeHexString, TokenTypes, Types as Gen } from "aptos";
 
 export interface Web3ProviderType {
   connect(): Promise<Response<PublicAccount>>;
@@ -10,26 +10,29 @@ export interface Web3ProviderType {
   generateRawTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64 }): Promise<Response<Uint8Array>>;
   generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>;
 
+  generateSignSubmitTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.HexEncodedBytes>>;
+  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64; checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Gen.Transaction>>;
   signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
   signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-  signMessage(message: string): Promise<Response<string>>;
+  signMessage(message: SignMessagePayload): Promise<Response<SignMessageResponse>>;
   submitTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
 
-  simulateTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.UserTransaction[]>>;
+  simulateTransaction(rawTransaction: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
 
   generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
   generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
 
   submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  submitBCSSimulation(bcsBody: Uint8Array): Promise<Response<Gen.UserTransaction[]>>;
+  submitBCSSimulation(bcsBody: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
 
   account(): Promise<Response<PublicAccount>>;
   getNetwork(): Promise<Response<string>>;
+  getNetworkURL(): Promise<Response<string>>;
   getBalance(): Promise<Response<string>>;
 
   sdk: Web3SDK;
   token: Web3Token; // NFT
-  coin: FewchaWeb3Coin; // Coin
+  fewchaCoin: FewchaWeb3Coin; // Coin
 }
 
 export type Web3SDK = {
@@ -42,6 +45,7 @@ export type Web3SDK = {
 
   getEventsByEventKey(eventKey: string): Promise<Response<Gen.Event[]>>;
   getEventsByEventHandle(address: MaybeHexString, eventHandleStruct: Gen.MoveStructTag, fieldName: string, query?: { start?: BigInt | number; limit?: number }): Promise<Response<Gen.Event[]>>;
+  getEventsByCreationNumber(address: MaybeHexString, creationNumber: number | bigint | string, query?: { start?: BigInt | number; limit?: number }): Promise<Response<Gen.Event[]>>;
 
   getTransactions(query?: { start?: BigInt | number; limit?: number }): Promise<Response<Gen.Transaction[]>>;
   getTransactionByHash(txnHash: string): Promise<Response<Gen.Transaction>>;
@@ -53,6 +57,10 @@ export type Web3SDK = {
   getLedgerInfo(): Promise<Response<Gen.IndexResponse>>;
   getChainId(): Promise<Response<number>>;
   getTableItem(handle: string, data: Gen.TableItemRequest, query?: { ledgerVersion?: BigInt | number }): Promise<Response<any>>;
+
+  lookupOriginalAddress(addressOrAuthKey: MaybeHexString): Promise<Response<HexString>>;
+  getBlockByHeight(blockHeight: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
+  getBlockByVersion(version: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
 };
 
 export type Web3Token = {
@@ -104,3 +112,22 @@ export const createReponse = <T>(method: string, status: number, data: T): Respo
     data,
   };
 };
+
+export interface SignMessagePayload {
+  address?: boolean; // Should we include the address of the account in the message
+  application?: boolean; // Should we include the domain of the dapp
+  chainId?: boolean; // Should we include the current chain id the wallet is connected to
+  message: string; // The message to be signed and displayed to the user
+  nonce: string; // A nonce the dapp should generate
+}
+
+export interface SignMessageResponse {
+  address: string;
+  application: string;
+  chainId: number;
+  fullMessage: string; // The message that was generated to sign
+  message: string; // The message passed in by the user
+  nonce: string;
+  prefix: string; // Should always be APTOS
+  signature: string; // The signed full message
+}
