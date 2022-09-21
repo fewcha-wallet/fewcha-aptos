@@ -1,7 +1,8 @@
 // Copyright (c) Aptos
 // SPDX-License-Identifier: Apache-2.0
 
-import { sha3_256 as sha3Hash } from "@noble/hashes/sha3";
+import * as SHA3 from "js-sha3";
+import { Buffer } from "buffer/";
 import {
   Ed25519PublicKey,
   Ed25519Signature,
@@ -67,7 +68,7 @@ export class TransactionBuilder<F extends SigningFn> {
 
   /** Generates a Signing Message out of a raw transaction. */
   static getSigningMessage(rawTxn: AnyRawTransaction): SigningMessage {
-    const hash = sha3Hash.create();
+    const hash = SHA3.sha3_256.create();
     if (rawTxn instanceof RawTransaction) {
       hash.update(RAW_TRANSACTION_SALT);
     } else if (rawTxn instanceof MultiAgentRawTransaction) {
@@ -76,7 +77,7 @@ export class TransactionBuilder<F extends SigningFn> {
       throw new Error("Unknown transaction type.");
     }
 
-    const prefix = hash.digest();
+    const prefix = new Uint8Array(hash.arrayBuffer());
 
     const body = bcsToBytes(rawTxn);
 
@@ -84,7 +85,7 @@ export class TransactionBuilder<F extends SigningFn> {
     mergedArray.set(prefix);
     mergedArray.set(body, prefix.length);
 
-    return mergedArray;
+    return Buffer.from(mergedArray);
   }
 }
 

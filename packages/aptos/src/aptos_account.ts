@@ -1,14 +1,13 @@
 // Copyright (c) Aptos
 // SPDX-License-Identifier: Apache-2.0
 
-import nacl from "tweetnacl";
-import { sha3_256 as sha3Hash } from "@noble/hashes/sha3";
+import * as Nacl from "tweetnacl";
+import * as SHA3 from "js-sha3";
+import { Buffer } from "buffer/"; // the trailing slash is important!
+import { derivePath } from "ed25519-hd-key";
 import * as bip39 from "@scure/bip39";
-import { bytesToHex } from "@noble/hashes/utils";
-import { derivePath } from "./utils/hd-key";
 import { HexString, MaybeHexString } from "./hex_string";
 import * as Gen from "./generated/index";
-import { Memoize } from "./utils";
 
 export interface AptosAccountObject {
   address?: Gen.HexEncodedBytes;
@@ -16,19 +15,30 @@ export interface AptosAccountObject {
   privateKeyHex: Gen.HexEncodedBytes;
 }
 
+export interface IAptosAccount {
+  address(): HexString;
+  authKey(): HexString;
+  pubKey(): HexString;
+  signBuffer(buffer: Buffer): HexString;
+  signHexString(hexString: MaybeHexString): HexString;
+  toPrivateKeyObject(): AptosAccountObject;
+}
+
 /**
  * Class for creating and managing Aptos account
  */
-export class AptosAccount {
+export class AptosAccount implements IAptosAccount {
   /**
    * A private key and public key, associated with the given account
    */
-  readonly signingKey: nacl.SignKeyPair;
+  readonly signingKey: Nacl.SignKeyPair;
 
   /**
    * Address associated with the given account
    */
   private readonly accountAddress: HexString;
+
+  private authKeyCached?: HexString;
 
   static fromAptosAccountObject(obj: AptosAccountObject): AptosAccount {
     return new AptosAccount(HexString.ensure(obj.privateKeyHex).toUint8Array(), obj.address);
@@ -62,9 +72,9 @@ export class AptosAccount {
       .map((part) => part.toLowerCase())
       .join(" ");
 
-    const { key } = derivePath(path, bytesToHex(bip39.mnemonicToSeedSync(normalizeMnemonics)));
+    const { key } = derivePath(path, Buffer.from(bip39.mnemonicToSeedSync(normalizeMnemonics)).toString("hex"));
 
-    return new AptosAccount(key);
+    return new AptosAccount(new Uint8Array(key));
   }
 
   /**
@@ -77,9 +87,9 @@ export class AptosAccount {
    */
   constructor(privateKeyBytes?: Uint8Array | undefined, address?: MaybeHexString) {
     if (privateKeyBytes) {
-      this.signingKey = nacl.sign.keyPair.fromSeed(privateKeyBytes.slice(0, 32));
+      this.signingKey = Nacl.sign.keyPair.fromSeed(privateKeyBytes.slice(0, 32));
     } else {
-      this.signingKey = nacl.sign.keyPair();
+      this.signingKey = Nacl.sign.keyPair();
     }
     this.accountAddress = HexString.ensure(address || this.authKey().hex());
   }
@@ -100,12 +110,14 @@ export class AptosAccount {
    * See here for more info: {@link https://aptos.dev/basics/basics-accounts#single-signer-authentication}
    * @returns Authentication key for the associated account
    */
-  @Memoize()
   authKey(): HexString {
-    const hash = sha3Hash.create();
-    hash.update(this.signingKey.publicKey);
-    hash.update("\x00");
-    return HexString.fromUint8Array(hash.digest());
+    if (!this.authKeyCached) {
+      const hash = SHA3.sha3_256.create();
+      hash.update(Buffer.from(this.signingKey.publicKey));
+      hash.update("\x00");
+      this.authKeyCached = new HexString(hash.hex());
+    }
+    return this.authKeyCached;
   }
 
   /**
@@ -114,7 +126,7 @@ export class AptosAccount {
    * @returns The public key for the associated account
    */
   pubKey(): HexString {
-    return HexString.fromUint8Array(this.signingKey.publicKey);
+    return HexString.ensure(Buffer.from(this.signingKey.publicKey).toString("hex"));
   }
 
   /**
@@ -122,9 +134,9 @@ export class AptosAccount {
    * @param buffer A buffer to sign
    * @returns A signature HexString
    */
-  signBuffer(buffer: Uint8Array): HexString {
-    const signature = nacl.sign(buffer, this.signingKey.secretKey);
-    return HexString.fromUint8Array(signature.slice(0, 64));
+  signBuffer(buffer: Buffer): HexString {
+    const signature = Nacl.sign(buffer, this.signingKey.secretKey);
+    return HexString.ensure(Buffer.from(signature).toString("hex").slice(0, 128));
   }
 
   /**
@@ -133,7 +145,7 @@ export class AptosAccount {
    * @returns A signature HexString
    */
   signHexString(hexString: MaybeHexString): HexString {
-    const toSign = HexString.ensure(hexString).toUint8Array();
+    const toSign = HexString.ensure(hexString).toBuffer();
     return this.signBuffer(toSign);
   }
 

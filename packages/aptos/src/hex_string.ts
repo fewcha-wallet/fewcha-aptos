@@ -3,6 +3,7 @@
 
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { HexEncodedBytes } from "./generated";
+import { Buffer } from "buffer/";
 
 // eslint-disable-next-line no-use-before-define
 export type MaybeHexString = HexString | string | HexEncodedBytes;
@@ -97,6 +98,10 @@ export class HexString {
    */
   toString(): string {
     return this.hex();
+  }
+
+  toBuffer(): Buffer {
+    return Buffer.from(this.noPrefix(), "hex");
   }
 
   /**
