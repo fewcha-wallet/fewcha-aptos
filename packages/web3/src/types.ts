@@ -7,17 +7,19 @@ export interface Web3ProviderType {
   disconnect(): Promise<Response<boolean>>;
   isConnected(): Promise<Response<boolean>>;
 
-  generateRawTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64 }): Promise<Response<Uint8Array>>;
-  generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>;
+  generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>; // tx
+  generateRawTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64 }): Promise<Response<Uint8Array>>; // tx
+  generateSignSubmitTransaction(payload: Gen.EntryFunctionPayload, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64 }): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
+  generateSignSubmitRawTransaction(payload: Uint8Array, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
+  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64; checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Gen.Transaction>>; // tx detail
 
-  generateSignSubmitTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.HexEncodedBytes>>;
-  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64; checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Gen.Transaction>>;
-  signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
   signMessage(message: SignMessagePayload): Promise<Response<SignMessageResponse>>;
-  submitTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
 
   simulateTransaction(rawTransaction: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
+
+  signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+  submitTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
+  signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
 
   generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
   generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
