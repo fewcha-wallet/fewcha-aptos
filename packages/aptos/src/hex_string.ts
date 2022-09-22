@@ -1,8 +1,9 @@
 // Copyright (c) Aptos
 // SPDX-License-Identifier: Apache-2.0
 
-import { Buffer } from "buffer/"; // the trailing slash is important!
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { HexEncodedBytes } from "./generated";
+import { Buffer } from "buffer/";
 
 // eslint-disable-next-line no-use-before-define
 export type MaybeHexString = HexString | string | HexEncodedBytes;
@@ -20,8 +21,8 @@ export class HexString {
    * @param buffer A buffer to convert
    * @returns New HexString
    */
-  static fromBuffer(buffer: Buffer): HexString {
-    return new HexString(buffer.toString("hex"));
+  static fromBuffer(buffer: Uint8Array): HexString {
+    return HexString.fromUint8Array(buffer);
   }
 
   /**
@@ -30,7 +31,7 @@ export class HexString {
    * @returns New HexString
    */
   static fromUint8Array(arr: Uint8Array): HexString {
-    return HexString.fromBuffer(Buffer.from(arr));
+    return new HexString(bytesToHex(arr));
   }
 
   /**
@@ -99,6 +100,10 @@ export class HexString {
     return this.hex();
   }
 
+  toBuffer(): Buffer {
+    return Buffer.from(this.noPrefix(), "hex");
+  }
+
   /**
    * Trimmes extra zeroes in the begining of a string
    * @returns Inner hexString without leading zeroes
@@ -113,18 +118,10 @@ export class HexString {
   }
 
   /**
-   * Converts hex string to a Buffer in hex encoding
-   * @returns Buffer from inner hexString without prefix
-   */
-  toBuffer(): Buffer {
-    return Buffer.from(this.noPrefix(), "hex");
-  }
-
-  /**
    * Converts hex string to a Uint8Array
    * @returns Uint8Array from inner hexString without prefix
    */
   toUint8Array(): Uint8Array {
-    return Uint8Array.from(this.toBuffer());
+    return Uint8Array.from(hexToBytes(this.noPrefix()));
   }
 }

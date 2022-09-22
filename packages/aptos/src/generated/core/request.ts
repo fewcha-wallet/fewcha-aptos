@@ -13,6 +13,111 @@ import { CancelablePromise } from "./CancelablePromise";
 import type { OnCancel } from "./CancelablePromise";
 import type { OpenAPIConfig } from "./OpenAPI";
 
+interface Cookie {
+  name: string;
+  value: string;
+  expires?: Date;
+  path?: string;
+  sameSite?: "Lax" | "None" | "Strict";
+  secure?: boolean;
+}
+
+class CookieJar {
+  constructor(private jar = new Map<string, Cookie[]>()) {}
+
+  setCookie(url: URL, cookieStr: string) {
+    const key = url.origin.toLowerCase();
+    if (!this.jar.has(key)) {
+      this.jar.set(key, []);
+    }
+
+    const cookie = CookieJar.parse(cookieStr);
+    this.jar.set(key, [...(this.jar.get(key)?.filter((c) => c.name !== cookie.name) || []), cookie]);
+  }
+
+  getCookies(url: URL): Cookie[] {
+    const key = url.origin.toLowerCase();
+    if (!this.jar.get(key)) {
+      return [];
+    }
+
+    // Filter out expired cookies
+    return this.jar.get(key)?.filter((cookie) => !cookie.expires || cookie.expires > new Date()) || [];
+  }
+
+  static parse(str: string): Cookie {
+    if (typeof str !== "string") {
+      throw new Error("argument str must be a string");
+    }
+
+    const parts = str.split(";").map((part) => part.trim());
+
+    let cookie: Cookie;
+
+    if (parts.length > 0) {
+      const [name, value] = parts[0].split("=");
+      if (!name || !value) {
+        throw new Error("Invalid cookie");
+      }
+
+      cookie = {
+        name,
+        value,
+      };
+    } else {
+      throw new Error("Invalid cookie");
+    }
+
+    parts.slice(1).forEach((part) => {
+      const [name, value] = part.split("=");
+      if (!name.trim()) {
+        throw new Error("Invalid cookie");
+      }
+
+      const nameLow = name.toLowerCase();
+      // eslint-disable-next-line quotes
+      const val = value?.charAt(0) === "'" || value?.charAt(0) === '"' ? value?.slice(1, -1) : value;
+      if (nameLow === "expires") {
+        cookie.expires = new Date(val);
+      }
+      if (nameLow === "path") {
+        cookie.path = val;
+      }
+      if (nameLow === "samesite") {
+        if (val !== "Lax" && val !== "None" && val !== "Strict") {
+          throw new Error("Invalid cookie SameSite value");
+        }
+        cookie.sameSite = val;
+      }
+      if (nameLow === "secure") {
+        cookie.secure = true;
+      }
+    });
+
+    return cookie;
+  }
+}
+
+const jar = new CookieJar();
+
+axios.interceptors.response.use((response) => {
+  if (Array.isArray(response.headers["set-cookie"])) {
+    response.headers["set-cookie"].forEach((c) => {
+      jar.setCookie(new URL(response.config.url), c);
+    });
+  }
+  return response;
+});
+
+axios.interceptors.request.use(function (config) {
+  const cookies = jar.getCookies(new URL(config.url));
+
+  if (cookies?.length > 0) {
+    config.headers.cookie = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
+  }
+  return config;
+});
+
 const isDefined = <T>(value: T | null | undefined): value is Exclude<T, null | undefined> => {
   return value !== undefined && value !== null;
 };
@@ -26,16 +131,7 @@ const isStringWithValue = (value: any): value is string => {
 };
 
 const isBlob = (value: any): value is Blob => {
-  return (
-    typeof value === "object" &&
-    typeof value.type === "string" &&
-    typeof value.stream === "function" &&
-    typeof value.arrayBuffer === "function" &&
-    typeof value.constructor === "function" &&
-    typeof value.constructor.name === "string" &&
-    /^(Blob|File)$/.test(value.constructor.name) &&
-    /^(Blob|File)$/.test(value[Symbol.toStringTag])
-  );
+  return typeof value === "object" && typeof value.type === "string" && typeof value.stream === "function" && typeof value.arrayBuffer === "function" && typeof value.constructor === "function" && typeof value.constructor.name === "string" && /^(Blob|File)$/.test(value.constructor.name) && /^(Blob|File)$/.test(value[Symbol.toStringTag]);
 };
 
 const isFormData = (value: any): value is FormData => {
@@ -47,12 +143,7 @@ const isSuccess = (status: number): boolean => {
 };
 
 const base64 = (str: string): string => {
-  try {
-    return btoa(str);
-  } catch (err) {
-    // @ts-ignore
-    return Buffer.from(str).toString("base64");
-  }
+  return btoa(str);
 };
 
 const getQueryString = (params: Record<string, any>): string => {
@@ -92,14 +183,12 @@ const getQueryString = (params: Record<string, any>): string => {
 const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
   const encoder = config.ENCODE_PATH || encodeURI;
 
-  const path = options.url
-    .replace("{api-version}", config.VERSION)
-    .replace(/{(.*?)}/g, (substring: string, group: string) => {
-      if (options.path?.hasOwnProperty(group)) {
-        return encoder(String(options.path[group]));
-      }
-      return substring;
-    });
+  const path = options.url.replace("{api-version}", config.VERSION).replace(/{(.*?)}/g, (substring: string, group: string) => {
+    if (options.path?.hasOwnProperty(group)) {
+      return encoder(String(options.path[group]));
+    }
+    return substring;
+  });
 
   const url = `${config.BASE}${path}`;
   if (options.query) {
@@ -144,11 +233,7 @@ const resolve = async <T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
   return resolver;
 };
 
-const getHeaders = async (
-  config: OpenAPIConfig,
-  options: ApiRequestOptions,
-  formData?: FormData,
-): Promise<Record<string, string>> => {
+const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptions, formData?: FormData): Promise<Record<string, string>> => {
   const token = await resolve(options, config.TOKEN);
   const username = await resolve(options, config.USERNAME);
   const password = await resolve(options, config.PASSWORD);
@@ -201,15 +286,7 @@ const getRequestBody = (options: ApiRequestOptions): any => {
   return undefined;
 };
 
-const sendRequest = async <T>(
-  config: OpenAPIConfig,
-  options: ApiRequestOptions,
-  url: string,
-  body: any,
-  formData: FormData | undefined,
-  headers: Record<string, string>,
-  onCancel: OnCancel,
-): Promise<AxiosResponse<T>> => {
+const sendRequest = async <T>(config: OpenAPIConfig, options: ApiRequestOptions, url: string, body: any, formData: FormData | undefined, headers: Record<string, string>, onCancel: OnCancel): Promise<AxiosResponse<T>> => {
   const source = axios.CancelToken.source();
 
   const requestConfig: AxiosRequestConfig = {
@@ -221,6 +298,14 @@ const sendRequest = async <T>(
     cancelToken: source.token,
     adapter: fetchAdapter,
   };
+
+  const isBCS = Object.keys(config.HEADERS || {})
+    .filter((k) => k.toLowerCase() === "accept")
+    .map((k) => (config.HEADERS as Record<string, string>)[k])
+    .includes("application/x-bcs");
+  if (isBCS) {
+    requestConfig.responseType = "arraybuffer";
+  }
 
   onCancel(() => source.cancel("The user aborted a request."));
 

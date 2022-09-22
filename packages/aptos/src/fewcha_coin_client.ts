@@ -104,12 +104,7 @@ export class FewchaCoinClient {
   /** Mints the coin */
   // coin_type_address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
-  async mintCoin(
-    account: AptosAccount,
-    coin_type_resource: string,
-    dst_address: string,
-    amount: number,
-  ): Promise<string> {
+  async mintCoin(account: AptosAccount, coin_type_resource: string, dst_address: string, amount: number): Promise<string> {
     const payload: {
       function: string;
       arguments: any[];
@@ -130,12 +125,7 @@ export class FewchaCoinClient {
   /** Transfers the coins */
   // coin_type_address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
-  async transferCoin(
-    account: AptosAccount,
-    coin_type_resource: string,
-    to_address: string,
-    amount: number,
-  ): Promise<string> {
+  async transferCoin(account: AptosAccount, coin_type_resource: string, to_address: string, amount: number): Promise<string> {
     const payload: {
       function: string;
       arguments: any[];
@@ -157,10 +147,7 @@ export class FewchaCoinClient {
   // address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
   async getCoinData(coin_type_resource: string): Promise<FewchaCoinData> {
-    const resource = await this.aptosClient.getAccountResource(
-      coin_type_resource.split("::")[0],
-      `0x1::coin::CoinInfo<${coin_type_resource}>`,
-    );
+    const resource = await this.aptosClient.getAccountResource(coin_type_resource.split("::")[0], `0x1::coin::CoinInfo<${coin_type_resource}>`);
     let coin_data = resource.data as FewchaCoinData;
     return {
       ...coin_data,
@@ -173,10 +160,7 @@ export class FewchaCoinClient {
   // coin_type_address: something like 0x${coinTypeAddress}
   // resource_type: something like moon_coin::MoonCoin
   async getCoinBalance(account_address: string, coin_type_resource: string): Promise<string> {
-    const coin_info = await this.aptosClient.getAccountResource(
-      account_address,
-      `0x1::coin::CoinStore<${coin_type_resource}>`,
-    );
+    const coin_info = await this.aptosClient.getAccountResource(account_address, `0x1::coin::CoinStore<${coin_type_resource}>`);
     return (coin_info.data as FewchaCoinStore).coin.value;
   }
 
