@@ -12,6 +12,7 @@ import {
   RemoteABIBuilderConfig,
 } from "./transaction_builder";
 import { bcsSerializeBytes, bcsSerializeU8, bcsToBytes, Bytes, Seq, Serializer, serializeVector, Uint64 } from "./bcs";
+import { IAptosAccount } from "./aptos_account";
 
 /**
  * Provides methods for retrieving data from Aptos node.
@@ -181,7 +182,7 @@ export class AptosClient {
   }
 
   /** Generates a signed transaction that can be submitted to the chain for execution. */
-  static generateBCSTransaction(accountFrom: AptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
+  static generateBCSTransaction(accountFrom: IAptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
     const txnBuilder = new TransactionBuilderEd25519((signingMessage: TxnBuilderTypes.SigningMessage) => {
       // @ts-ignore
       const sigHexStr = accountFrom.signBuffer(signingMessage);
@@ -204,7 +205,7 @@ export class AptosClient {
    * @returns The BCS encoded signed transaction, which you should then pass into
    * the `submitBCSSimulation` function.
    */
-  static generateBCSSimulation(accountFrom: AptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
+  static generateBCSSimulation(accountFrom: IAptosAccount, rawTxn: TxnBuilderTypes.RawTransaction): Uint8Array {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const txnBuilder = new TransactionBuilderEd25519((_signingMessage: TxnBuilderTypes.SigningMessage) => {
       // @ts-ignore
@@ -268,7 +269,7 @@ export class AptosClient {
    */
   // eslint-disable-next-line class-methods-use-this
   async signTransaction(
-    accountFrom: AptosAccount,
+    accountFrom: IAptosAccount,
     rawTransaction: TxnBuilderTypes.RawTransaction,
   ): Promise<Uint8Array> {
     return Promise.resolve(AptosClient.generateBCSTransaction(accountFrom, rawTransaction));
@@ -369,7 +370,7 @@ export class AptosClient {
    *
    */
   async simulateTransaction(
-    accountFrom: AptosAccount,
+    accountFrom: IAptosAccount,
     rawTransaction: TxnBuilderTypes.RawTransaction,
     query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean },
   ): Promise<Gen.UserTransaction[]> {
@@ -671,7 +672,7 @@ export class AptosClient {
    * @returns The transaction response from the API.
    */
   async generateSignSubmitTransaction(
-    sender: AptosAccount,
+    sender: IAptosAccount,
     payload: TxnBuilderTypes.TransactionPayload,
     extraArgs?: {
       maxGasAmount?: Uint64;
@@ -697,7 +698,7 @@ export class AptosClient {
    * @returns Transaction hash
    */
   async publishPackage(
-    sender: AptosAccount,
+    sender: IAptosAccount,
     packageMetadata: Bytes,
     modules: Seq<TxnBuilderTypes.Module>,
     extraArgs?: {
@@ -728,7 +729,7 @@ export class AptosClient {
    * those for information about the return / error semantics of this function.
    */
   async generateSignSubmitWaitForTransaction(
-    sender: AptosAccount,
+    sender: IAptosAccount,
     payload: TxnBuilderTypes.TransactionPayload,
     extraArgs?: {
       maxGasAmount?: Uint64;
@@ -761,7 +762,7 @@ export class AptosClient {
    * @returns PendingTransaction
    */
   async rotateAuthKeyEd25519(
-    forAccount: AptosAccount,
+    forAccount: IAptosAccount,
     toPrivateKeyBytes: Uint8Array,
     extraArgs?: {
       maxGasAmount?: Uint64;
