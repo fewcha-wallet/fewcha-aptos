@@ -5,8 +5,9 @@ import Web3 from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
-  const web3 = new Web3((window as any).martian);
-  console.log(web3.action);
+  console.log((window as any).fewcha);
+  const web3 = new Web3((window as any).fewcha);
+  console.log(web3);
   return (
     <div>
       {/* Common */}
@@ -424,7 +425,7 @@ const Web3Js = () => {
           onClick={async () => {
             const id = uuidv4();
             const txnHash = await web3.action.token.createToken(
-              "fewcha try 9174f2af-b201-44c1-a0a9-ea400864d192",
+              "fewcha try c23d765c-1136-4843-950e-366e61a92628",
               `nft ${id}`,
               `fewcha try ${id} desc`,
               1,
