@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AptosAccount } from "./aptos_account";
-import { AptosClient } from "./aptos_client";
+import { AptosClient, OptionalTransactionArgs } from "./aptos_client";
 import * as TokenTypes from "./token_types";
 import * as Gen from "./generated/index";
 import { HexString, MaybeHexString } from "./hex_string";
-import { BCS, TransactionBuilder, TransactionBuilderABI, TxnBuilderTypes } from "./transaction_builder";
-import { MAX_U64_BIG_INT } from "./transaction_builder/bcs/consts";
+import { TransactionBuilder, TransactionBuilderABI, TxnBuilderTypes } from "./transaction_builder";
+import { MAX_U64_BIG_INT } from "./bcs/consts";
 import { TOKEN_ABIS } from "./abis";
+import { AnyNumber, bcsToBytes } from "./bcs";
 
 /**
  * Class for creating, minting and managing minting NFT collections and tokens
@@ -44,7 +45,8 @@ export class TokenClient {
     name: string,
     description: string,
     uri: string,
-    maxAmount: BCS.AnyNumber = MAX_U64_BIG_INT,
+    maxAmount: AnyNumber = MAX_U64_BIG_INT,
+    extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
     // <:!:createCollection
     const payload = this.transactionBuilder.buildTransactionPayload(
@@ -53,7 +55,7 @@ export class TokenClient {
       [name, description, uri, maxAmount, [false, false, false]],
     );
 
-    return this.aptosClient.generateSignSubmitTransaction(account, payload);
+    return this.aptosClient.generateSignSubmitTransaction(account, payload, extraArgs);
   }
 
   /**
@@ -82,13 +84,14 @@ export class TokenClient {
     description: string,
     supply: number,
     uri: string,
-    max: BCS.AnyNumber = MAX_U64_BIG_INT,
+    max: AnyNumber = MAX_U64_BIG_INT,
     royalty_payee_address: MaybeHexString = account.address(),
     royalty_points_denominator: number = 0,
     royalty_points_numerator: number = 0,
     property_keys: Array<string> = [],
     property_values: Array<string> = [],
     property_types: Array<string> = [],
+    extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
     // <:!:createToken
     const payload = this.transactionBuilder.buildTransactionPayload(
@@ -111,7 +114,7 @@ export class TokenClient {
       ],
     );
 
-    return this.aptosClient.generateSignSubmitTransaction(account, payload);
+    return this.aptosClient.generateSignSubmitTransaction(account, payload, extraArgs);
   }
 
   /**
@@ -134,6 +137,7 @@ export class TokenClient {
     name: string,
     amount: number,
     property_version: number = 0,
+    extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
     const payload = this.transactionBuilder.buildTransactionPayload(
       "0x3::token_transfers::offer_script",
@@ -141,7 +145,7 @@ export class TokenClient {
       [receiver, creator, collectionName, name, property_version, amount],
     );
 
-    return this.aptosClient.generateSignSubmitTransaction(account, payload);
+    return this.aptosClient.generateSignSubmitTransaction(account, payload, extraArgs);
   }
 
   /**
@@ -162,6 +166,7 @@ export class TokenClient {
     collectionName: string,
     name: string,
     property_version: number = 0,
+    extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
     const payload = this.transactionBuilder.buildTransactionPayload(
       "0x3::token_transfers::claim_script",
@@ -169,7 +174,7 @@ export class TokenClient {
       [sender, creator, collectionName, name, property_version],
     );
 
-    return this.aptosClient.generateSignSubmitTransaction(account, payload);
+    return this.aptosClient.generateSignSubmitTransaction(account, payload, extraArgs);
   }
 
   /**
@@ -190,6 +195,7 @@ export class TokenClient {
     collectionName: string,
     name: string,
     property_version: number = 0,
+    extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
     const payload = this.transactionBuilder.buildTransactionPayload(
       "0x3::token_transfers::cancel_offer_script",
@@ -197,15 +203,15 @@ export class TokenClient {
       [receiver, creator, collectionName, name, property_version],
     );
 
-    return this.aptosClient.generateSignSubmitTransaction(account, payload);
+    return this.aptosClient.generateSignSubmitTransaction(account, payload, extraArgs);
   }
 
   /**
    * Directly transfer the specified amount of tokens from account to receiver
    * using a single multi signature transaction.
    *
-   * @param account AptosAccount where token from which tokens will be transfered
-   * @param receiver  Hex-encoded 32 byte Aptos account address to which tokens will be transfered
+   * @param sender AptosAccount where token from which tokens will be transfered
+   * @param receiver Hex-encoded 32 byte Aptos account address to which tokens will be transfered
    * @param creator Hex-encoded 32 byte Aptos account address to which created tokens
    * @param collectionName Name of collection where token is stored
    * @param name Token name
@@ -221,6 +227,7 @@ export class TokenClient {
     name: string,
     amount: number,
     propertyVersion: number = 0,
+    extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
     const payload = this.transactionBuilder.buildTransactionPayload(
       "0x3::token::direct_transfer_script",
@@ -228,7 +235,7 @@ export class TokenClient {
       [creator, collectionName, name, propertyVersion, amount],
     );
 
-    const rawTxn = await this.aptosClient.generateRawTransaction(sender.address(), payload);
+    const rawTxn = await this.aptosClient.generateRawTransaction(sender.address(), payload, extraArgs);
     const multiAgentTxn = new TxnBuilderTypes.MultiAgentRawTransaction(rawTxn, [
       TxnBuilderTypes.AccountAddress.fromHex(receiver.address()),
     ]);
@@ -257,7 +264,7 @@ export class TokenClient {
       [receiverAuthenticator], // Secondary signer authenticators
     );
 
-    const bcsTxn = BCS.bcsToBytes(new TxnBuilderTypes.SignedTransaction(rawTxn, multiAgentAuthenticator));
+    const bcsTxn = bcsToBytes(new TxnBuilderTypes.SignedTransaction(rawTxn, multiAgentAuthenticator));
 
     const transactionRes = await this.aptosClient.submitSignedBCSTransaction(bcsTxn);
 

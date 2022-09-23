@@ -6,6 +6,7 @@ import { AptosClient } from "./aptos_client";
 import { OpenAPIConfig } from "./generated";
 import { AxiosHttpRequest } from "./generated/core/AxiosHttpRequest";
 import { HexString, MaybeHexString } from "./hex_string";
+import { DEFAULT_TXN_TIMEOUT_SEC } from "./utils";
 
 /**
  * Class for requsting tokens from faucet
@@ -45,9 +46,10 @@ export class FaucetClient extends AptosClient {
    * coins into that account
    * @param address Hex-encoded 16 bytes Aptos account address wich mints tokens
    * @param amount Amount of tokens to mint
+   * @param timeoutSecs
    * @returns Hashes of submitted transactions
    */
-  async fundAccount(address: MaybeHexString, amount: number): Promise<string[]> {
+  async fundAccount(address: MaybeHexString, amount: number, timeoutSecs = DEFAULT_TXN_TIMEOUT_SEC): Promise<string[]> {
     const tnxHashes = await this.faucetRequester.request<Array<string>>({
       method: "POST",
       url: "/mint",
@@ -60,7 +62,7 @@ export class FaucetClient extends AptosClient {
     const promises: Promise<void>[] = [];
     for (let i = 0; i < tnxHashes.length; i += 1) {
       const tnxHash = tnxHashes[i];
-      promises.push(this.waitForTransaction(tnxHash));
+      promises.push(this.waitForTransaction(tnxHash, { timeoutSecs }));
     }
     await Promise.all(promises);
     return tnxHashes;

@@ -1,6 +1,6 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
-import { BCS, TxnBuilderTypes } from "aptos";
+import { BCS, TxnBuilderTypes, Types } from "aptos";
 import Web3 from "@fewcha/web3";
 import { parseError } from "./utils";
 
@@ -77,6 +77,18 @@ const Web3Js = () => {
         <button
           onClick={async () => {
             web3.action
+              .getNetworkURL()
+              .then((data) => parseError(data.status) && console.log(data))
+              .catch(console.log)
+              .finally(console.log);
+          }}
+        >
+          Get Network URL
+        </button>
+
+        <button
+          onClick={async () => {
+            web3.action
               .getBalance()
               .then((data) => parseError(data.status) && console.log(data))
               .catch(console.log)
@@ -114,20 +126,42 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            const receiverAddress = TxnBuilderTypes.AccountAddress.fromHex(
-              "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
-            );
+            const receiverAddress = "0x9bbba8ae651511c5f722b9842230c229bf39ddf4aa453c7f7ccf943660af45fa";
+            const sendBalance = 1000;
+
+            const payload: Types.EntryFunctionPayload = {
+              function: "0x1::coin::transfer",
+              type_arguments: ["0x1::aptos_coin::AptosCoin"],
+              arguments: [receiverAddress, sendBalance],
+            };
+
+            const res = await web3.action.generateSignSubmitTransaction(payload);
+            if (!parseError(res.status)) return;
+
+            console.log("res", res);
+          }}
+        >
+          Generate Sign Submit Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034";
             const sendBalance = 1000;
 
             const token = new TxnBuilderTypes.TypeTagStruct(
               TxnBuilderTypes.StructTag.fromString("0x1::aptos_coin::AptosCoin"),
             );
+
             const entryFunctionPayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
               TxnBuilderTypes.EntryFunction.natural(
                 "0x1::coin",
                 "transfer",
                 [token],
-                [BCS.bcsToBytes(receiverAddress), BCS.bcsSerializeUint64(sendBalance)],
+                [
+                  BCS.bcsToBytes(TxnBuilderTypes.AccountAddress.fromHex(receiverAddress)),
+                  BCS.bcsSerializeUint64(sendBalance),
+                ],
               ),
             );
 
@@ -140,6 +174,68 @@ const Web3Js = () => {
           }}
         >
           Generate Raw Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = TxnBuilderTypes.AccountAddress.fromHex(
+              "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
+            );
+            const sendBalance = 1000;
+
+            const token = new TxnBuilderTypes.TypeTagStruct(
+              TxnBuilderTypes.StructTag.fromString("0x1::aptos_coin::AptosCoin"),
+            );
+
+            const entryFunctionPayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
+              TxnBuilderTypes.EntryFunction.natural(
+                "0x1::coin",
+                "transfer",
+                [token],
+                [BCS.bcsToBytes(receiverAddress), BCS.bcsSerializeUint64(sendBalance)],
+              ),
+            );
+
+            const s = new BCS.Serializer();
+            entryFunctionPayload.serialize(s);
+
+            const rawTxn = await web3.action.generateSignSubmitRawTransaction(s.getBytes());
+
+            console.log(rawTxn);
+          }}
+        >
+          Generate Sign Submit Raw Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = TxnBuilderTypes.AccountAddress.fromHex(
+              "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
+            );
+            const sendBalance = 1000;
+
+            const token = new TxnBuilderTypes.TypeTagStruct(
+              TxnBuilderTypes.StructTag.fromString("0x1::aptos_coin::AptosCoin"),
+            );
+
+            const entryFunctionPayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
+              TxnBuilderTypes.EntryFunction.natural(
+                "0x1::coin",
+                "transfer",
+                [token],
+                [BCS.bcsToBytes(receiverAddress), BCS.bcsSerializeUint64(sendBalance)],
+              ),
+            );
+
+            const s = new BCS.Serializer();
+            entryFunctionPayload.serialize(s);
+
+            const rawTxn = await web3.action.generateSignSubmitWaitForTransaction(s.getBytes());
+
+            console.log(rawTxn);
+          }}
+        >
+          Generate Sign Submit Wait For Transaction
         </button>
 
         <button
@@ -393,7 +489,13 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            const signed = await web3.action.signMessage("random message");
+            const signed = await web3.action.signMessage({
+              address: true,
+              application: true,
+              chainId: true,
+              message: "long heo",
+              nonce: "1",
+            });
             console.log(signed);
           }}
         >
@@ -448,7 +550,7 @@ const Web3Js = () => {
             console.log(web3.action.token);
             const txnHash = await web3.action.token.offerToken(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
               `nft 32182451-9852-4425-9d70-b76534b8672f`,
               1,
@@ -466,7 +568,7 @@ const Web3Js = () => {
             console.log(web3.action.token);
             const txnHash = await web3.action.token.claimToken(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
               `nft 32182451-9852-4425-9d70-b76534b8672f`,
             );
@@ -483,7 +585,7 @@ const Web3Js = () => {
             console.log(web3.action.token);
             const txnHash = await web3.action.token.cancelTokenOffer(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
               `nft 32182451-9852-4425-9d70-b76534b8672f`,
             );
@@ -503,7 +605,7 @@ const Web3Js = () => {
         <button
           onClick={() => {
             web3.action.sdk
-              .getAccount("0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e")
+              .getAccount("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
               .then((data) => parseError(data.status) && console.log(data))
               .catch(console.log)
               .finally(console.log);
@@ -515,7 +617,7 @@ const Web3Js = () => {
         <button
           onClick={() => {
             web3.action.sdk
-              .getAccountTransactions("0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e")
+              .getAccountTransactions("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
               .then((data) => parseError(data.status) && console.log(data))
               .catch(console.log)
               .finally(console.log);
@@ -527,7 +629,7 @@ const Web3Js = () => {
         <button
           onClick={() => {
             web3.action.sdk
-              .getAccountModules("0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e")
+              .getAccountModules("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
               .then((data) => parseError(data.status) && console.log(data))
               .catch(console.log)
               .finally(console.log);
@@ -539,7 +641,7 @@ const Web3Js = () => {
         <button
           onClick={() => {
             web3.action.sdk
-              .getAccountModule("0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e", "test")
+              .getAccountModule("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e", "test")
               .then((data) => parseError(data.status) && console.log(data))
               .catch(console.log)
               .finally(console.log);
@@ -551,7 +653,7 @@ const Web3Js = () => {
         <button
           onClick={() => {
             web3.action.sdk
-              .getAccountResources("0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e")
+              .getAccountResources("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
               .then((data) => parseError(data.status) && console.log(data))
               .catch(console.log)
               .finally(console.log);
@@ -589,7 +691,7 @@ const Web3Js = () => {
         <div>Coin</div>
         <button
           onClick={async () => {
-            const txnHash = await web3.action.coin.initializeCoin("moon_coin::MoonCoin", "Fewcha1", "FWC", "18");
+            const txnHash = await web3.action.fewchaCoin.initializeCoin("moon_coin::MoonCoin", "Fewcha1", "FWC", "18");
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -601,7 +703,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const txnHash = await web3.action.coin.registerCoin("0x1::moon_coin::MoonCoin");
+            const txnHash = await web3.action.fewchaCoin.registerCoin("0x1::moon_coin::MoonCoin");
             if (!parseError(txnHash.status)) {
               return;
             }
@@ -613,9 +715,9 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const txnHash = await web3.action.coin.mintCoin(
+            const txnHash = await web3.action.fewchaCoin.mintCoin(
               "0x1::aptos_coin::AptosCoin",
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               100,
             );
             if (!parseError(txnHash.status)) return;
@@ -627,9 +729,9 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const transfer = await web3.action.coin.transferCoin(
+            const transfer = await web3.action.fewchaCoin.transferCoin(
               "0x1::aptos_coin::AptosCoin",
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               1,
             );
             if (!parseError(transfer.status)) return;
@@ -641,7 +743,7 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const coinData = await web3.action.coin.getCoinData("0x1::aptos_coin::AptosCoin");
+            const coinData = await web3.action.fewchaCoin.getCoinData("0x1::aptos_coin::AptosCoin");
             if (!parseError(coinData.status)) {
               return;
             }
@@ -653,8 +755,8 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const balance = await web3.action.coin.getCoinBalance(
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+            const balance = await web3.action.fewchaCoin.getCoinBalance(
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               "0x1::aptos_coin::AptosCoin",
             );
             if (!parseError(balance.status)) {
@@ -668,8 +770,8 @@ const Web3Js = () => {
         </button>
         <button
           onClick={async () => {
-            const coins = await web3.action.coin.getCoins(
-              "0x20364f4121f608f2a09830bc0ab6980fdccff45c2f5df6c41c17f40e511fe80e",
+            const coins = await web3.action.fewchaCoin.getCoins(
+              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
             );
             if (!parseError(coins.status)) {
               return;

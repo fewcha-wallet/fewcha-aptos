@@ -9,7 +9,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@fewcha/web3": "*",
+    "@fewcha/web3": "^0.1.27",
     "@fewcha/web3-react": "*",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.3.0",
