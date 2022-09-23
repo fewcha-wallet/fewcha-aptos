@@ -131,7 +131,16 @@ const isStringWithValue = (value: any): value is string => {
 };
 
 const isBlob = (value: any): value is Blob => {
-  return typeof value === "object" && typeof value.type === "string" && typeof value.stream === "function" && typeof value.arrayBuffer === "function" && typeof value.constructor === "function" && typeof value.constructor.name === "string" && /^(Blob|File)$/.test(value.constructor.name) && /^(Blob|File)$/.test(value[Symbol.toStringTag]);
+  return (
+    typeof value === "object" &&
+    typeof value.type === "string" &&
+    typeof value.stream === "function" &&
+    typeof value.arrayBuffer === "function" &&
+    typeof value.constructor === "function" &&
+    typeof value.constructor.name === "string" &&
+    /^(Blob|File)$/.test(value.constructor.name) &&
+    /^(Blob|File)$/.test(value[Symbol.toStringTag])
+  );
 };
 
 const isFormData = (value: any): value is FormData => {
@@ -183,12 +192,14 @@ const getQueryString = (params: Record<string, any>): string => {
 const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
   const encoder = config.ENCODE_PATH || encodeURI;
 
-  const path = options.url.replace("{api-version}", config.VERSION).replace(/{(.*?)}/g, (substring: string, group: string) => {
-    if (options.path?.hasOwnProperty(group)) {
-      return encoder(String(options.path[group]));
-    }
-    return substring;
-  });
+  const path = options.url
+    .replace("{api-version}", config.VERSION)
+    .replace(/{(.*?)}/g, (substring: string, group: string) => {
+      if (options.path?.hasOwnProperty(group)) {
+        return encoder(String(options.path[group]));
+      }
+      return substring;
+    });
 
   const url = `${config.BASE}${path}`;
   if (options.query) {
@@ -233,7 +244,11 @@ const resolve = async <T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
   return resolver;
 };
 
-const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptions, formData?: FormData): Promise<Record<string, string>> => {
+const getHeaders = async (
+  config: OpenAPIConfig,
+  options: ApiRequestOptions,
+  formData?: FormData,
+): Promise<Record<string, string>> => {
   const token = await resolve(options, config.TOKEN);
   const username = await resolve(options, config.USERNAME);
   const password = await resolve(options, config.PASSWORD);
@@ -286,7 +301,15 @@ const getRequestBody = (options: ApiRequestOptions): any => {
   return undefined;
 };
 
-const sendRequest = async <T>(config: OpenAPIConfig, options: ApiRequestOptions, url: string, body: any, formData: FormData | undefined, headers: Record<string, string>, onCancel: OnCancel): Promise<AxiosResponse<T>> => {
+const sendRequest = async <T>(
+  config: OpenAPIConfig,
+  options: ApiRequestOptions,
+  url: string,
+  body: any,
+  formData: FormData | undefined,
+  headers: Record<string, string>,
+  onCancel: OnCancel,
+): Promise<AxiosResponse<T>> => {
   const source = axios.CancelToken.source();
 
   const requestConfig: AxiosRequestConfig = {
