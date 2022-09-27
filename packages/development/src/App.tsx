@@ -5,7 +5,7 @@ import Web3 from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
-  const provider = (window as any).fewcha;
+  const provider = (window as any).aptos;
   // const provider = (window as any).martian;
 
   const web3 = new Web3(provider);
@@ -428,12 +428,35 @@ const Web3Js = () => {
             if (!parseError(txnRequest.status)) return;
 
             const txnHash = await web3.action.signAndSubmitTransaction(txnRequest.data);
+
             if (!parseError(txnHash.status)) return;
 
             console.log("txnHash", txnHash);
           }}
         >
           Sign and Submit Transaction
+        </button>
+
+        <button
+          onClick={async () => {
+            const receiverAddress = "0xcd2add1ea1db230de04771337d56f154508eac8f03271c87133818005fbe394c";
+            const sendBalance = 20000;
+
+            const payload = {
+              type: "entry_function_payload",
+              function: "0x1::coin::transfer",
+              type_arguments: ["0x1::aptos_coin::AptosCoin"],
+              arguments: [receiverAddress, sendBalance],
+            };
+
+            const txnHash = await web3.action.signAndSubmitTransaction(payload as any);
+
+            if (!parseError(txnHash.status)) return;
+
+            console.log("txnHash", txnHash);
+          }}
+        >
+          Petra Sign and Submit Transaction
         </button>
 
         <button
@@ -495,17 +518,16 @@ const Web3Js = () => {
         <div>Token</div>
         <button
           onClick={async () => {
-            const id = uuidv4();
-            const txnHash = await web3.action.token.createCollection(
-              `fewcha try ${id}`,
-              `fewcha try ${id} desc`,
-              "https://fewcha.app/svgs/logo.svg",
-            );
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "txnHash");
+            // const id = uuidv4();
+            // const txnHash = await web3.action.token.createCollection(
+            //   `fewcha try ${id}`,
+            //   `fewcha try ${id} desc`,
+            //   "https://fewcha.app/svgs/logo.svg",
+            // );
+            // if (!parseError(txnHash.status)) {
+            //   return;
+            // }
+            // console.log(txnHash.data, "txnHash");
           }}
         >
           Create Collection
