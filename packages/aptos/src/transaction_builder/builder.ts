@@ -1,8 +1,7 @@
 // Copyright (c) Aptos
 // SPDX-License-Identifier: Apache-2.0
 
-import * as SHA3 from "js-sha3";
-import { Buffer } from "buffer/";
+import { sha3_256 as sha3Hash } from "@noble/hashes/sha3";
 import {
   Ed25519PublicKey,
   Ed25519Signature,
@@ -30,7 +29,7 @@ import { ArgumentABI, EntryFunctionABI, ScriptABI, TransactionScriptABI, TypeArg
 import { HexString, MaybeHexString } from "../hex_string";
 import { argToTransactionArgument, TypeTagParser, serializeArg } from "./builder_utils";
 import * as Gen from "../generated/index";
-import { MemoizeExpiring } from "../utils";
+import { DEFAULT_TXN_EXP_SEC_FROM_NOW, DEFAULT_MAX_GAS_AMOUNT, MemoizeExpiring } from "../utils";
 
 export { TypeTagParser } from "./builder_utils";
 
@@ -68,7 +67,7 @@ export class TransactionBuilder<F extends SigningFn> {
 
   /** Generates a Signing Message out of a raw transaction. */
   static getSigningMessage(rawTxn: AnyRawTransaction): SigningMessage {
-    const hash = SHA3.sha3_256.create();
+    const hash = sha3Hash.create();
     if (rawTxn instanceof RawTransaction) {
       hash.update(RAW_TRANSACTION_SALT);
     } else if (rawTxn instanceof MultiAgentRawTransaction) {
@@ -77,7 +76,7 @@ export class TransactionBuilder<F extends SigningFn> {
       throw new Error("Unknown transaction type.");
     }
 
-    const prefix = new Uint8Array(hash.arrayBuffer());
+    const prefix = hash.digest();
 
     const body = bcsToBytes(rawTxn);
 
@@ -85,7 +84,7 @@ export class TransactionBuilder<F extends SigningFn> {
     mergedArray.set(prefix);
     mergedArray.set(body, prefix.length);
 
-    return Buffer.from(mergedArray);
+    return mergedArray;
   }
 }
 
@@ -193,8 +192,8 @@ export class TransactionBuilderABI {
     });
 
     this.builderConfig = {
-      maxGasAmount: BigInt(2000),
-      expSecFromNow: 20,
+      maxGasAmount: BigInt(DEFAULT_MAX_GAS_AMOUNT),
+      expSecFromNow: DEFAULT_TXN_EXP_SEC_FROM_NOW,
       ...builderConfig,
     };
   }
