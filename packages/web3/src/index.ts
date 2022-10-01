@@ -5,6 +5,7 @@ import * as utils from "./utils";
 import Web3Provider from "./provider";
 import { Web3ProviderType, Web3SDK, Web3Token } from "./types";
 import { MartianMask } from "./martina.mask";
+import { PetraMask } from "./petra.mask";
 
 class Web3 {
   public action: Web3ProviderType;
@@ -14,7 +15,13 @@ class Web3 {
       if ((provider as any).isFewcha) {
         this.action = new Web3Provider(provider).provider;
       } else {
-        this.action = new MartianMask(provider) as any;
+        if ((provider as any)._isConnected !== undefined) {
+          this.action = new MartianMask(provider) as any;
+          console.log("7s62::Martian:", this.action);
+        } else {
+          this.action = new PetraMask(provider) as any;
+          console.log("7s62::Petra:", this.action);
+        }
       }
     } else {
       this.action = new Web3Provider((window as any).fewcha).provider;
