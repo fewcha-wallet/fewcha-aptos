@@ -1,71 +1,65 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { BCS, HexString, MaybeHexString, OptionalTransactionArgs, TokenTypes, Types as Gen } from "aptos";
+import { BCS, HexString, MaybeHexString, TokenTypes, OptionalTransactionArgs, Types as Gen } from "aptos";
 
-export interface Web3ProviderType {
+export interface IWeb3Provider {
   connect(): Promise<Response<PublicAccount>>;
   disconnect(): Promise<Response<boolean>>;
   isConnected(): Promise<Response<boolean>>;
-
-  generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>; // tx
-  generateRawTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs): Promise<Response<Uint8Array>>; // tx
-  generateSignSubmitTransaction(payload: Gen.EntryFunctionPayload, extraArgs?: OptionalTransactionArgs): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
-  generateSignSubmitRawTransaction(payload: Uint8Array, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
-  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64; checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Gen.Transaction>>; // tx detail
-
-  signMessage(message: SignMessagePayload): Promise<Response<SignMessageResponse>>;
-
-  simulateTransaction(rawTransaction: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
-
-  signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-  submitTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-
-  generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-  generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-
-  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  submitBCSSimulation(bcsBody: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
-
+  
   account(): Promise<Response<PublicAccount>>;
   getNetwork(): Promise<Response<string>>;
   getNetworkURL(): Promise<Response<string>>;
   getBalance(): Promise<Response<string>>;
 
-  sdk: Web3SDK;
-  token: Web3Token; // NFT
-  fewchaCoin: FewchaWeb3Coin; // Coin
+  sdk: IWeb3SuiSDK | IWeb3AptosSDK;
+  token: IWeb3AptosToken | IWeb3SuiToken;
+  coin: IWeb3Coin;
 }
 
-export type Web3SDK = {
+export type IWeb3SuiSDK = {}
+
+export type IWeb3AptosSDK = {
+  generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>; // tx
+  generateRawTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs): Promise<Response<Uint8Array>>; // tx
+  generateSignSubmitTransaction(payload: Gen.EntryFunctionPayload, extraArgs?: OptionalTransactionArgs): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
+  generateSignSubmitRawTransaction(payload: Uint8Array, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
+  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64; checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Gen.Transaction>>; // tx detail
+  signMessage(message: SignMessagePayload): Promise<Response<SignMessageResponse>>;
+  simulateTransaction(rawTransaction: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
+  signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+  submitTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
+  signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
+  generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+  generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
+  submitBCSSimulation(bcsBody: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
   getAccount(accountAddress: MaybeHexString): Promise<Response<Gen.AccountData>>;
   getAccountTransactions(accountAddress: MaybeHexString, query?: PaginationArgs): Promise<Response<Gen.Transaction[]>>;
   getAccountModules(accountAddress: MaybeHexString, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveModuleBytecode[]>>;
   getAccountModule(accountAddress: MaybeHexString, moduleName: string, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveModuleBytecode>>;
   getAccountResources(accountAddress: MaybeHexString, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveResource[]>>;
   getAccountResource(accountAddress: MaybeHexString, resourceType: Gen.MoveStructTag, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveResource>>;
-
   getEventsByEventKey(eventKey: string): Promise<Response<Gen.Event[]>>;
   getEventsByCreationNumber(address: MaybeHexString, creationNumber: BCS.AnyNumber | string, query?: PaginationArgs): Promise<Response<Gen.Event[]>>;
   getEventsByEventHandle(address: MaybeHexString, eventHandleStruct: Gen.MoveStructTag, fieldName: string, query?: PaginationArgs): Promise<Response<Gen.Event[]>>;
-
   getTransactions(query?: PaginationArgs): Promise<Response<Gen.Transaction[]>>;
   getTransactionByHash(txnHash: string): Promise<Response<Gen.Transaction>>;
   getTransactionByVersion(txnVersion: BCS.AnyNumber): Promise<Response<Gen.Transaction>>;
   transactionPending(txnHash: string): Promise<Response<boolean>>;
   waitForTransactionWithResult(txnHash: string, extraArgs?: { timeoutSecs?: number; checkSuccess?: boolean }): Promise<Response<Gen.Transaction>>;
   waitForTransaction(txnHash: string, extraArgs?: { timeoutSecs?: number; checkSuccess?: boolean }): Promise<Response<void>>;
-
   getLedgerInfo(): Promise<Response<Gen.IndexResponse>>;
   getChainId(): Promise<Response<number>>;
   getTableItem(handle: string, data: Gen.TableItemRequest, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<any>>;
-
   lookupOriginalAddress(addressOrAuthKey: MaybeHexString): Promise<Response<HexString>>;
   getBlockByHeight(blockHeight: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
   getBlockByVersion(version: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
 };
 
-export type Web3Token = {
+export type IWeb3SuiToken = {}
+
+export type IWeb3AptosToken = {
   createCollection(name: string, description: string, uri: string, maxAmount: BCS.AnyNumber, extraArgs?: OptionalTransactionArgs): Promise<Response<string>>;
   createToken(
     collectionName: string,
@@ -92,7 +86,7 @@ export type Web3Token = {
   getTokenForAccount(account: MaybeHexString, tokenId: TokenTypes.TokenId): Promise<Response<TokenTypes.Token>>;
 };
 
-export type FewchaWeb3Coin = {
+export type IWeb3Coin = {
   initializeCoin(resource_type: string, name: string, symbol: string, decimals: string): Promise<Response<string>>;
   registerCoin(coin_type_resource: string): Promise<Response<string>>;
   mintCoin(coin_type_resource: string, dst_address: string, amount: number): Promise<Response<string>>;

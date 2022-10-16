@@ -1,12 +1,12 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { Web3ProviderType } from "./types";
+import { IWeb3Provider } from "./types";
 
 class Web3Provider {
-  public provider: Web3ProviderType;
+  public provider: IWeb3Provider;
 
-  constructor(provider: Web3ProviderType) {
-    this.provider = provider as Web3ProviderType;
+  constructor(provider: IWeb3Provider) {
+    this.provider = provider as IWeb3Provider;
     return this;
   }
 }

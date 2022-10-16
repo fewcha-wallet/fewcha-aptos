@@ -3,14 +3,18 @@
 import * as Aptos from "aptos";
 import * as utils from "./utils";
 import Web3Provider from "./provider";
-import { Web3ProviderType, Web3SDK, Web3Token } from "./types";
+import { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, 
+  IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, 
+  Response, PublicAccount,
+  SignMessagePayload, SignMessageResponse, PaginationArgs
+} from "./types";
 import { MartianMask } from "./martina.mask";
 import { PetraMask } from "./petra.mask";
 
 class Web3 {
-  public action: Web3ProviderType;
+  public action: IWeb3Provider;
 
-  constructor(provider?: Web3ProviderType) {
+  constructor(provider?: IWeb3Provider) {
     if (provider) {
       if ((provider as any).isFewcha) {
         this.action = new Web3Provider(provider).provider;
@@ -47,6 +51,10 @@ class Web3 {
 export { Aptos, utils };
 
 export { Web3Provider };
-export type { Web3ProviderType, Web3Token, Web3SDK };
+export type { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, 
+  IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, 
+  Response, PublicAccount,
+  SignMessagePayload, SignMessageResponse, PaginationArgs
+};
 
 export default Web3;
