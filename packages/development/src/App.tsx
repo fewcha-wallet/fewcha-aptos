@@ -1,7 +1,7 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
 import { BCS, TxnBuilderTypes, Types } from "aptos";
-import Web3 from "@fewcha/web3";
+import Web3, { IWeb3AptosToken } from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
@@ -11,16 +11,14 @@ const Web3Js = () => {
   const web3 = new Web3(provider);
   return (
     <div>
-      {/* Common */}
-      <div>
-        <div>Common</div>
+      <h1>Common</h1>
+      <div className="grid">
         <button
           onClick={async () => {
             web3.action
               .connect()
-              .then((data) => parseError(data.status) && console.log("7s62", data))
-              .catch(console.log)
-              .finally(console.log);
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
           }}
         >
           Connnect
@@ -30,9 +28,8 @@ const Web3Js = () => {
           onClick={async () => {
             web3.action
               .isConnected()
-              .then((data) => parseError(data.status) && console.log("7s62", data))
-              .catch((err) => console.log("7s62", err))
-              .finally(console.log);
+              .then((data) => parseError(data.status) && alert(data))
+              .catch((err) => alert(err));
           }}
         >
           IsConnnect
@@ -42,9 +39,8 @@ const Web3Js = () => {
           onClick={async () => {
             web3.action
               .disconnect()
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
           }}
         >
           Disconnect
@@ -54,9 +50,8 @@ const Web3Js = () => {
           onClick={async () => {
             web3.action
               .account()
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
           }}
         >
           Account
@@ -66,9 +61,8 @@ const Web3Js = () => {
           onClick={async () => {
             web3.action
               .getNetwork()
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
           }}
         >
           Get Network
@@ -76,11 +70,10 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            // web3.action
-            //   .getNetworkURL()
-            //   .then((data) => parseError(data.status) && console.log(data))
-            //   .catch(console.log)
-            //   .finally(console.log);
+            web3.action
+              .getNetworkURL()
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
           }}
         >
           Get Network URL
@@ -89,20 +82,29 @@ const Web3Js = () => {
         <button
           onClick={async () => {
             web3.action
+              .getNetworkType()
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Network Type
+        </button>
+
+        <button
+          onClick={async () => {
+            web3.action
               .getBalance()
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
           }}
         >
           Get Balance
         </button>
       </div>
 
-      {/* Transaction */}
-      <div>
-        <div>Transaction</div>
-
+      <h1>SDK</h1>
+      <h2>Aptos</h2>
+      <div className="grid">
         <button
           onClick={async () => {
             const receiverAddress = "0xcd2add1ea1db230de04771337d56f154508eac8f03271c87133818005fbe394c";
@@ -115,10 +117,10 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnRequest = await web3.action.generateTransaction(payload);
+            const txnRequest = await web3.action.sdk.aptos.generateTransaction(payload);
             if (!parseError(txnRequest.status)) return;
 
-            console.log("txnRequest", txnRequest);
+            alert(txnRequest);
           }}
         >
           Generate Transaction
@@ -133,9 +135,9 @@ const Web3Js = () => {
               type_arguments: ["0x1::aptos_coin::AptosCoin"],
               arguments: [receiverAddress, sendBalance],
             };
-            const res = await web3.action.generateSignSubmitTransaction(payload);
+            const res = await web3.action.sdk.aptos.generateSignSubmitTransaction(payload);
             if (!parseError(res.status)) return;
-            console.log("res", res);
+            alert(res);
           }}
         >
           Generate Sign Submit Transaction
@@ -165,9 +167,9 @@ const Web3Js = () => {
             const s = new BCS.Serializer();
             entryFunctionPayload.serialize(s);
 
-            const rawTxn = await web3.action.generateRawTransaction(s.getBytes());
+            const rawTxn = await web3.action.sdk.aptos.generateRawTransaction(s.getBytes());
 
-            console.log(rawTxn);
+            alert(rawTxn);
           }}
         >
           Generate Raw Transaction
@@ -192,8 +194,8 @@ const Web3Js = () => {
             // );
             // const s = new BCS.Serializer();
             // entryFunctionPayload.serialize(s);
-            // const rawTxn = await web3.action.generateSignSubmitRawTransaction(s.getBytes());
-            // console.log(rawTxn);
+            // const rawTxn = await web3.action.sdk.aptos.generateSignSubmitRawTransaction(s.getBytes());
+            // alert(rawTxn);
           }}
         >
           Generate Sign Submit Raw Transaction
@@ -218,8 +220,8 @@ const Web3Js = () => {
             // );
             // const s = new BCS.Serializer();
             // entryFunctionPayload.serialize(s);
-            // const rawTxn = await web3.action.generateSignSubmitWaitForTransaction(s.getBytes());
-            // console.log(rawTxn);
+            // const rawTxn = await web3.action.sdk.aptos.generateSignSubmitWaitForTransaction(s.getBytes());
+            // alert(rawTxn);
           }}
         >
           Generate Sign Submit Wait For Transaction
@@ -247,12 +249,12 @@ const Web3Js = () => {
             const s = new BCS.Serializer();
             entryFunctionPayload.serialize(s);
 
-            const rawTxn = await web3.action.generateRawTransaction(s.getBytes());
+            const rawTxn = await web3.action.sdk.aptos.generateRawTransaction(s.getBytes());
             if (!parseError(rawTxn.status)) return;
 
-            const bcsTxn = await web3.action.generateBCSTransaction(rawTxn.data);
+            const bcsTxn = await web3.action.sdk.aptos.generateBCSTransaction(rawTxn.data);
 
-            console.log(bcsTxn);
+            alert(bcsTxn);
           }}
         >
           Generate BCS Transaction
@@ -270,13 +272,13 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnRequest = await web3.action.generateTransaction(payload);
+            const txnRequest = await web3.action.sdk.aptos.generateTransaction(payload);
             if (!parseError(txnRequest.status)) return;
 
-            const siTx = await web3.action.simulateTransaction(txnRequest.data);
+            const siTx = await web3.action.sdk.aptos.simulateTransaction(txnRequest.data);
             if (!parseError(siTx.status)) return;
 
-            console.log("siTx", siTx);
+            alert(siTx);
           }}
         >
           Simulate Transaction
@@ -294,13 +296,13 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnRequest = await web3.action.generateTransaction(payload);
-            const signedTx = await web3.action.signTransaction(txnRequest.data);
+            const txnRequest = await web3.action.sdk.aptos.generateTransaction(payload);
+            const signedTx = await web3.action.sdk.aptos.signTransaction(txnRequest.data);
             if (!parseError(signedTx.status)) {
               return;
             }
 
-            console.log("signedTx", signedTx);
+            alert(signedTx);
           }}
         >
           Sign Transaction
@@ -328,22 +330,20 @@ const Web3Js = () => {
             const s = new BCS.Serializer();
             entryFunctionPayload.serialize(s);
 
-            const rawTxn = await web3.action.generateRawTransaction(s.getBytes());
+            const rawTxn = await web3.action.sdk.aptos.generateRawTransaction(s.getBytes());
             if (!parseError(rawTxn.status)) return;
 
-            const bcsTxn = await web3.action.generateBCSTransaction(rawTxn.data);
+            const bcsTxn = await web3.action.sdk.aptos.generateBCSTransaction(rawTxn.data);
             if (!parseError(bcsTxn.status)) return;
 
-            const signedTx = await web3.action.signTransaction(bcsTxn.data);
+            const signedTx = await web3.action.sdk.aptos.signTransaction(bcsTxn.data);
             if (!parseError(signedTx.status)) return;
 
-            console.log("signedTx", signedTx);
+            alert(signedTx);
           }}
         >
           Sign BCS Transaction
         </button>
-
-        <br />
 
         <button
           onClick={async () => {
@@ -357,16 +357,16 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnRequest = await web3.action.generateTransaction(payload);
+            const txnRequest = await web3.action.sdk.aptos.generateTransaction(payload);
             if (!parseError(txnRequest.status)) return;
 
-            const signedTx = await web3.action.signTransaction(txnRequest.data);
+            const signedTx = await web3.action.sdk.aptos.signTransaction(txnRequest.data);
             if (!parseError(signedTx.status)) return;
 
-            const txnHash = await web3.action.submitTransaction(signedTx.data);
+            const txnHash = await web3.action.sdk.aptos.submitTransaction(signedTx.data);
             if (!parseError(txnHash.status)) return;
 
-            console.log("tx", txnHash);
+            alert(txnHash);
           }}
         >
           Submit Transaction
@@ -394,19 +394,19 @@ const Web3Js = () => {
             const s = new BCS.Serializer();
             entryFunctionPayload.serialize(s);
 
-            const rawTxn = await web3.action.generateRawTransaction(s.getBytes());
+            const rawTxn = await web3.action.sdk.aptos.generateRawTransaction(s.getBytes());
             if (!parseError(rawTxn.status)) return;
 
-            const bcsTxn = await web3.action.generateBCSTransaction(rawTxn.data);
+            const bcsTxn = await web3.action.sdk.aptos.generateBCSTransaction(rawTxn.data);
             if (!parseError(bcsTxn.status)) return;
 
-            const signedTx = await web3.action.signTransaction(bcsTxn.data);
+            const signedTx = await web3.action.sdk.aptos.signTransaction(bcsTxn.data);
             if (!parseError(signedTx.status)) return;
 
-            const txnHash = await web3.action.submitTransaction(signedTx.data);
+            const txnHash = await web3.action.sdk.aptos.submitTransaction(signedTx.data);
             if (!parseError(txnHash.status)) return;
 
-            console.log("tx", txnHash);
+            alert(txnHash);
           }}
         >
           Submit BCS Transaction
@@ -424,14 +424,14 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnRequest = await web3.action.generateTransaction(payload);
+            const txnRequest = await web3.action.sdk.aptos.generateTransaction(payload);
             if (!parseError(txnRequest.status)) return;
 
-            const txnHash = await web3.action.signAndSubmitTransaction(txnRequest.data);
+            const txnHash = await web3.action.sdk.aptos.signAndSubmitTransaction(txnRequest.data);
 
             if (!parseError(txnHash.status)) return;
 
-            console.log("txnHash", txnHash);
+            alert(txnHash);
           }}
         >
           Sign and Submit Transaction
@@ -449,11 +449,11 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnHash = await web3.action.signAndSubmitTransaction(payload as any);
+            const txnHash = await web3.action.sdk.aptos.signAndSubmitTransaction(payload as any);
 
             if (!parseError(txnHash.status)) return;
 
-            console.log("txnHash", txnHash);
+            alert(txnHash);
           }}
         >
           Petra Sign and Submit Transaction
@@ -471,27 +471,19 @@ const Web3Js = () => {
               arguments: [receiverAddress, sendBalance],
             };
 
-            const txnRequest = await web3.action.generateTransaction(payload);
+            const txnRequest = await web3.action.sdk.aptos.generateTransaction(payload);
             if (!parseError(txnRequest.status)) return;
 
-            const estTx = await web3.action.simulateTransaction(txnRequest.data);
+            const estTx = await web3.action.sdk.aptos.simulateTransaction(txnRequest.data);
             if (!parseError(estTx.status)) return;
 
-            const estTx1 = estTx.data[0];
-
-            if (estTx1.success) {
-              console.log(estTx1.gas_used, "gas_used");
-            } else {
-              console.log(estTx1.vm_status, "vm_status");
-            }
-
-            const tx = await web3.action.signTransaction(txnRequest.data);
+            const tx = await web3.action.sdk.aptos.signTransaction(txnRequest.data);
             if (!parseError(tx.status)) return;
 
-            const txnHash = await web3.action.submitTransaction(tx.data);
+            const txnHash = await web3.action.sdk.aptos.submitTransaction(tx.data);
             if (!parseError(txnHash.status)) return;
 
-            console.log("tx", txnHash);
+            alert(txnHash);
           }}
         >
           Full Flow Transaction
@@ -499,35 +491,112 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            const signed = await web3.action.signMessage({
+            const signed = await web3.action.sdk.aptos.signMessage({
               address: true,
               application: true,
               chainId: true,
               message: "long heo",
               nonce: "1",
             });
-            console.log(signed);
+            alert(signed);
           }}
         >
           Sign Message
         </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getAccount("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Account
+        </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getAccountTransactions("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Account Transactions
+        </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getAccountModules("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Account Modules
+        </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getAccountModule("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e", "test")
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Account Module: test
+        </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getAccountResources("0x89c8b1fa5c4eb4310c732f1486cb83505a8a533a6fb367eb3f727d5bdecdaaae")
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Account Resources
+        </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getTransactions()
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Transsactions
+        </button>
+
+        <button
+          onClick={() => {
+            web3.action.sdk.aptos
+              .getChainId()
+              .then((data) => parseError(data.status) && alert(data))
+              .catch(alert);
+          }}
+        >
+          Get Chain Id
+        </button>
       </div>
 
-      {/* Token */}
-      <div>
-        <div>Token</div>
+      <h1>Token</h1>
+      <div className="grid">
         <button
           onClick={async () => {
-            // const id = uuidv4();
-            // const txnHash = await web3.action.token.createCollection(
-            //   `fewcha try ${id}`,
-            //   `fewcha try ${id} desc`,
-            //   "https://fewcha.app/svgs/logo.svg",
-            // );
-            // if (!parseError(txnHash.status)) {
-            //   return;
-            // }
-            // console.log(txnHash.data, "txnHash");
+            const id = uuidv4();
+            const txnHash = await (web3.action.token as IWeb3AptosToken).createCollection(
+              `fewcha try ${id}`,
+              `fewcha try ${id} desc`,
+              "https://fewcha.app/svgs/logo.svg",
+              10000
+            );
+            if (!parseError(txnHash.status)) {
+              return;
+            }
+            alert(txnHash.data);
           }}
         >
           Create Collection
@@ -536,7 +605,7 @@ const Web3Js = () => {
         <button
           onClick={async () => {
             const id = uuidv4();
-            const txnHash = await web3.action.token.createToken(
+            const txnHash = await (web3.action.token as IWeb3AptosToken).createToken(
               "fewcha try 5818bdb9-2809-4add-ae2a-a24182cd4528",
               `nft ${id}`,
               `fewcha try ${id} desc`,
@@ -548,7 +617,7 @@ const Web3Js = () => {
               return;
             }
 
-            console.log(txnHash.data, "txnHash");
+            alert(txnHash.data);
           }}
         >
           Create Token
@@ -556,8 +625,7 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            console.log(web3.action.token);
-            const txnHash = await web3.action.token.offerToken(
+            const txnHash = await (web3.action.token as IWeb3AptosToken).offerToken(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
               "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
@@ -566,7 +634,7 @@ const Web3Js = () => {
             );
             if (!parseError(txnHash.status)) return;
 
-            console.log(txnHash.data, "txnHash");
+            alert(txnHash.data);
           }}
         >
           Offer Token
@@ -574,8 +642,7 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            console.log(web3.action.token);
-            const txnHash = await web3.action.token.claimToken(
+            const txnHash = await (web3.action.token as IWeb3AptosToken).claimToken(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
               "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
@@ -583,7 +650,7 @@ const Web3Js = () => {
             );
             if (!parseError(txnHash.status)) return;
 
-            console.log(txnHash.data, "txnHash");
+            alert(txnHash.data);
           }}
         >
           Claim Token
@@ -591,8 +658,7 @@ const Web3Js = () => {
 
         <button
           onClick={async () => {
-            console.log(web3.action.token);
-            const txnHash = await web3.action.token.cancelTokenOffer(
+            const txnHash = await (web3.action.token as IWeb3AptosToken).cancelTokenOffer(
               "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
               "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
               `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
@@ -601,196 +667,10 @@ const Web3Js = () => {
 
             if (!parseError(txnHash.status)) return;
 
-            console.log(txnHash.data, "txnHash");
+            alert(txnHash.data);
           }}
         >
           Cancel Token Offer
-        </button>
-      </div>
-
-      {/* SDK Get functions */}
-      <div>
-        <div>SDK Get functions</div>
-        <button
-          onClick={() => {
-            web3.action.sdk
-              .getAccount("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Account
-        </button>
-
-        <button
-          onClick={() => {
-            web3.action.sdk
-              .getAccountTransactions("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Account Transactions
-        </button>
-
-        <button
-          onClick={() => {
-            web3.action.sdk
-              .getAccountModules("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Account Modules
-        </button>
-
-        <button
-          onClick={() => {
-            web3.action.sdk
-              .getAccountModule("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e", "test")
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Account Module: test
-        </button>
-
-        <button
-          onClick={() => {
-            console.log("7s62", web3.action.sdk);
-            web3.action.sdk
-              .getAccountResources("0x89c8b1fa5c4eb4310c732f1486cb83505a8a533a6fb367eb3f727d5bdecdaaae")
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Account Resources
-        </button>
-
-        <button
-          onClick={() => {
-            web3.action.sdk
-              .getTransactions()
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Transsactions
-        </button>
-
-        <button
-          onClick={() => {
-            web3.action.sdk
-              .getChainId()
-              .then((data) => parseError(data.status) && console.log(data))
-              .catch(console.log)
-              .finally(console.log);
-          }}
-        >
-          Get Chain Id
-        </button>
-      </div>
-      {/* Coin */}
-      <div>
-        <div>Coin</div>
-        <button
-          onClick={async () => {
-            const txnHash = await web3.action.fewchaCoin.initializeCoin("moon_coin::MoonCoin", "Fewcha1", "FWC", "18");
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "initializeCoin");
-          }}
-        >
-          Initialize coin
-        </button>
-        <button
-          onClick={async () => {
-            const txnHash = await web3.action.fewchaCoin.registerCoin("0x1::moon_coin::MoonCoin");
-            if (!parseError(txnHash.status)) {
-              return;
-            }
-
-            console.log(txnHash.data, "initializeCoin");
-          }}
-        >
-          Register coin
-        </button>
-        <button
-          onClick={async () => {
-            const txnHash = await web3.action.fewchaCoin.mintCoin(
-              "0x1::aptos_coin::AptosCoin",
-              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
-              100,
-            );
-            if (!parseError(txnHash.status)) return;
-
-            console.log(txnHash.data, "mintCoin");
-          }}
-        >
-          Mint coin
-        </button>
-        <button
-          onClick={async () => {
-            const transfer = await web3.action.fewchaCoin.transferCoin(
-              "0x1::aptos_coin::AptosCoin",
-              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
-              1,
-            );
-            if (!parseError(transfer.status)) return;
-
-            console.log(transfer.data, "transfer");
-          }}
-        >
-          Transfer coin
-        </button>
-        <button
-          onClick={async () => {
-            const coinData = await web3.action.fewchaCoin.getCoinData("0x1::aptos_coin::AptosCoin");
-            if (!parseError(coinData.status)) {
-              return;
-            }
-
-            console.log(coinData.data, "coinData");
-          }}
-        >
-          Get coin data
-        </button>
-        <button
-          onClick={async () => {
-            const balance = await web3.action.fewchaCoin.getCoinBalance(
-              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
-              "0x1::aptos_coin::AptosCoin",
-            );
-            if (!parseError(balance.status)) {
-              return;
-            }
-
-            console.log(balance.data, "balance");
-          }}
-        >
-          Get coin balance
-        </button>
-        <button
-          onClick={async () => {
-            const coins = await web3.action.fewchaCoin.getCoins(
-              "0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e",
-            );
-            if (!parseError(coins.status)) {
-              return;
-            }
-
-            console.log(coins.data, "coins");
-          }}
-        >
-          Get coins
         </button>
       </div>
     </div>

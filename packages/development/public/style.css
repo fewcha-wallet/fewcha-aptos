@@ -1,0 +1,10 @@
+html {
+    font-size: 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    column-gap: 10px;
+    row-gap: 5px;
+}
