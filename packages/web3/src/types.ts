@@ -14,10 +14,8 @@ export interface IWeb3Provider {
   getNetworkType(): Promise<Response<string>>;
   getBalance(): Promise<Response<string>>;
 
-  sdk: {
-    aptos: IWeb3AptosSDK,
-    sui: IWeb3SuiSDK,
-  };
+  aptos: IWeb3AptosSDK,
+  sui: IWeb3SuiSDK,
   token: IWeb3AptosToken | IWeb3SuiToken;
   coin: IWeb3Coin;
 }
