@@ -1,6 +1,7 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
 import { BCS, HexString, MaybeHexString, TokenTypes, OptionalTransactionArgs, Types as Gen } from "aptos";
+import { Base64DataBuffer, ExecuteTransactionRequestType, GatewayTxSeqNumber, GetObjectDataResponse, GetTxnDigestsResponse, MergeCoinTransaction, MoveCallTransaction, ObjectId, ObjectOwner, PayTransaction, PublishTransaction, SignaturePubkeyPair, SignatureScheme, SignerWithProvider, SplitCoinTransaction, SubscriptionId, SuiAddress, SuiEventEnvelope, SuiEventFilter, SuiEvents, SuiExecuteTransactionResponse, SuiMoveFunctionArgTypes, SuiMoveNormalizedFunction, SuiMoveNormalizedModule, SuiMoveNormalizedModules, SuiMoveNormalizedStruct, SuiObjectInfo, SuiObjectRef, SuiTransactionResponse, TransactionDigest, TransactionEffects, TransferObjectTransaction, TransferSuiTransaction } from "@mysten/sui.js";
 
 export interface IWeb3Provider {
   connect(): Promise<Response<PublicAccount>>;
@@ -10,14 +11,74 @@ export interface IWeb3Provider {
   account(): Promise<Response<PublicAccount>>;
   getNetwork(): Promise<Response<string>>;
   getNetworkURL(): Promise<Response<string>>;
+  getNetworkType(): Promise<Response<string>>;
   getBalance(): Promise<Response<string>>;
 
-  sdk: IWeb3SuiSDK | IWeb3AptosSDK;
+  sdk: {
+    aptos: IWeb3AptosSDK,
+    sui: IWeb3SuiSDK,
+  };
   token: IWeb3AptosToken | IWeb3SuiToken;
   coin: IWeb3Coin;
 }
 
-export type IWeb3SuiSDK = {}
+export type IWeb3SuiSDK = {
+  getMoveFunctionArgTypes(objectId: string, moduleName: string, functionName: string): Promise<Response<SuiMoveFunctionArgTypes>>;
+  getNormalizedMoveModulesByPackage(objectId: string): Promise<Response<SuiMoveNormalizedModules>>;
+  getNormalizedMoveModule(objectId: string, moduleName: string): Promise<Response<SuiMoveNormalizedModule>>;
+  getNormalizedMoveFunction(objectId: string, moduleName: string, functionName: string): Promise<Response<SuiMoveNormalizedFunction>>;
+  getNormalizedMoveStruct(objectId: string, moduleName: string, structName: string): Promise<Response<SuiMoveNormalizedStruct>>;
+  getObjectsOwnedByAddress(address: string): Promise<Response<SuiObjectInfo[]>>;
+  getGasObjectsOwnedByAddress(address: string): Promise<Response<SuiObjectInfo[]>>;
+  getObjectsOwnedByObject(objectId: string): Promise<Response<SuiObjectInfo[]>>;
+  getObject(objectId: string): Promise<Response<GetObjectDataResponse>>;
+  getObjectRef(objectId: string): Promise<Response<SuiObjectRef | undefined>>;
+  getObjectBatch(objectIds: string[]): Promise<Response<GetObjectDataResponse[]>>;
+  getTransactionsForObject(objectID: string): Promise<Response<GetTxnDigestsResponse>>;
+  getTransactionsForAddress(addressID: string): Promise<Response<GetTxnDigestsResponse>>;
+  getTransactionWithEffects(digest: TransactionDigest): Promise<Response<SuiTransactionResponse>>;
+  getTransactionWithEffectsBatch(digests: TransactionDigest[]): Promise<Response<SuiTransactionResponse[]>>;
+  executeTransaction(txnBytes: string, signatureScheme: SignatureScheme, signature: string, pubkey: string): Promise<Response<SuiTransactionResponse>>;
+  executeTransactionWithRequestType(txnBytes: string, signatureScheme: SignatureScheme, signature: string, pubkey: string, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  getTotalTransactionNumber(): Promise<Response<number>>;
+  getTransactionDigestsInRange(start: GatewayTxSeqNumber, end: GatewayTxSeqNumber): Promise<Response<GetTxnDigestsResponse>>;
+  getRecentTransactions(count: number): Promise<Response<GetTxnDigestsResponse>>;
+  syncAccountState(address: string): Promise<Response<any>>;
+  getEventsByTransaction(digest: TransactionDigest, count?: number): Promise<Response<SuiEvents>>;
+  getEventsByModule(package_: string, module: string, count?: number, startTime?: number, endTime?: number): Promise<Response<SuiEvents>>;
+  getEventsByMoveEventStructName(moveEventStructName: string, count?: number, startTime?: number, endTime?: number): Promise<Response<SuiEvents>>;
+  getEventsBySender(sender: SuiAddress, count?: number, startTime?: number, endTime?: number): Promise<Response<SuiEvents>>;
+  getEventsByRecipient(recipient: ObjectOwner, count?: number, startTime?: number, endTime?: number): Promise<Response<SuiEvents>>;
+  getEventsByObject(object: ObjectId, count?: number, startTime?: number, endTime?: number): Promise<Response<SuiEvents>>;
+  getEventsByTimeRange(count?: number, startTime?: number, endTime?: number): Promise<Response<SuiEvents>>;
+  subscribeEvent(filter: SuiEventFilter, onMessage: (event: SuiEventEnvelope) => void): Promise<Response<SubscriptionId>>;
+  unsubscribeEvent(id: SubscriptionId): Promise<Response<boolean>>;
+  dryRunTransaction(txnBytes: string, signatureScheme: SignatureScheme, signature: string, pubkey: string): Promise<Response<TransactionEffects>>;
+
+  // Signer
+  signAndDryRunTransaction(txBytes: Base64DataBuffer): Promise<Response<TransactionEffects>>;
+  transferObjectDryRun(transaction: TransferObjectTransaction): Promise<Response<TransactionEffects>>;
+  executeMoveCallDryRun(transaction: MoveCallTransaction): Promise<Response<TransactionEffects>>;
+  transferSuiDryRun(transaction: TransferSuiTransaction): Promise<Response<TransactionEffects>>;
+  publishDryRun(transaction: PublishTransaction): Promise<Response<TransactionEffects>>;
+  signData(data: Base64DataBuffer): Promise<Response<SignaturePubkeyPair>>;
+  signAndExecuteTransaction(txBytes: Base64DataBuffer): Promise<Response<SuiTransactionResponse>>;
+  signAndExecuteTransactionWithRequestType(txBytes: Base64DataBuffer, requestType: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  transferObject(transaction: TransferObjectTransaction): Promise<Response<SuiTransactionResponse>>;
+  transferSui(transaction: TransferSuiTransaction): Promise<Response<SuiTransactionResponse>>;
+  pay(transaction: PayTransaction): Promise<Response<SuiTransactionResponse>>;
+  mergeCoin(transaction: MergeCoinTransaction): Promise<Response<SuiTransactionResponse>>;
+  splitCoin(transaction: SplitCoinTransaction): Promise<Response<SuiTransactionResponse>>;
+  executeMoveCall(transaction: MoveCallTransaction): Promise<Response<SuiTransactionResponse>>;
+  publish(transaction: PublishTransaction): Promise<Response<SuiTransactionResponse>>;
+  transferObjectWithRequestType(transaction: TransferObjectTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  transferSuiWithRequestType(transaction: TransferSuiTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  payWithRequestType(transaction: PayTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  mergeCoinWithRequestType(transaction: MergeCoinTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  splitCoinWithRequestType(transaction: SplitCoinTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  executeMoveCallWithRequestType(transaction: MoveCallTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+  publishWithRequestType(transaction: PublishTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
+}
 
 export type IWeb3AptosSDK = {
   generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>; // tx
@@ -87,14 +148,18 @@ export type IWeb3AptosToken = {
 };
 
 export type IWeb3Coin = {
-  initializeCoin(resource_type: string, name: string, symbol: string, decimals: string): Promise<Response<string>>;
-  registerCoin(coin_type_resource: string): Promise<Response<string>>;
-  mintCoin(coin_type_resource: string, dst_address: string, amount: number): Promise<Response<string>>;
-  transferCoin(coin_type_resource: string, to_address: string, amount: number): Promise<Response<string>>;
-
-  getCoinData(coin_type_resource: string): Promise<Response<CoinData>>;
-  getCoinBalance(account_address: string, coin_type_resource: string): Promise<Response<string>>;
-  getCoins(account_address: string): Promise<Response<string[]>>;
+  faucet(address: string, nodeUrl: string, faucetUrl: string): Promise<void>;
+  getCoins(owner: string): Promise<string[]>;
+  getCoinInfo(coinResource: string): Promise<CoinData>;
+  getBalance(owner: string, coinResource: string, coinManagedType: string): Promise<string>;
+  buildTransferCoinPayload(
+    receiver: string,
+    amount: string,
+    coinTypeResource: string,
+    sender: string | undefined,
+  ): Promise<any>;
+  getPublishedCoinPackages(owner: string): Promise<string[]>;
+  buildMintCoinPayload(receiver: string, amount: string, coinTypeResource: string): Promise<any>;
 };
 
 export interface PaginationArgs {
