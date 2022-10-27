@@ -3,11 +3,7 @@
 import * as Aptos from "aptos";
 import * as utils from "./utils";
 import Web3Provider from "./provider";
-import { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, 
-  IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, 
-  Response, PublicAccount,
-  SignMessagePayload, SignMessageResponse, PaginationArgs
-} from "./types";
+import { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, Response, PublicAccount, SignMessagePayload, SignMessageResponse, PaginationArgs } from "./types";
 import { MartianMask } from "./martina.mask";
 import { PetraMask } from "./petra.mask";
 
@@ -21,10 +17,8 @@ class Web3 {
       } else {
         if ((provider as any)._isConnected !== undefined) {
           this.action = new MartianMask(provider) as any;
-          console.log("7s62::Martian:", this.action);
         } else {
           this.action = new PetraMask(provider) as any;
-          console.log("7s62::Petra:", this.action);
         }
       }
     } else {
@@ -51,10 +45,6 @@ class Web3 {
 export { Aptos, utils };
 
 export { Web3Provider };
-export type { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, 
-  IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, 
-  Response, PublicAccount,
-  SignMessagePayload, SignMessageResponse, PaginationArgs
-};
+export type { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, Response, PublicAccount, SignMessagePayload, SignMessageResponse, PaginationArgs };
 
 export default Web3;

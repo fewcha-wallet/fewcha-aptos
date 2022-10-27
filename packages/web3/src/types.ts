@@ -1,23 +1,62 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { BCS, HexString, MaybeHexString, TokenTypes, OptionalTransactionArgs, Types as Gen } from "aptos";
-import { Base64DataBuffer, ExecuteTransactionRequestType, GatewayTxSeqNumber, GetObjectDataResponse, GetTxnDigestsResponse, MergeCoinTransaction, MoveCallTransaction, ObjectId, ObjectOwner, PayTransaction, PublishTransaction, SignaturePubkeyPair, SignatureScheme, SignerWithProvider, SplitCoinTransaction, SubscriptionId, SuiAddress, SuiEventEnvelope, SuiEventFilter, SuiEvents, SuiExecuteTransactionResponse, SuiMoveFunctionArgTypes, SuiMoveNormalizedFunction, SuiMoveNormalizedModule, SuiMoveNormalizedModules, SuiMoveNormalizedStruct, SuiObjectInfo, SuiObjectRef, SuiTransactionResponse, TransactionDigest, TransactionEffects, TransferObjectTransaction, TransferSuiTransaction } from "@mysten/sui.js";
+import { BCS, HexString, MaybeHexString, TokenTypes, Types as Gen } from "aptos";
+import {
+  Base64DataBuffer,
+  ExecuteTransactionRequestType,
+  GatewayTxSeqNumber,
+  GetObjectDataResponse,
+  GetTxnDigestsResponse,
+  MergeCoinTransaction,
+  MoveCallTransaction,
+  ObjectId,
+  ObjectOwner,
+  PayTransaction,
+  PublishTransaction,
+  SignaturePubkeyPair,
+  SignatureScheme,
+  SplitCoinTransaction,
+  SubscriptionId,
+  SuiAddress,
+  SuiEventEnvelope,
+  SuiEventFilter,
+  SuiEvents,
+  SuiExecuteTransactionResponse,
+  SuiMoveFunctionArgTypes,
+  SuiMoveNormalizedFunction,
+  SuiMoveNormalizedModule,
+  SuiMoveNormalizedModules,
+  SuiMoveNormalizedStruct,
+  SuiObjectInfo,
+  SuiObjectRef,
+  SuiTransactionResponse,
+  TransactionDigest,
+  TransactionEffects,
+  TransferObjectTransaction,
+  TransferSuiTransaction,
+} from "@mysten/sui.js";
 
 export interface IWeb3Provider {
   connect(): Promise<Response<PublicAccount>>;
   disconnect(): Promise<Response<boolean>>;
   isConnected(): Promise<Response<boolean>>;
-  
+
   account(): Promise<Response<PublicAccount>>;
   getNetwork(): Promise<Response<string>>;
   getNetworkURL(): Promise<Response<string>>;
   getNetworkType(): Promise<Response<string>>;
   getBalance(): Promise<Response<string>>;
 
-  aptos: IWeb3AptosSDK,
-  sui: IWeb3SuiSDK,
+  aptos: IWeb3AptosSDK;
+  sui: IWeb3SuiSDK;
   token: IWeb3AptosToken | IWeb3SuiToken;
   coin: IWeb3Coin;
+}
+
+interface OptionalTransactionArgs {
+  maxGasAmount?: string;
+  gasUnitPrice?: string;
+  expireTimestamp?: string;
 }
 
 export type IWeb3SuiSDK = {
@@ -76,7 +115,7 @@ export type IWeb3SuiSDK = {
   splitCoinWithRequestType(transaction: SplitCoinTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
   executeMoveCallWithRequestType(transaction: MoveCallTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
   publishWithRequestType(transaction: PublishTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
-}
+};
 
 export type IWeb3AptosSDK = {
   generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>; // tx
@@ -116,7 +155,7 @@ export type IWeb3AptosSDK = {
   getBlockByVersion(version: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
 };
 
-export type IWeb3SuiToken = {}
+export type IWeb3SuiToken = {};
 
 export type IWeb3AptosToken = {
   createCollection(name: string, description: string, uri: string, maxAmount: BCS.AnyNumber, extraArgs?: OptionalTransactionArgs): Promise<Response<string>>;
@@ -150,12 +189,7 @@ export type IWeb3Coin = {
   getCoins(owner: string): Promise<string[]>;
   getCoinInfo(coinResource: string): Promise<CoinData>;
   getBalance(owner: string, coinResource: string, coinManagedType: string): Promise<string>;
-  buildTransferCoinPayload(
-    receiver: string,
-    amount: string,
-    coinTypeResource: string,
-    sender: string | undefined,
-  ): Promise<any>;
+  buildTransferCoinPayload(receiver: string, amount: string, coinTypeResource: string, sender: string | undefined): Promise<any>;
   getPublishedCoinPackages(owner: string): Promise<string[]>;
   buildMintCoinPayload(receiver: string, amount: string, coinTypeResource: string): Promise<any>;
 };

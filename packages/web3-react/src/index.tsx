@@ -1,9 +1,10 @@
+// Copyright 2022 Fewcha. All rights reserved.
 import React, { useContext, createContext, PropsWithChildren, useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Web3ProviderType } from "@fewcha/web3";
 import { PublicAccount } from "@fewcha/web3/dist/types";
 import { wallets } from "./config/wallet";
 import { PopupBackground, PopupBackgroundScreen, PopupBackgroundWrapper, PopupBackgroundBackground, ConnectWalletButton, Popup, PopupClose, PopupTitle, WalletList, WalletItem, WalletTitleWrapper, WalletIcon, WalletTitle, WalletDetected } from "./style/main";
+import Web3 from "@fewcha/web3";
 
 export const Web3Context = createContext<Web3ContextValue>(null as any);
 type PopupProps = {};
@@ -28,8 +29,8 @@ type Web3ContextValue = {
   removePopup: (key: string) => void;
   removeAll: () => void;
 
-  fewcha: Web3ProviderType;
-  martian: any;
+  fewcha: Web3;
+  martian: Web3;
 
   currentWallet: "fewcha" | "martian";
   setCurrentWallet: (wallet: "fewcha" | "martian") => void;
@@ -46,8 +47,8 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [popups, changePopups] = useState<{ key: string; Component: React.FC<{}> }[]>([]);
   const [currentWallet, setCurrentWallet] = useState<"fewcha" | "martian">("fewcha");
 
-  let fewcha = (window as any).fewcha as Web3ProviderType;
-  const martian = (window as any).martian;
+  const fewcha = new Web3();
+  const martian = new Web3((window as any).martian);
 
   const popupBackgroundService = useRef<HTMLDivElement | null>(null);
 
@@ -123,28 +124,12 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     }
   };
 
-  const initialized = (event: Event) => {
-    fewcha = (window as any).fewcha as Web3ProviderType;
-    fewcha &&
-      fewcha.isConnected().then((isConnected) => {
-        setIsConnected(isConnected.data);
-        setCurrentWallet("fewcha");
-        fewcha.account().then((account) => {
-          setAccount(account.data);
-          fewcha.getBalance().then((balance) => {
-            setBalance(balance.data);
-          });
-        });
-      });
-  };
-
   const disconnect = () => {
-    fewcha && fewcha.disconnect();
-    martian && martian.disconnect();
+    fewcha && fewcha.action.disconnect();
+    martian && martian.action.disconnect();
   };
 
   useEffect(() => {
-    window.addEventListener("aptos#initialized", initialized);
     window.addEventListener("aptos#connected", connectedEvent);
     window.addEventListener("aptos#disconnected", disconnectedEvent);
     window.addEventListener("aptos#changeAccount", changeAccount);
@@ -152,7 +137,6 @@ const Web3ReactProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     window.addEventListener("aptos#changeNetwork", changeNetwork);
 
     return () => {
-      window.removeEventListener("aptos#initialized", initialized);
       window.removeEventListener("aptos#connected", connectedEvent);
       window.removeEventListener("aptos#disconnected", disconnectedEvent);
       window.removeEventListener("aptos#changeAccount", changeAccount);

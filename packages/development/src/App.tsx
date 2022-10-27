@@ -28,10 +28,12 @@ const Web3Js = () => {
         };
 
         const txnRequest = await web3.action.aptos.generateTransaction(payload);
-        const signedTx = await web3.action.aptos.signTransaction(txnRequest.data);
-        if (!parseError(signedTx.status)) return;
+        catchResponse(txnRequest);
+        if (!parseError(txnRequest.status)) return;
 
+        const signedTx = await web3.action.aptos.signTransaction(txnRequest.data);
         catchResponse(signedTx);
+        if (!parseError(signedTx.status)) return;
       }}
     >
       Sign Transaction
@@ -62,15 +64,16 @@ const Web3Js = () => {
         entryFunctionPayload.serialize(s);
 
         const rawTxn = await web3.action.aptos.generateRawTransaction(s.getBytes());
+        catchResponse(rawTxn);
         if (!parseError(rawTxn.status)) return;
 
         const bcsTxn = await web3.action.aptos.generateBCSTransaction(rawTxn.data);
+        catchResponse(bcsTxn);
         if (!parseError(bcsTxn.status)) return;
 
         const signedTx = await web3.action.aptos.signTransaction(bcsTxn.data);
-        if (!parseError(signedTx.status)) return;
-
         catchResponse(signedTx);
+        if (!parseError(signedTx.status)) return;
       }}
     >
       Sign BCS Transaction
@@ -88,9 +91,10 @@ const Web3Js = () => {
           type_arguments: ["0x1::aptos_coin::AptosCoin"],
           arguments: [receiverAddress, sendBalance],
         };
-        const res = await web3.action.aptos.generateSignSubmitTransaction(payload);
-        if (!parseError(res.status)) return;
+
+        const res = await web3.action.aptos.generateSignSubmitTransaction(payload, { expireTimestamp: "1" });
         catchResponse(res);
+        if (!parseError(res.status)) return;
       }}
     >
       Generate and Sign and Submit Transaction
@@ -104,9 +108,11 @@ const Web3Js = () => {
           "0xcca3338dfda1b5e9bab0d744c3b50a9a24e3fe55bba48917307e813a4535e034",
         );
         const sendBalance = 1000;
+
         const token = new TxnBuilderTypes.TypeTagStruct(
           TxnBuilderTypes.StructTag.fromString("0x1::aptos_coin::AptosCoin"),
         );
+
         const entryFunctionPayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
           TxnBuilderTypes.EntryFunction.natural(
             "0x1::coin",
@@ -119,8 +125,8 @@ const Web3Js = () => {
         entryFunctionPayload.serialize(s);
 
         const rawTxn = await web3.action.aptos.generateSignSubmitRawTransaction(s.getBytes());
-        if (!parseError(rawTxn.status)) return;
         catchResponse(rawTxn);
+        if (!parseError(rawTxn.status)) return;
       }}
     >
       Generate Sign Submit Raw Transaction
@@ -149,8 +155,8 @@ const Web3Js = () => {
         entryFunctionPayload.serialize(s);
 
         const rawTxn = await web3.action.aptos.generateSignSubmitWaitForTransaction(s.getBytes());
-        if (!parseError(rawTxn.status)) return;
         catchResponse(rawTxn);
+        if (!parseError(rawTxn.status)) return;
       }}
     >
       Generate Sign Submit Wait For Transaction
@@ -168,6 +174,7 @@ const Web3Js = () => {
           nonce: "1",
         });
         catchResponse(signed);
+        if (!parseError(signed.status)) return;
       }}
     >
       Sign Message
@@ -178,16 +185,16 @@ const Web3Js = () => {
     <button
       onClick={async () => {
         const receiverAddress = "0xcd2add1ea1db230de04771337d56f154508eac8f03271c87133818005fbe394c";
-        const sendBalance = 1;
+        const sendBalance = "1";
 
         const payload = {
           type: "entry_function_payload",
-          function: "0x1::coin::transfer",
-          type_arguments: ["0x1::aptos_coin::AptosCoin"],
+          function: "0x1::aptos_account::transfer",
+          type_arguments: [],
           arguments: [receiverAddress, sendBalance],
         };
 
-        const txnRequest = await web3.action.aptos.generateTransaction(payload, { max_gas_amount: "4000000" });
+        const txnRequest = await web3.action.aptos.generateTransaction(payload);
         catchResponse(txnRequest);
         if (!parseError(txnRequest.status)) return;
 
@@ -378,7 +385,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .connect()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(console.log)
                 .finally(console.log);
             }}
@@ -390,7 +400,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .isConnected()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch((err) => console.log(err))
                 .finally(console.log);
             }}
@@ -402,7 +415,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .disconnect()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  parseError(data.status);
+                  catchResponse(data);
+                })
                 .catch(console.log)
                 .finally(console.log);
             }}
@@ -414,7 +430,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .account()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(console.log)
                 .finally(console.log);
             }}
@@ -426,7 +445,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .getNetwork()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(console.log)
                 .finally(console.log);
             }}
@@ -438,7 +460,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .getNetworkURL()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(console.log)
                 .finally(console.log);
             }}
@@ -450,7 +475,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .getNetworkType()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -461,7 +489,10 @@ const Web3Js = () => {
             onClick={async () => {
               web3.action
                 .getBalance()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(console.log)
                 .finally(console.log);
             }}
@@ -498,10 +529,8 @@ const Web3Js = () => {
               };
 
               const txnHash = await web3.action.aptos.signAndSubmitTransaction(payload as any);
-
-              if (!parseError(txnHash.status)) return;
-
               catchResponse(txnHash);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Petra Sign and Submit Transaction
@@ -520,18 +549,20 @@ const Web3Js = () => {
               };
 
               const txnRequest = await web3.action.aptos.generateTransaction(payload);
+              catchResponse(txnRequest);
               if (!parseError(txnRequest.status)) return;
 
               const estTx = await web3.action.aptos.simulateTransaction(txnRequest.data);
+              catchResponse(estTx);
               if (!parseError(estTx.status)) return;
 
               const tx = await web3.action.aptos.signTransaction(txnRequest.data);
+              catchResponse(tx);
               if (!parseError(tx.status)) return;
 
               const txnHash = await web3.action.aptos.submitTransaction(tx.data);
-              if (!parseError(txnHash.status)) return;
-
               catchResponse(txnHash);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Full Flow Transaction
@@ -541,7 +572,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getAccount("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -552,7 +586,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getAccountTransactions("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -563,7 +600,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getAccountModules("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e")
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -574,7 +614,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getAccountModule("0x110530540a599d5ddbae493fa91140f0656611069279d55c6eed3156cead8a0e", "test")
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -585,7 +628,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getAccountResources("0x89c8b1fa5c4eb4310c732f1486cb83505a8a533a6fb367eb3f727d5bdecdaaae")
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -596,7 +642,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getTransactions()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -607,7 +656,10 @@ const Web3Js = () => {
             onClick={() => {
               web3.action.aptos
                 .getChainId()
-                .then((data) => parseError(data.status) && catchResponse(data))
+                .then((data) => {
+                  catchResponse(data);
+                  parseError(data.status);
+                })
                 .catch(catchResponse);
             }}
           >
@@ -658,10 +710,9 @@ const Web3Js = () => {
                 "https://fewcha.app/svgs/logo.svg",
                 10000,
               );
-              if (!parseError(txnHash.status)) {
-                return;
-              }
+
               catchResponse(txnHash.data);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Create Collection
@@ -678,11 +729,9 @@ const Web3Js = () => {
                 "https://fewcha.app/svgs/logo.svg",
                 1,
               );
-              if (!parseError(txnHash.status)) {
-                return;
-              }
 
               catchResponse(txnHash.data);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Create Token
@@ -697,9 +746,9 @@ const Web3Js = () => {
                 `nft 32182451-9852-4425-9d70-b76534b8672f`,
                 1,
               );
-              if (!parseError(txnHash.status)) return;
 
               catchResponse(txnHash.data);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Offer Token
@@ -713,9 +762,9 @@ const Web3Js = () => {
                 `fewcha try 180fb0f4-aadf-49ba-bfa9-571f1b69be58`,
                 `nft 32182451-9852-4425-9d70-b76534b8672f`,
               );
-              if (!parseError(txnHash.status)) return;
 
               catchResponse(txnHash.data);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Claim Token
@@ -730,9 +779,8 @@ const Web3Js = () => {
                 `nft 32182451-9852-4425-9d70-b76534b8672f`,
               );
 
-              if (!parseError(txnHash.status)) return;
-
               catchResponse(txnHash.data);
+              if (!parseError(txnHash.status)) return;
             }}
           >
             Cancel Token Offer
