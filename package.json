@@ -18,22 +18,19 @@
     "web3": "yarn workspace @fewcha/web3",
     "link-all": "lerna exec --parallel yarn link",
     "unlink-all": "lerna exec --parallel --bail=false yarn unlink",
-    "nx": "nx"
+    "nx": "nx",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@commitlint/config-conventional": "^17.2.0",
     "@types/node": "^18.11.9",
     "commitlint": "^17.2.0",
+    "husky": "^8.0.1",
     "lerna": "^6.0.1",
     "lint-staged": "^13.0.3",
     "nx": "^15.0.10",
+    "prettier": "^2.7.1",
     "typescript": "^4.8.4"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "npx --no-install commitlint --edit \"$1\"",
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "*.{ts,tsx,js,css,json,md}": [
