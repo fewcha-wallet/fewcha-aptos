@@ -3,7 +3,7 @@
 import * as Aptos from "aptos";
 import * as utils from "./utils";
 import Web3Provider from "./provider";
-import { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, Response, PublicAccount, SignMessagePayload, SignMessageResponse, PaginationArgs } from "./types";
+import { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, IWeb3AptosToken, IWeb3Coin, Response, PublicAccount, SignMessagePayload, SignMessageResponse, PaginationArgs, OptionalTransactionArgs, SubmitTransactionRequest } from "./types";
 import { MartianMask } from "./martina.mask";
 import { PetraMask } from "./petra.mask";
 
@@ -45,6 +45,6 @@ class Web3 {
 export { Aptos, utils };
 
 export { Web3Provider };
-export type { IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, IWeb3AptosToken, IWeb3SuiToken, IWeb3Coin, Response, PublicAccount, SignMessagePayload, SignMessageResponse, PaginationArgs };
+export type { OptionalTransactionArgs, SubmitTransactionRequest, IWeb3Provider, IWeb3AptosSDK, IWeb3SuiSDK, IWeb3AptosToken, IWeb3Coin, Response, PublicAccount, SignMessagePayload, SignMessageResponse, PaginationArgs };
 
 export default Web3;

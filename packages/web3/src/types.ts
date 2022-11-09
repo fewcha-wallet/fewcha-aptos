@@ -1,6 +1,6 @@
 // Copyright 2022 Fewcha. All rights reserved.
 
-import { BCS, HexString, MaybeHexString, TokenTypes, Types as Gen } from "aptos";
+import { HexString, MaybeHexString, TokenTypes, Types } from "aptos";
 import {
   Base64DataBuffer,
   ExecuteTransactionRequestType,
@@ -36,6 +36,17 @@ import {
   TransferSuiTransaction,
 } from "@mysten/sui.js";
 
+export type Response<T> = {
+  data: T;
+  method: string;
+  status: number;
+};
+
+export type PublicAccount = {
+  address: string;
+  publicKey: string;
+};
+
 export interface IWeb3Provider {
   connect(): Promise<Response<PublicAccount>>;
   disconnect(): Promise<Response<boolean>>;
@@ -49,15 +60,87 @@ export interface IWeb3Provider {
 
   aptos: IWeb3AptosSDK;
   sui: IWeb3SuiSDK;
-  token: IWeb3AptosToken | IWeb3SuiToken;
+  token: IWeb3AptosToken;
   coin: IWeb3Coin;
 }
 
-interface OptionalTransactionArgs {
+export type OptionalTransactionArgs = {
   maxGasAmount?: string;
   gasUnitPrice?: string;
   expireTimestamp?: string;
-}
+};
+
+export type SubmitTransactionRequest = {
+  sender: string;
+  sequence_number: string;
+  max_gas_amount: string;
+  gas_unit_price: string;
+  expiration_timestamp_secs: string;
+  payload: Types.TransactionPayload;
+  signature: Types.TransactionSignature;
+};
+
+export type EstimateGasArgs = {
+  estimateGasUnitPrice?: boolean;
+  estimateMaxGasAmount?: boolean;
+  estimatePrioritizedGasUnitPrice?: boolean;
+};
+
+export type IWeb3AptosSDK = {
+  // generateTransaction return transaction as Uint8Array
+  generateTransaction(payload: Types.EntryFunctionPayload, options?: Partial<SubmitTransactionRequest>): Promise<Response<Uint8Array>>;
+  // generateRawTransaction return transaction as Uint8Array
+  generateRawTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs): Promise<Response<Uint8Array>>;
+  // generateBCSTransaction return transaction as Uint8Array
+  generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+  generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+
+  signMessage(message: SignMessagePayload): Promise<Response<SignMessageResponse>>;
+  signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
+
+  // submitTransaction return transaction hash
+  submitTransaction(signedTxn: Uint8Array): Promise<Response<Types.HexEncodedBytes>>;
+  // signAndSubmitTransaction return transaction hash
+  signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Types.HexEncodedBytes>>;
+  // submitSignedBCSTransaction return transaction hash
+  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Types.HexEncodedBytes>>;
+
+  // generateSignSubmitTransaction return transaction hash
+  generateSignSubmitTransaction(payload: Types.EntryFunctionPayload, extraArgs?: OptionalTransactionArgs): Promise<Response<Types.HexEncodedBytes>>;
+  // generateSignSubmitTransaction return transaction hash
+  generateSignSubmitRawTransaction(payload: Uint8Array, options?: Partial<SubmitTransactionRequest>): Promise<Response<Types.HexEncodedBytes>>; // tx hash
+  // generateSignSubmitWaitForTransaction return transaction detail
+  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs & { checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Types.Transaction>>;
+
+  simulateTransaction(rawTransaction: Uint8Array, query?: EstimateGasArgs): Promise<Response<Types.UserTransaction[]>>;
+  submitBCSSimulation(bcsBody: Uint8Array, query?: EstimateGasArgs): Promise<Response<Types.UserTransaction[]>>;
+
+  getAccount(accountAddress: MaybeHexString): Promise<Response<Types.AccountData>>;
+  getAccountTransactions(accountAddress: MaybeHexString, query?: PaginationArgs): Promise<Response<Types.Transaction[]>>;
+  getAccountModules(accountAddress: MaybeHexString, query?: { ledgerVersion?: number }): Promise<Response<Types.MoveModuleBytecode[]>>;
+  getAccountModule(accountAddress: MaybeHexString, moduleName: string, query?: { ledgerVersion?: number }): Promise<Response<Types.MoveModuleBytecode>>;
+  getAccountResources(accountAddress: MaybeHexString, query?: { ledgerVersion?: number }): Promise<Response<Types.MoveResource[]>>;
+  getAccountResource(accountAddress: MaybeHexString, resourceType: Types.MoveStructTag, query?: { ledgerVersion?: number }): Promise<Response<Types.MoveResource>>;
+
+  getEventsByCreationNumber(address: MaybeHexString, creationNumber: number | string, query?: PaginationArgs): Promise<Response<Types.Event[]>>;
+  getEventsByEventHandle(address: MaybeHexString, eventHandleStruct: Types.MoveStructTag, fieldName: string, query?: PaginationArgs): Promise<Response<Types.Event[]>>;
+
+  getTransactions(query?: PaginationArgs): Promise<Response<Types.Transaction[]>>;
+  getTransactionByHash(txnHash: string): Promise<Response<Types.Transaction>>;
+  getTransactionByVersion(txnVersion: number): Promise<Response<Types.Transaction>>;
+
+  transactionPending(txnHash: string): Promise<Response<boolean>>;
+
+  waitForTransactionWithResult(txnHash: string, extraArgs?: { timeoutSecs?: number; checkSuccess?: boolean }): Promise<Response<Types.Transaction>>;
+  waitForTransaction(txnHash: string, extraArgs?: { timeoutSecs?: number; checkSuccess?: boolean }): Promise<Response<void>>;
+
+  getLedgerInfo(): Promise<Response<Types.IndexResponse>>;
+  getChainId(): Promise<Response<number>>;
+  getTableItem(handle: string, data: Types.TableItemRequest, query?: { ledgerVersion?: number }): Promise<Response<any>>;
+  lookupOriginalAddress(addressOrAuthKey: MaybeHexString): Promise<Response<HexString>>;
+  getBlockByHeight(blockHeight: number, withTransactions?: boolean): Promise<Response<Types.Block>>;
+  getBlockByVersion(version: number, withTransactions?: boolean): Promise<Response<Types.Block>>;
+};
 
 export type IWeb3SuiSDK = {
   getMoveFunctionArgTypes(objectId: string, moduleName: string, functionName: string): Promise<Response<SuiMoveFunctionArgTypes>>;
@@ -117,55 +200,15 @@ export type IWeb3SuiSDK = {
   publishWithRequestType(transaction: PublishTransaction, requestType?: ExecuteTransactionRequestType): Promise<Response<SuiExecuteTransactionResponse>>;
 };
 
-export type IWeb3AptosSDK = {
-  generateTransaction(payload: Gen.EntryFunctionPayload, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Uint8Array>>; // tx
-  generateRawTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs): Promise<Response<Uint8Array>>; // tx
-  generateSignSubmitTransaction(payload: Gen.EntryFunctionPayload, extraArgs?: OptionalTransactionArgs): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
-  generateSignSubmitRawTransaction(payload: Uint8Array, options?: Partial<Gen.SubmitTransactionRequest>): Promise<Response<Gen.HexEncodedBytes>>; // tx hash
-  generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: { maxGasAmount?: BCS.Uint64; gasUnitPrice?: BCS.Uint64; expireTimestamp?: BCS.Uint64; checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Gen.Transaction>>; // tx detail
-  signMessage(message: SignMessagePayload): Promise<Response<SignMessageResponse>>;
-  simulateTransaction(rawTransaction: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
-  signTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-  submitTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  signAndSubmitTransaction(rawTransaction: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  generateBCSTransaction(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-  generateBCSSimulation(rawTransaction: Uint8Array): Promise<Response<Uint8Array>>;
-  submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Gen.HexEncodedBytes>>;
-  submitBCSSimulation(bcsBody: Uint8Array, query?: { estimateGasUnitPrice?: boolean; estimateMaxGasAmount?: boolean }): Promise<Response<Gen.UserTransaction[]>>;
-  getAccount(accountAddress: MaybeHexString): Promise<Response<Gen.AccountData>>;
-  getAccountTransactions(accountAddress: MaybeHexString, query?: PaginationArgs): Promise<Response<Gen.Transaction[]>>;
-  getAccountModules(accountAddress: MaybeHexString, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveModuleBytecode[]>>;
-  getAccountModule(accountAddress: MaybeHexString, moduleName: string, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveModuleBytecode>>;
-  getAccountResources(accountAddress: MaybeHexString, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveResource[]>>;
-  getAccountResource(accountAddress: MaybeHexString, resourceType: Gen.MoveStructTag, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<Gen.MoveResource>>;
-  getEventsByEventKey(eventKey: string): Promise<Response<Gen.Event[]>>;
-  getEventsByCreationNumber(address: MaybeHexString, creationNumber: BCS.AnyNumber | string, query?: PaginationArgs): Promise<Response<Gen.Event[]>>;
-  getEventsByEventHandle(address: MaybeHexString, eventHandleStruct: Gen.MoveStructTag, fieldName: string, query?: PaginationArgs): Promise<Response<Gen.Event[]>>;
-  getTransactions(query?: PaginationArgs): Promise<Response<Gen.Transaction[]>>;
-  getTransactionByHash(txnHash: string): Promise<Response<Gen.Transaction>>;
-  getTransactionByVersion(txnVersion: BCS.AnyNumber): Promise<Response<Gen.Transaction>>;
-  transactionPending(txnHash: string): Promise<Response<boolean>>;
-  waitForTransactionWithResult(txnHash: string, extraArgs?: { timeoutSecs?: number; checkSuccess?: boolean }): Promise<Response<Gen.Transaction>>;
-  waitForTransaction(txnHash: string, extraArgs?: { timeoutSecs?: number; checkSuccess?: boolean }): Promise<Response<void>>;
-  getLedgerInfo(): Promise<Response<Gen.IndexResponse>>;
-  getChainId(): Promise<Response<number>>;
-  getTableItem(handle: string, data: Gen.TableItemRequest, query?: { ledgerVersion?: BCS.AnyNumber }): Promise<Response<any>>;
-  lookupOriginalAddress(addressOrAuthKey: MaybeHexString): Promise<Response<HexString>>;
-  getBlockByHeight(blockHeight: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
-  getBlockByVersion(version: number, withTransactions?: boolean): Promise<Response<Gen.Block>>;
-};
-
-export type IWeb3SuiToken = {};
-
 export type IWeb3AptosToken = {
-  createCollection(name: string, description: string, uri: string, maxAmount: BCS.AnyNumber, extraArgs?: OptionalTransactionArgs): Promise<Response<string>>;
+  createCollection(name: string, description: string, uri: string, maxAmount: number, extraArgs?: OptionalTransactionArgs): Promise<Response<string>>;
   createToken(
     collectionName: string,
     name: string,
     description: string,
     supply: number,
     uri: string,
-    max?: BCS.AnyNumber,
+    max?: number,
     royalty_payee_address?: MaybeHexString,
     royalty_points_denominator?: number,
     royalty_points_numerator?: number,
@@ -195,34 +238,15 @@ export type IWeb3Coin = {
 };
 
 export interface PaginationArgs {
-  start?: BCS.AnyNumber;
+  start?: number;
   limit?: number;
 }
-
-export type PublicAccount = {
-  address: string;
-  publicKey: string;
-};
 
 export type CoinData = {
   coin_type_resource: string;
   name: string;
   symbol: string;
   decimals: number;
-};
-
-export type Response<T> = {
-  data: T;
-  method: string;
-  status: number;
-};
-
-export const createReponse = <T>(method: string, status: number, data: T): Response<T> => {
-  return {
-    method,
-    status,
-    data,
-  };
 };
 
 export interface SignMessagePayload {
@@ -243,3 +267,7 @@ export interface SignMessageResponse {
   prefix: string; // Should always be APTOS
   signature: string; // The signed full message
 }
+
+export const createReponse = <T>(method: string, status: number, data: T): Response<T> => {
+  return { method, status, data };
+};

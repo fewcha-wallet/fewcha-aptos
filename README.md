@@ -3,7 +3,7 @@
 ## Packages
 
 | Package                                                                                           | Description |
-|---------------------------------------------------------------------------------------------------|-------------|
+| ------------------------------------------------------------------------------------------------- | ----------- |
 | [`@fewcha/web3`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/web3)             |             |
 | [`@fewcha/web3-react`](https://github.com/fewcha-wallet/aptos-web3/tree/main/packages/web3-react) |             |
 
@@ -28,7 +28,7 @@ yarn build
 yarn run publish
 ```
 
-### Web3-react
+### Development
 
 ```
 yarn build
@@ -40,7 +40,7 @@ Keep a terminal for
 yarn dev start
 ```
 
-Change `packages/web3-react` and run `yarn build` again
+Change `packages/developement`
 
 ## License
 

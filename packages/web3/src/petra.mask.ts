@@ -1,6 +1,7 @@
+// Copyright 2022 Fewcha. All rights reserved.
+
 import { Types as Gen } from "aptos";
 import { createReponse, PublicAccount, Response } from "./types";
-import {} from "aptos";
 
 export class PetraMask {
   public provider: any;
