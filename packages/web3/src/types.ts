@@ -106,9 +106,9 @@ export type IWeb3AptosSDK = {
   submitSignedBCSTransaction(signedTxn: Uint8Array): Promise<Response<Types.HexEncodedBytes>>;
 
   // generateSignSubmitTransaction return transaction hash
-  generateSignSubmitTransaction(payload: Types.EntryFunctionPayload, extraArgs?: OptionalTransactionArgs): Promise<Response<Types.HexEncodedBytes>>;
-  // generateSignSubmitTransaction return transaction hash
-  generateSignSubmitRawTransaction(payload: Uint8Array, options?: Partial<SubmitTransactionRequest>): Promise<Response<Types.HexEncodedBytes>>; // tx hash
+  generateSignSubmitTransaction(payload: Types.EntryFunctionPayload, options?: Partial<SubmitTransactionRequest>): Promise<Response<Types.HexEncodedBytes>>;
+  // generateSignSubmitRawTransaction return transaction hash
+  generateSignSubmitRawTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs & { checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Types.HexEncodedBytes>>; // tx hash
   // generateSignSubmitWaitForTransaction return transaction detail
   generateSignSubmitWaitForTransaction(payload: Uint8Array, extraArgs?: OptionalTransactionArgs & { checkSuccess?: boolean; timeoutSecs?: number }): Promise<Response<Types.Transaction>>;
 
