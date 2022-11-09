@@ -5,7 +5,7 @@ import Web3, { IWeb3AptosToken } from "@fewcha/web3";
 import { parseError } from "./utils";
 
 const Web3Js = () => {
-  const provider = (window as any).aptos;
+  const provider = (window as any).fewcha;
 
   const [response, setResponse] = useState("");
   const catchResponse = (data: any) => {
@@ -92,7 +92,7 @@ const Web3Js = () => {
           arguments: [receiverAddress, sendBalance],
         };
 
-        const res = await web3.action.aptos.generateSignSubmitTransaction(payload, { expireTimestamp: "1" });
+        const res = await web3.action.aptos.generateSignSubmitTransaction(payload, {});
         catchResponse(res);
         if (!parseError(res.status)) return;
       }}
