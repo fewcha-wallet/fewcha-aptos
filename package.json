@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "scripts": {
-    "bootstrap": "lerna bootstrap --npm-client=yarn",
-    "build": "lerna run build --npm-client=yarn --parallel --scope @fewcha/aptos --scope @fewcha/web3 --scope @fewcha/web3-react",
-    "build-web3": "lerna run build --npm-client=yarn --parallel --scope @fewcha/aptos --scope @fewcha/web3",
-    "test": "lerna run test --npm-client=yarn --stream",
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build --scope @fewcha/aptos --scope @fewcha/web3 --scope @fewcha/web3-react",
+    "build-web3": "lerna run build --scope @fewcha/aptos --scope @fewcha/web3",
+    "test": "lerna run test --stream",
     "publish": "lerna publish --no-private",
     "bs": "yarn bootstrap",
     "dev": "yarn workspace development",
@@ -26,7 +26,7 @@
     "@types/node": "^18.11.9",
     "commitlint": "^17.2.0",
     "husky": "^8.0.1",
-    "lerna": "^6.0.1",
+    "lerna": "^6.0.3",
     "lint-staged": "^13.0.3",
     "nx": "^15.0.10",
     "prettier": "^2.7.1",
