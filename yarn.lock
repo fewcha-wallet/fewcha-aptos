@@ -4790,6 +4790,17 @@ anymatch@^3.0.3, anymatch@~3.1.2:
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-2.0.0.tgz#52520b8ae5b569215b354efc0caa3fe1e45a8adc"
   integrity sha512-lYe4Gx7QT+MKGbDsA+Z+he/Wtef0BiwDOlK/XkBrdfsh9J/jPPXbX0tE9x9cl27Tmu5gg3QUbUrQYa/y+KOHPQ==
 
+aptos@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.10.0.tgz#83b1e89d47f76e872f8c8fceafa58e9445282c14"
+  integrity sha512-iapFseSv1GQn9nVXZzuk9LyrFCN/3/lg/kPgjbAeM2M66Fb2TZkN8khbTat4ol5qo4TXPWoMJdyzR8PwE6KlXA==
+  dependencies:
+    "@noble/hashes" "1.1.3"
+    "@scure/bip39" "1.1.0"
+    axios "0.27.2"
+    form-data "4.0.0"
+    tweetnacl "1.0.3"
+
 aptos@^1.3.10:
   version "1.3.13"
   resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.13.tgz#cbf12431b6ee66a3d1952b1d1ce6520005170da0"
@@ -4800,17 +4811,6 @@ aptos@^1.3.10:
     axios "0.27.2"
     form-data "4.0.0"
     js-sha3 "0.8.0"
-    tweetnacl "1.0.3"
-
-aptos@^1.3.17:
-  version "1.3.17"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.17.tgz#bdfb8ab9790b52abbeefd862721007b4d13c9302"
-  integrity sha512-SPgWR9D0nHwLNpvxH943T9ieA2/Q0AVVsvT/qTUuWQSImxkxMVkb++XyWhiFyQpnZDqo6o2o0/fZakeUkqrc8w==
-  dependencies:
-    "@noble/hashes" "1.1.3"
-    "@scure/bip39" "1.1.0"
-    axios "0.27.2"
-    form-data "4.0.0"
     tweetnacl "1.0.3"
 
 are-we-there-yet@^3.0.0:
