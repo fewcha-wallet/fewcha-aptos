@@ -1,4 +1,4 @@
-// Copyright (c) Aptos
+// Copyright © Aptos Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 import { Deserializer } from "./deserializer";
@@ -20,7 +20,7 @@ export function serializeVector<T extends Serializable>(value: Seq<T>, serialize
 }
 
 /**
- * Serializes a vector with specified item serializaiton function.
+ * Serializes a vector with specified item serialization function.
  * Very dynamic function and bypasses static typechecking.
  */
 export function serializeVectorWithFunc(value: any[], func: string): Bytes {
@@ -78,6 +78,12 @@ export function bcsSerializeU32(value: Uint32): Bytes {
 export function bcsSerializeU128(value: AnyNumber): Bytes {
   const serializer = new Serializer();
   serializer.serializeU128(value);
+  return serializer.getBytes();
+}
+
+export function bcsSerializeU256(value: AnyNumber): Bytes {
+  const serializer = new Serializer();
+  serializer.serializeU256(value);
   return serializer.getBytes();
 }
 

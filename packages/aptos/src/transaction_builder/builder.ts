@@ -1,4 +1,4 @@
-// Copyright (c) Aptos
+// Copyright © Aptos Foundation
 // SPDX-License-Identifier: Apache-2.0
 
 import { sha3_256 as sha3Hash } from "@noble/hashes/sha3";
@@ -23,15 +23,21 @@ import {
   TransactionPayloadEntryFunction,
   TransactionPayloadScript,
   ModuleId,
+  TypeTagParser,
 } from "../aptos_types";
 import { bcsToBytes, Bytes, Deserializer, Serializer, Uint64, Uint8 } from "../bcs";
 import { ArgumentABI, EntryFunctionABI, ScriptABI, TransactionScriptABI, TypeArgumentABI } from "../aptos_types/abi";
-import { HexString, MaybeHexString } from "../hex_string";
-import { argToTransactionArgument, TypeTagParser, serializeArg } from "./builder_utils";
+import { argToTransactionArgument, serializeArg } from "./builder_utils";
 import * as Gen from "../generated/index";
-import { DEFAULT_TXN_EXP_SEC_FROM_NOW, DEFAULT_MAX_GAS_AMOUNT, MemoizeExpiring } from "../utils";
+import {
+  DEFAULT_TXN_EXP_SEC_FROM_NOW,
+  DEFAULT_MAX_GAS_AMOUNT,
+  HexString,
+  MaybeHexString,
+  MemoizeExpiring,
+} from "../utils";
 
-export { TypeTagParser } from "./builder_utils";
+export { TypeTagParser } from "../aptos_types";
 
 const RAW_TRANSACTION_SALT = "APTOS::RawTransaction";
 const RAW_TRANSACTION_WITH_DATA_SALT = "APTOS::RawTransactionWithData";
@@ -226,7 +232,7 @@ export class TransactionBuilderABI {
    * Builds a TransactionPayload. For dApps, chain ID and account sequence numbers are only known to the wallet.
    * Instead of building a RawTransaction (requires chainID and sequenceNumber), dApps can build a TransactionPayload
    * and pass the payload to the wallet for signing and sending.
-   * @param func Fully qualified func names, e.g. 0x1::Coin::transfer
+   * @param func Fully qualified func names, e.g. 0x1::aptos_account::transfer
    * @param ty_tags TypeTag strings
    * @param args Function arguments
    * @returns TransactionPayload
@@ -263,7 +269,7 @@ export class TransactionBuilderABI {
 
   /**
    * Builds a RawTransaction
-   * @param func Fully qualified func names, e.g. 0x1::Coin::transfer
+   * @param func Fully qualified func names, e.g. 0x1::aptos_account::transfer
    * @param ty_tags TypeTag strings.
    * @example Below are valid value examples
    * ```
@@ -273,8 +279,11 @@ export class TransactionBuilderABI {
    * vector<0x1::aptos_coin::AptosCoin>
    * bool
    * u8
+   * u16
+   * u32
    * u64
    * u128
+   * u256
    * address
    * ```
    * @param args Function arguments
@@ -358,7 +367,7 @@ export class TransactionBuilderRemoteABI {
   /**
    * Builds a raw transaction. Only support script function a.k.a entry function payloads
    *
-   * @param func fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coins::transfer
+   * @param func fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coin::transfer
    * @param ty_tags
    * @param args
    * @returns RawTransaction
@@ -371,7 +380,7 @@ export class TransactionBuilderRemoteABI {
     if (funcNameParts.length !== 3) {
       throw new Error(
         // eslint-disable-next-line max-len
-        "'func' needs to be a fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coins::transfer",
+        "'func' needs to be a fully qualified function name in format <address>::<module>::<function>, e.g. 0x1::coin::transfer",
       );
     }
 
@@ -388,10 +397,12 @@ export class TransactionBuilderRemoteABI {
     // Remove all `signer` and `&signer` from argument list because the Move VM injects those arguments. Clients do not
     // need to care about those args. `signer` and `&signer` are required be in the front of the argument list. But we
     // just loop through all arguments and filter out `signer` and `&signer`.
-    const originalArgs = funcAbi!.params.filter((param) => param !== "signer" && param !== "&signer");
+    const abiArgs = funcAbi!.params.filter((param) => param !== "signer" && param !== "&signer");
 
-    // Convert string arguments to TypeArgumentABI
-    const typeArgABIs = originalArgs.map((arg, i) => new ArgumentABI(`var${i}`, new TypeTagParser(arg).parseTypeTag()));
+    // Convert abi string arguments to TypeArgumentABI
+    const typeArgABIs = abiArgs.map(
+      (abiArg, i) => new ArgumentABI(`var${i}`, new TypeTagParser(abiArg, ty_tags).parseTypeTag()),
+    );
 
     const entryFunctionABI = new EntryFunctionABI(
       funcAbi!.name,
