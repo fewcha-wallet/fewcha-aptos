@@ -4,7 +4,6 @@
 import axios from 'axios';
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import FormData from 'form-data';
-import fetchAdapter from '@vespaiach/axios-fetch-adapter';
 
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
@@ -310,7 +309,6 @@ const sendRequest = async <T>(
         method: options.method,
         withCredentials: config.WITH_CREDENTIALS,
         cancelToken: source.token,
-        adapter: fetchAdapter,
     };
 
     const isBCS = Object.keys(config.HEADERS || {})

@@ -37,40 +37,31 @@ const FAUCET_URL = process.env.APTOS_FAUCET_URL || "https://faucet.devnet.aptosl
   );
 
   // Each Aptos account stores an auth key. Initial account address can be derived from auth key.
-  // See https://aptos.dev/basics/basics-accounts for more details.
+  // See https://aptos.dev/concepts/accounts for more details.
   const authKey = TxnBuilderTypes.AuthenticationKey.fromMultiEd25519PublicKey(multiSigPublicKey);
 
   // Derive the multisig account address and fund the address with 5000 AptosCoin.
   const mutisigAccountAddress = authKey.derivedAddress();
-  await faucetClient.fundAccount(mutisigAccountAddress, 100000);
+  await faucetClient.fundAccount(mutisigAccountAddress, 100_000_000);
 
   let resources = await client.getAccountResources(mutisigAccountAddress);
   let accountResource = resources.find((r) => r.type === aptosCoinStore);
   let balance = parseInt((accountResource?.data as any).coin.value);
-  assert(balance === 100000);
-  console.log(`multisig account coins: ${balance}. Should be 100000!`);
+  assert(balance === 100_000_000);
+  console.log(`multisig account coins: ${balance}. Should be 100000000!`);
 
   const account4 = new AptosAccount();
-  // Creates a receiver account and fund the account with 0 AptosCoin
-  await faucetClient.fundAccount(account4.address(), 0);
-  resources = await client.getAccountResources(account4.address());
-  accountResource = resources.find((r) => r.type === aptosCoinStore);
-  balance = parseInt((accountResource?.data as any).coin.value);
-  assert(balance === 0);
-  console.log(`account4 coins: ${balance}. Should be 0!`);
-
-  const token = new TxnBuilderTypes.TypeTagStruct(TxnBuilderTypes.StructTag.fromString("0x1::aptos_coin::AptosCoin"));
 
   // TS SDK support 3 types of transaction payloads: `EntryFunction`, `Script` and `Module`.
   // See https://aptos-labs.github.io/ts-sdk-doc/ for the details.
   const entryFunctionPayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
     TxnBuilderTypes.EntryFunction.natural(
       // Fully qualified module name, `AccountAddress::ModuleName`
-      "0x1::coin",
+      "0x1::aptos_account",
       // Module function
       "transfer",
       // The coin type to transfer
-      [token],
+      [],
       // Arguments for function `transfer`: receiver account address and amount to transfer
       [BCS.bcsToBytes(TxnBuilderTypes.AccountAddress.fromHex(account4.address())), BCS.bcsSerializeUint64(123)],
     ),
@@ -89,9 +80,9 @@ const FAUCET_URL = process.env.APTOS_FAUCET_URL || "https://faucet.devnet.aptosl
     BigInt(sequenceNumber),
     entryFunctionPayload,
     // Max gas unit to spend
-    BigInt(2000),
+    BigInt(10000),
     // Gas price per unit
-    BigInt(1),
+    BigInt(100),
     // Expiration timestamp. Transaction is discarded if it is not executed within 10 seconds from now.
     BigInt(Math.floor(Date.now() / 1000) + 10),
     new TxnBuilderTypes.ChainId(chainId),

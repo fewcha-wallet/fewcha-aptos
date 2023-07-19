@@ -322,26 +322,42 @@ export type GetTokenActivitiesCountQuery = {
   };
 };
 
+export type GetTokenCurrentOwnerDataQueryVariables = Types.Exact<{
+  where_condition: Types.Current_Token_Ownerships_V2_Bool_Exp;
+}>;
+
+export type GetTokenCurrentOwnerDataQuery = {
+  __typename?: "query_root";
+  current_token_ownerships_v2: Array<{ __typename?: "current_token_ownerships_v2"; owner_address: string }>;
+};
+
 export type GetTokenDataQueryVariables = Types.Exact<{
-  token_id?: Types.InputMaybe<Types.Scalars["String"]>;
+  where_condition?: Types.InputMaybe<Types.Current_Token_Datas_V2_Bool_Exp>;
 }>;
 
 export type GetTokenDataQuery = {
   __typename?: "query_root";
-  current_token_datas: Array<{
-    __typename?: "current_token_datas";
-    token_data_id_hash: string;
-    name: string;
-    collection_name: string;
-    creator_address: string;
-    default_properties: any;
-    largest_property_version: any;
-    maximum: any;
-    metadata_uri: string;
-    payee_address: string;
-    royalty_points_denominator: any;
-    royalty_points_numerator: any;
+  current_token_datas_v2: Array<{
+    __typename?: "current_token_datas_v2";
+    token_data_id: string;
+    token_name: string;
+    token_uri: string;
+    token_properties: any;
+    token_standard: string;
+    largest_property_version_v1?: any | null;
+    maximum?: any | null;
+    is_fungible_v2?: boolean | null;
     supply: any;
+    last_transaction_version: any;
+    last_transaction_timestamp: any;
+    current_collection?: {
+      __typename?: "current_collections_v2";
+      collection_id: string;
+      collection_name: string;
+      creator_address: string;
+      uri: string;
+      current_supply: any;
+    } | null;
   }>;
 };
 
@@ -396,13 +412,12 @@ export type GetTokenOwnedFromCollectionQuery = {
 };
 
 export type GetTokenOwnersDataQueryVariables = Types.Exact<{
-  token_id?: Types.InputMaybe<Types.Scalars["String"]>;
-  property_version?: Types.InputMaybe<Types.Scalars["numeric"]>;
+  where_condition: Types.Current_Token_Ownerships_V2_Bool_Exp;
 }>;
 
 export type GetTokenOwnersDataQuery = {
   __typename?: "query_root";
-  current_token_ownerships: Array<{ __typename?: "current_token_ownerships"; owner_address: string }>;
+  current_token_ownerships_v2: Array<{ __typename?: "current_token_ownerships_v2"; owner_address: string }>;
 };
 
 export type GetTopUserTransactionsQueryVariables = Types.Exact<{
