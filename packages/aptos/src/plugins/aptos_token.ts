@@ -491,7 +491,7 @@ export class AptosToken {
     tokenType?: string,
     extraArgs?: OptionalTransactionArgs,
   ): Promise<string> {
-    const builder = new TransactionBuilderRemoteABI(this.provider.aptosClient, {
+    const builder = new TransactionBuilderRemoteABI(this.provider, {
       sender: owner.address(),
       ...extraArgs,
     });
@@ -501,7 +501,7 @@ export class AptosToken {
       [HexString.ensure(token).hex(), HexString.ensure(recipient).hex()],
     );
     const bcsTxn = AptosClient.generateBCSTransaction(owner, rawTxn);
-    const pendingTransaction = await this.provider.aptosClient.submitSignedBCSTransaction(bcsTxn);
+    const pendingTransaction = await this.provider.submitSignedBCSTransaction(bcsTxn);
     return pendingTransaction.hash;
   }
 

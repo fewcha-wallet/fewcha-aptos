@@ -3,6 +3,7 @@ import { AnyNumber } from "../bcs/types";
 import { VERSION } from "../version";
 import { AptosApiError, AptosRequest, AptosResponse, ClientConfig } from "./types";
 import "./cookieJar";
+import fetchAdapter from "@vespaiach/axios-fetch-adapter";
 
 /**
  * Meaningful errors map
@@ -46,6 +47,7 @@ async function axiosRequest<Request, Response>(
     url,
     params,
     data: body,
+    adapter: fetchAdapter,
     withCredentials: overrides?.WITH_CREDENTIALS ?? true,
   };
 
